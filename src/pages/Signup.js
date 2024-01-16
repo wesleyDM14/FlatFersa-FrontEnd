@@ -16,31 +16,41 @@ import Logo from './../assets/logo.png';
 import { Formik, Form } from 'formik';
 import { TextInput } from './../components/FormLib';
 import * as Yup from 'yup';
+import { cpf } from 'cpf-cnpj-validator';
 
 //icons
 import {
     FiMail,
-    FiLock
+    FiUser,
+    FiPhone,
+    FiFileText,
 } from 'react-icons/fi';
 
 //loader
 import { ThreeDots } from 'react-loader-spinner';
 
-const Login = () => {
+const Signup = () => {
+    const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+
     return (
         <div>
             <StyledFormArea>
                 <Avatar image={Logo} />
-                <StyledTitle size={30} color={colors.theme}>Área de Login</StyledTitle>
+                <StyledTitle size={30} color={colors.theme}>Novo Acesso</StyledTitle>
                 <Formik
                     initialValues={{
                         email: "",
-                        password: "",
+                        nome: "",
+                        cpf: "",
+                        telefone: "",
                     }}
                     validationSchema={
                         Yup.object({
                             email: Yup.string().email("Endereço de email inválido").required("Obrigatório"),
-                            password: Yup.string().min(8, "Senha curta").max(30, "Senha longa").required("Obrigatório"),
+                            nome: Yup.string().required("Obrigatório"),
+                            cpf: Yup.string().required("Obrigatório").test((value) => cpf.isValid(value)),
+                            telefone: Yup.string().matches(phoneRegExp, 'Numero de telefone inválido')
+                                .min(11, 'Telefone curto').max(11, 'Telefone Longo').required("Obrigatório"),
                         })
                     }
                     onSubmit={(values, { setSubmitting }) => {
@@ -57,16 +67,30 @@ const Login = () => {
                                 icon={<FiMail />}
                             />
                             <TextInput
-                                name='password'
-                                type='password'
-                                label='Senha'
-                                placeholder='********'
-                                icon={<FiLock />}
+                                name='cpf'
+                                type='text'
+                                label='CPF'
+                                placeholder='Digite seu cpf'
+                                icon={<FiFileText />}
+                            />
+                            <TextInput
+                                name='nome'
+                                type='text'
+                                label='Nome'
+                                placeholder='Digite seu nome'
+                                icon={<FiUser />}
+                            />
+                            <TextInput
+                                name='telefone'
+                                type='text'
+                                label='Telefone'
+                                placeholder='Digite seu Telefone'
+                                icon={<FiPhone />}
                             />
                             <ButtonGroup>
                                 {
                                     !isSubmitting && (
-                                        <StyledFormButton type='submit'>Login</StyledFormButton>
+                                        <StyledFormButton type='submit'>Solicitar</StyledFormButton>
                                     )
                                 }
                                 {
@@ -83,7 +107,7 @@ const Login = () => {
                     )}
                 </Formik>
                 <ExtraText>
-                    Não possui cadastro? <TextLink to='/signup'>Cadastrar</TextLink>
+                    Já possui cadastro? <TextLink to='/login'>Login</TextLink>
                 </ExtraText>
             </StyledFormArea>
             <CopyrightText>
@@ -93,4 +117,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default Signup;
