@@ -1,9 +1,23 @@
+import {
+  StyledContainer
+} from './components/Styles';
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
+
+import Home from './pages/Home';
+import Login from './pages/Login';
 
 function App() {
   return (
-    <div>
-      <h1>Hello World!</h1>
-    </div>
+    <Router>
+      <StyledContainer>
+        <Home />
+      </StyledContainer>
+    </Router>
   );
 }
 
