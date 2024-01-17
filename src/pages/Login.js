@@ -52,7 +52,6 @@ const Login = ({ loginUser }) => {
                         })
                     }
                     onSubmit={(values, { setSubmitting, setFieldError }) => {
-                        console.log(values);
                         loginUser(values, navigate, setFieldError, setSubmitting);
                     }}
                 >

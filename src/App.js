@@ -13,15 +13,18 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 
+import AuthRoutes from './components/AuthRoutes';
+import BaseRoutes from './components/BaseRoutes';
+
 function App() {
   return (
     <Router>
       <StyledContainer>
         <Routes>
-          <Route path='/signup' element={<Signup />}/>
-          <Route path='/login' element={<Login />}/>
-          <Route path='/' element={<Home />}/>
-          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/signup' element={<BaseRoutes><Signup /></BaseRoutes>} />
+          <Route path='/login' element={<BaseRoutes><Login /></BaseRoutes>} />
+          <Route path='/' element={<BaseRoutes><Home /></BaseRoutes>} />
+          <Route path='/dashboard' element={<AuthRoutes><Dashboard /></AuthRoutes>} />
         </Routes>
       </StyledContainer>
     </Router>
