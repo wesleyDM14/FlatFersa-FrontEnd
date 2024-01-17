@@ -29,8 +29,15 @@ import {
 //loader
 import { ThreeDots } from 'react-loader-spinner';
 
-const Signup = () => {
+//auth & redux
+import { connect } from 'react-redux';
+import { signupUser } from '../auth/actions/userActions';
+import { useNavigate } from 'react-router-dom';
+
+const Signup = ({ signupUser }) => {
+
     const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+    const navigate = useNavigate();
 
     return (
         <div>
@@ -53,8 +60,9 @@ const Signup = () => {
                                 .min(11, 'Telefone curto').max(11, 'Telefone Longo').required("Obrigatório"),
                         })
                     }
-                    onSubmit={(values, { setSubmitting }) => {
+                    onSubmit={(values, { setSubmitting, setFieldError }) => {
                         console.log(values);
+                        signupUser(values, navigate, setFieldError, setSubmitting);
                     }}
                 >
                     {({ isSubmitting }) => (
@@ -117,4 +125,4 @@ const Signup = () => {
     )
 }
 
-export default Signup;
+export default connect(null, { signupUser })(Signup);

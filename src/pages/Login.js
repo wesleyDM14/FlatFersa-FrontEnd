@@ -26,7 +26,15 @@ import {
 //loader
 import { ThreeDots } from 'react-loader-spinner';
 
-const Login = () => {
+//auth & redux
+import { connect } from 'react-redux';
+import { loginUser } from '../auth/actions/userActions';
+import { useNavigate } from 'react-router-dom';
+
+const Login = ({ loginUser }) => {
+
+    const navigate = useNavigate();
+
     return (
         <div>
             <StyledFormArea>
@@ -43,8 +51,9 @@ const Login = () => {
                             password: Yup.string().min(8, "Senha curta").max(30, "Senha longa").required("Obrigatório"),
                         })
                     }
-                    onSubmit={(values, { setSubmitting }) => {
+                    onSubmit={(values, { setSubmitting, setFieldError }) => {
                         console.log(values);
+                        loginUser(values, navigate, setFieldError, setSubmitting);
                     }}
                 >
                     {({ isSubmitting }) => (
@@ -93,4 +102,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default connect(null, { loginUser })(Login);
