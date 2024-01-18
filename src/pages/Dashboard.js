@@ -1,10 +1,28 @@
+import { useState } from 'react';
 import { connect } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+import { logoutUser } from '../auth/actions/userActions';
+
+import Sidebar from '../components/Sidebar';
 
 const Dashboard = ({ user }) => {
+
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const navigate = useNavigate();
+
+    const openSidebar = () => {
+        setSidebarOpen(true);
+    }
+
+    const closeSidebar = () => {
+        setSidebarOpen(false);
+    }
+
     return (
-        <div>
-            <h1>Dashboard</h1>
-            <h5>Welcome, {user.name}</h5>
+        <div className='container'>
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
         </div>
     )
 }
@@ -13,4 +31,4 @@ const mapStateToProps = ({ session }) => ({
     user: session.user
 });
 
-export default connect(mapStateToProps)(Dashboard);
+export default connect(mapStateToProps, { logoutUser })(Dashboard);

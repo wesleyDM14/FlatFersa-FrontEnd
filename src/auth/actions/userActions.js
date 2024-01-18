@@ -14,14 +14,14 @@ export const loginUser = (credentials, navigate, setFieldError, setSubmitting) =
         const userData = data;
         const token = userData.token;
 
-        sessionService.saveSession(token).then(() => { 
+        sessionService.saveSession(token).then(() => {
             sessionService.saveUser(userData).then(() => {
                 navigate('/dashboard');
             }).catch(err => console.error(err));
-        }).catch( err => console.error(err));
+        }).catch(err => console.error(err));
 
         setSubmitting(false);
-        
+
     }).catch((err) => {
         const { data } = err.response;
         setFieldError('email', data.error);
@@ -34,6 +34,9 @@ export const signupUser = (credentials, navigate, setFieldError, setSubmitting) 
 
 }
 
-export const logoutUser = () => {
-
+export const logoutUser = (navigate) => {
+    sessionService.deleteSession();
+    sessionService.deleteUser();
+    console.log('entrou aqui');
+    navigate('/');
 }

@@ -14,16 +14,16 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 
 import AuthRoutes from './components/AuthRoutes';
-import BaseRoutes from './components/BaseRoutes';
+import BasicRoute from './components/BasicRoutes';
 
 function App() {
   return (
     <Router>
       <StyledContainer>
         <Routes>
-          <Route path='/signup' element={<BaseRoutes><Signup /></BaseRoutes>} />
-          <Route path='/login' element={<BaseRoutes><Login /></BaseRoutes>} />
-          <Route path='/' element={<BaseRoutes><Home /></BaseRoutes>} />
+          <Route path='/signup' element={<BasicRoute><Signup /></BasicRoute>} />
+          <Route path='/login' element={<BasicRoute><Login /></BasicRoute>} />
+          <Route path='/' element={<BasicRoute><Home /></BasicRoute>} />
           <Route path='/dashboard' element={<AuthRoutes><Dashboard /></AuthRoutes>} />
         </Routes>
       </StyledContainer>
