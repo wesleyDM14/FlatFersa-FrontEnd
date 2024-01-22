@@ -50,7 +50,7 @@ export const Avatar = styled.div`
     width: 85px;
     height: 85px;
     border-radius: 50px;
-    background-image: url(${props => props.image});
+    background-image: url(${props => props.$image});
     background-size: cover;
     background-position: center;
     margin: auto;
@@ -98,7 +98,7 @@ export const StyledTextInput = styled.input`
     margin: 5px auto 10px auto;
     transition: ease-in-out 0.3s;
 
-    ${(props) => props.invalid && `background-color: ${colors.red}; color: ${colors.primary};`}
+    ${(props) => props.$invalid && `background-color: ${colors.red}; color: ${colors.primary};`}
 
     &:focus{
         background-color: ${colors.dark2};
@@ -170,8 +170,8 @@ export const StyledIcon = styled.p`
     position: absolute;
     font-size: 21px;
     top: 35px;
-    ${(props) => props.right && `right: 15px;`};
-    ${(props) => !props.right && `left: 15px;`};
+    ${(props) => props.$right && `right: 15px;`};
+    ${(props) => !props.$right && `left: 15px;`};
 `;
 
 //copyright
@@ -194,12 +194,16 @@ export const TitleContainer = styled.div`
 export const ImageContainer = styled.div`
     display: flex;
     align-items: center;
+
+    @media only screen and (max-width: 978px) {
+        flex-direction: column;
+    }
 `;
 
 export const SidebarLogo = styled.div`
     width: 80px;
     height: 55px;
-    background-image: url(${props => props.image});
+    background-image: url(${props => props.$image});
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -210,6 +214,10 @@ export const Title = styled.h1`
     font-size: 18px;
     display: inline;
     margin-left: 15px;
+    @media only screen and (max-width: 978px) {
+        font-size: 12px;
+        text-align: center;
+    }
 `;
 
 export const MenuContainer = styled.div`
@@ -220,8 +228,12 @@ export const MenuContainer = styled.div`
 export const CloseContainer = styled.div`
     font-size: 18px;
     display: none;
+
     @media only screen and (max-width: 978px) {
         display: inline;
+        align-items: center;
+        justify-content: center;
+        color: white;
     }
 `;
 
@@ -277,4 +289,51 @@ export const Logoult = styled.a`
     color: #e65061;
     font-weight: 700;
     text-transform: uppercase;
+`;
+
+//navbar
+export const NavbarContainer = styled.nav`
+    background: ${colors.primary};
+    grid-area: nav;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px 0 30px;
+    border-bottom: 1px solid lightgray;
+`;
+
+export const LeftContainer = styled.div`
+    display: flex;
+`;
+
+export const RightContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
+
+export const NavbarIten = styled(Link)`
+    margin-right: 30px;
+    text-decoration: none;
+    color: #a5aaad;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+`;
+
+export const NavbarShowIcon = styled.div`
+    display: none;
+    @media only screen and (max-width: 978px) {
+        display: inline;
+    }
+`;
+
+export const NavbarAvatar = styled.div`
+    width: 30px;
+    height: 30px;
+    background-image: url(${props => props.image});
+    background-size: cover;
+    background-position: center;
+    margin: auto;
 `;

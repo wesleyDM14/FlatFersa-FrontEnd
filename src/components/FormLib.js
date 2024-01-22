@@ -19,14 +19,14 @@ export const TextInput = ({ icon, ...props }) => {
             <StyledLabel htmlFor={props.name}>{props.label}</StyledLabel>
             {props.type !== 'password' && (
                 <StyledTextInput
-                    invalid={meta.touched && meta.error}
+                    $invalid={meta.touched && meta.error}
                     {...field}
                     {...props}
                 />
             )}
             {props.type === 'password' && (
                 <StyledTextInput
-                    invalid={meta.touched && meta.error}
+                    $invalid={meta.touched && meta.error}
                     {...field}
                     {...props}
                     type={show ? "text" : "password"}
@@ -38,7 +38,7 @@ export const TextInput = ({ icon, ...props }) => {
 
             {
                 props.type === 'password' && (
-                    <StyledIcon onClick={() => setShow(!show)} right>
+                    <StyledIcon onClick={() => setShow(!show)} $right>
                         {show && <FiEye />}
                         {!show && <FiEyeOff />}
                     </StyledIcon>

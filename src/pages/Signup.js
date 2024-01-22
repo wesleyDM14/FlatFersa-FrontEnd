@@ -61,7 +61,6 @@ const Signup = ({ signupUser }) => {
                         })
                     }
                     onSubmit={(values, { setSubmitting, setFieldError }) => {
-                        console.log(values);
                         signupUser(values, navigate, setFieldError, setSubmitting);
                     }}
                 >

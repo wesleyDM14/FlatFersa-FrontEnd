@@ -31,12 +31,11 @@ export const loginUser = (credentials, navigate, setFieldError, setSubmitting) =
 }
 
 export const signupUser = (credentials, navigate, setFieldError, setSubmitting) => {
-
+    //create a user
 }
 
 export const logoutUser = (navigate) => {
     sessionService.deleteSession();
     sessionService.deleteUser();
-    console.log('entrou aqui');
     navigate('/');
 }

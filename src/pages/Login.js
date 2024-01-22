@@ -38,7 +38,7 @@ const Login = ({ loginUser }) => {
     return (
         <div>
             <StyledFormArea>
-                <Avatar image={Logo} />
+                <Avatar $image={Logo} />
                 <StyledTitle size={30} color={colors.theme}>Área de Login</StyledTitle>
                 <Formik
                     initialValues={{

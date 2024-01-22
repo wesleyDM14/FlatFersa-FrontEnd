@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../auth/actions/userActions';
 
 import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
+import Main from '../components/Main';
 
 const Dashboard = ({ user }) => {
 
@@ -22,6 +24,8 @@ const Dashboard = ({ user }) => {
 
     return (
         <div className='container'>
+            <Navbar openSidebar={openSidebar} />
+            <Main />
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
         </div>
     )
