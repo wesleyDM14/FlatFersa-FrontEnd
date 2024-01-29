@@ -259,6 +259,14 @@ export const MenuItemContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+    cursor: pointer;
+
+    &:focus{
+        padding: 7px;
+        background: rgba(62, 161, 117, 0.3);
+        width: 100%;
+        border-radius: 3px;
+    }
 `;
 
 export const MenuItemTitle = styled(Link)`
@@ -266,13 +274,6 @@ export const MenuItemTitle = styled(Link)`
     color: #a5aaad;
     font-weight: 700;
     font-size: 14px;
-    cursor: pointer;
-    &:focus{
-        padding: 7px;
-        background: rgba(62, 161, 117, 0.3);
-        width: 100%;
-        border-radius: 3px;
-    }
 `;
 
 export const LogoultContainer = styled.div`
@@ -317,7 +318,7 @@ export const NavbarIten = styled(Link)`
     margin-right: 30px;
     text-decoration: none;
     color: #a5aaad;
-    font-size: 15px;
+    font-size: 25px;
     font-weight: 700;
     cursor: pointer;
 `;
@@ -337,3 +338,65 @@ export const NavbarAvatar = styled.div`
     background-position: center;
     margin: auto;
 `;
+
+//main styles
+export const MainContainer = styled.div`
+    padding: 20px 35px;
+`;
+
+export const MainHeader = styled.div`
+    display: grid;
+    grid-template-columns: 7fr 3fr;
+    margin-bottom: 35px;
+`;
+
+export const MainTitleContainer = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
+export const MainIconTitleContainer = styled.div`
+    margin-right: 20px;
+    font-size: 20px;
+    color: #a5aaa5;
+`;
+
+export const MainTitle = styled.h1`
+    font-size: 24px;
+    color: #2e4a66;
+    margin-bottom: 5px;
+`;
+
+export const MainRegisterContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const MainRegisterIconContainer = styled.div`
+    margin-right: 10px;
+    font-size: 20px;
+    color: #34a806;
+    cursor: pointer;
+`;
+
+export const MainRegisterTitle = styled.h2`
+    font-size: 14px;
+    color: #2e4a66;
+    margin-right: 15px;
+`;
+
+//Clients page
+export const modalStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%,-50%)',
+        overflowY: 'auto',
+        maxHeight: '500px',
+        padding: '0'
+    }
+}

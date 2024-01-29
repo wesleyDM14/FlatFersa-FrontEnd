@@ -38,13 +38,17 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
             </TitleContainer>
             <MenuContainer>
                 <MenuTitleSection>GESTÃO</MenuTitleSection>
-                <MenuItemContainer>
+                <MenuItemContainer onClick={() => {
+                    navigate('/apartamentos');
+                }}>
                     <IconContainer>
                         <FaHotel />
                     </IconContainer>
                     <MenuItemTitle>Apartamentos</MenuItemTitle>
                 </MenuItemContainer>
-                <MenuItemContainer>
+                <MenuItemContainer onClick={() => {
+                    navigate('/clients');
+                }}>
                     <IconContainer>
                         <FaUserFriends />
                     </IconContainer>

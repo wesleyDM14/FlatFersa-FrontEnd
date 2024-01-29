@@ -15,6 +15,8 @@ import Dashboard from './pages/Dashboard';
 
 import AuthRoutes from './components/AuthRoutes';
 import BasicRoute from './components/BasicRoutes';
+import ClientsPage from './pages/ClientsPage';
+import AptPage from './pages/AptPage';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path='/login' element={<BasicRoute><Login /></BasicRoute>} />
           <Route path='/' element={<BasicRoute><Home /></BasicRoute>} />
           <Route path='/dashboard' element={<AuthRoutes><Dashboard /></AuthRoutes>} />
+          <Route path='/clients' element={<AuthRoutes><ClientsPage /></AuthRoutes>} />
+          <Route path='/apartamentos' element={<AuthRoutes><AptPage /></AuthRoutes>} />
         </Routes>
       </StyledContainer>
     </Router>

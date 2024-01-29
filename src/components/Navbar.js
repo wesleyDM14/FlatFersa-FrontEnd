@@ -6,7 +6,7 @@ import {
     NavbarShowIcon,
     NavbarAvatar
 } from './Styles';
-import { FaBars} from "react-icons/fa";
+import { FaBars, FaHome} from "react-icons/fa";
 import logo from './../assets/logo.png';
 
 const Navbar = ({openSidebar}) => {
@@ -16,8 +16,7 @@ const Navbar = ({openSidebar}) => {
                 <FaBars />
             </NavbarShowIcon>
             <LeftContainer>
-                <NavbarIten to={'/'}>Home</NavbarIten>
-                <NavbarIten to={'/'}>Admin</NavbarIten>
+                <NavbarIten to={'/dashboard'}><FaHome /></NavbarIten>
             </LeftContainer>
             <RightContainer>
                 <NavbarAvatar image={logo}/>
