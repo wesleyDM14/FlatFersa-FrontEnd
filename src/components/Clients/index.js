@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ButtonGroup,
+    LoadingContainer,
     MainContainer,
     MainHeader,
     MainIconTitleContainer,
@@ -32,16 +33,18 @@ import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
 import { TextInput } from "./../FormLib";
 import { cpf } from 'cpf-cnpj-validator';
-import { registerClient } from "../../auth/actions/clientActions";
-
+import { getAllClients, registerClient } from "../../auth/actions/clientActions";
+import ClientList from "./clientsList";
 
 const ClientsMain = ({ user, navigate }) => {
 
     Modal.setAppElement(document.getElementById('root'));
     const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
+    const [clients, setClients] = useState([]);
     const [modalRegisterIsOpen, setModalRegisterIsOpen] = useState(false);
     const [modalRequestIsOpen, setModalRequestIsOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const openRegisterModal = () => {
         setModalRegisterIsOpen(true);
@@ -58,6 +61,16 @@ const ClientsMain = ({ user, navigate }) => {
     const closeRequestModal = () => {
         setModalRequestIsOpen(false);
     }
+
+    useEffect(() => {
+        async function loadDataClients() {
+            if (loading) {
+                let temp = await getAllClients(user, { setLoading });
+                setClients(temp);
+            }
+        }
+        loadDataClients();
+    }, [user, loading]);
 
     return (
         <main>
@@ -109,7 +122,7 @@ const ClientsMain = ({ user, navigate }) => {
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                    await registerClient(values, user, { closeRegisterModal, setFieldError, setSubmitting });
+                                    await registerClient(values, user, { closeRegisterModal, setLoading, setFieldError, setSubmitting });
                                 }}
                             >
                                 {
@@ -188,6 +201,19 @@ const ClientsMain = ({ user, navigate }) => {
 
                     </Modal>
                 </MainHeader>
+                {
+                    loading ? (
+                        <LoadingContainer>
+                            <ThreeDots
+                                color={colors.dark3}
+                                height={80}
+                                width={300}
+                            />
+                        </LoadingContainer>
+                    ) : (
+                        <ClientList clients={clients} navigate={navigate}/>
+                    )
+                }
             </MainContainer>
         </main>
     )

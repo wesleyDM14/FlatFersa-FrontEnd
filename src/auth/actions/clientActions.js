@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BaseUrl } from "./../../components/BaseUrl";
 
-export const registerClient = async (client, user, { closeRegisterModal, setFieldError, setSubmitting }) => {
+export const registerClient = async (client, user, { closeRegisterModal, setLoading, setFieldError, setSubmitting }) => {
     await axios.post(BaseUrl + 'clients', client, {
         headers: {
             "Content-Type": "application/json",
@@ -9,8 +9,8 @@ export const registerClient = async (client, user, { closeRegisterModal, setFiel
         }
     }
     ).then((response) => {
-        const { data } = response;
-        //closeRegisterModal();
+        closeRegisterModal();
+        setLoading(true);
     }).catch((err) => {
         const { response } = err;
         const { data } = response;
@@ -22,6 +22,17 @@ export const registerClient = async (client, user, { closeRegisterModal, setFiel
     setSubmitting(false);
 }
 
-export const getAllClients = () => {
-
+export const getAllClients = async (user, { setLoading }) => {
+    let clients = [];
+    await axios.get(BaseUrl + 'clients', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.token}`
+        }
+    }).then((response) => {
+        const { data } = response;
+        clients = data.clients;
+    }).catch(err => console.error(err));
+    setLoading(false);
+    return clients;
 }

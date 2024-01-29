@@ -400,3 +400,155 @@ export const modalStyles = {
         padding: '0'
     }
 }
+
+export const LoadingContainer = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+`;
+
+//Clients List
+export const ClientListContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const ClientListHeader = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 1fr;
+    height: 40px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background-color: ${colors.primary};
+    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+`;
+
+export const ListLabel = styled.h5`
+    font-size: 14px;
+    color: #2e4a66;
+    margin-right: 10px;
+`;
+
+export const SingleClient = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 1fr;
+    height: 50px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    cursor: pointer;
+`;
+
+export const ClientSingleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
+export const ClientLabel = styled.h1`
+    font-size: 18px;
+    color: ${colors.lightblue};
+    margin-right: 10px;
+`;
+
+export const ClientValue = styled.a`
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 30px;
+    text-decoration: none;
+    color: ${colors.dark1};
+
+    @media (max-width: 1380px) {
+        font-weight: 300;
+    }
+`;
+
+export const AdminClientContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+`;
+
+export const EditIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${colors.lightblue};
+`;
+
+export const DeleteIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${colors.red};
+`;
+
+export const DeleteContainer = styled.div`
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+`;
+
+export const DeleteTitle = styled.h1`
+    font-size: 20px;
+    color: #2e4a66;
+`;
+
+export const DeleteButtonContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 25px;
+`;
+
+export const CancelButton = styled.button`
+    padding: 10px;
+    width: 100px;
+    background-color: red;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    border: 0;
+    border-radius: 15px;
+    transition: ease-in-out 0.3s;
+    outline: 0;
+
+    &:hover{
+        cursor: pointer;
+        background-color: black;
+    }
+`;
+
+export const ConfirmButton = styled.button`
+    padding: 10px;
+    width: 100px;
+    background-color: lightgreen;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    border: 0;
+    border-radius: 15px;
+    transition: ease-in-out 0.3s;
+    outline: 0;
+
+    &:hover{
+        cursor: pointer;
+        background-color: black;
+    }
+`;
+
+export const ClientContactContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
+export const IconContactContaier = styled.a`
+    font-size: 18px;
+    color: ${colors.lightblue};
+    margin-right: 10px;
+`;
