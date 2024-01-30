@@ -63,6 +63,7 @@ const Login = ({ loginUser }) => {
                                 label='Email'
                                 placeholder='Digite seu email'
                                 icon={<FiMail />}
+                                width={350}
                             />
                             <TextInput
                                 name='password'
@@ -70,6 +71,7 @@ const Login = ({ loginUser }) => {
                                 label='Senha'
                                 placeholder='********'
                                 icon={<FiLock />}
+                                width={350}
                             />
                             <ButtonGroup>
                                 {

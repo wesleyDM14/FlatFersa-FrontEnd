@@ -1,38 +1,34 @@
 import { useState } from 'react';
 import {
     ClientListContainer,
-    ClientListHeader,
     ListLabel,
-    SingleClient,
     ClientSingleContainer,
     ClientValue,
     AdminClientContainer,
     EditIcon,
     DeleteIcon,
-    IconContactContaier,
-    ClientContactContainer,
-    ClientLabel,
-    modalStyles,
+    ApartmentListHeader,
+    SingleApartment,
     DeleteContainer,
     DeleteTitle,
     DeleteButtonContainer,
     CancelButton,
-    ConfirmButton
+    ConfirmButton,
+    modalStyles
 } from './../Styles.js';
 import {
     FaEdit,
     FaTrash,
-    FaWhatsapp,
 } from 'react-icons/fa';
 import Modal from 'react-modal';
-import { deleteClient } from '../../auth/actions/clientActions.js';
+import { deleteApartment } from '../../auth/actions/apartmentActions.js';
 
-const ClientList = ({ user, clients, setLoading, navigate }) => {
+const ApartmentList = ({ user, apartments, setLoading, navigate }) => {
 
     Modal.setAppElement(document.getElementById('root'));
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
     const [modalUpdateIsOpen, setModalUpdateIsOpen] = useState(false);
-    const [selectedClient, setSelectedClient] = useState({});
+    const [selectedApartment, setSelectedApartment] = useState({});
 
     const openDeleteModal = () => {
         setModalDeleteIsOpen(true);
@@ -52,40 +48,40 @@ const ClientList = ({ user, clients, setLoading, navigate }) => {
 
     return (
         <ClientListContainer>
-            <ClientListHeader>
-                <ListLabel>Nome</ListLabel>
-                <ListLabel>Contato</ListLabel>
-            </ClientListHeader>
+            <ApartmentListHeader>
+                <ListLabel>Número</ListLabel>
+                <ListLabel>Localização</ListLabel>
+                <ListLabel>Status</ListLabel>
+            </ApartmentListHeader>
             {
-                clients.map((client) => (
-                    <SingleClient key={client.id}>
+                apartments.map((apartment) => (
+                    <SingleApartment key={apartment.id}>
                         <ClientSingleContainer onClick={() => console.log('navigate')}>
-                            <ClientLabel>Cliente: </ClientLabel>
-                            <ClientValue>{client.name}</ClientValue>
+                            <ClientValue>{apartment.number}</ClientValue>
                         </ClientSingleContainer>
-                        <ClientContactContainer>
-                            <IconContactContaier href={`https://whatsa.me/55${client.phone}`} target='_blank'>
-                                <FaWhatsapp />
-                            </IconContactContaier>
-                            <ClientValue href={`https://whatsa.me/55${client.phone}`} target='_blank'>{client.phone}</ClientValue>
-                        </ClientContactContainer>
+                        <ClientSingleContainer onClick={() => console.log('navigate')}>
+                            <ClientValue>{apartment.building}</ClientValue>
+                        </ClientSingleContainer>
+                        <ClientSingleContainer>
+                            <ClientValue>{apartment.ocupado ? 'Ocupado' : 'Vago'}</ClientValue>
+                        </ClientSingleContainer>
                         <AdminClientContainer>
                             <EditIcon>
                                 <FaEdit onClick={() => {
-                                    setSelectedClient(client);
+                                    setSelectedApartment(apartment);
                                     openUpdateModal();
                                 }} />
                             </EditIcon>
                             <DeleteIcon>
                                 <FaTrash onClick={
                                     () => {
-                                        setSelectedClient(client);
+                                        setSelectedApartment(apartment);
                                         openDeleteModal();
                                     }
                                 } />
                             </DeleteIcon>
                         </AdminClientContainer>
-                    </SingleClient>
+                    </SingleApartment>
                 ))
             }
             <Modal
@@ -94,11 +90,11 @@ const ClientList = ({ user, clients, setLoading, navigate }) => {
                 style={modalStyles}
             >
                 <DeleteContainer>
-                    <DeleteTitle>Quer realmente excluir {selectedClient.name}?</DeleteTitle>
+                    <DeleteTitle>Quer realmente excluir Apartamento {selectedApartment.number}?</DeleteTitle>
                     <DeleteButtonContainer>
                         <CancelButton
                             onClick={() => {
-                                setSelectedClient({});
+                                setSelectedApartment({});
                                 closeDeleteModal();
                             }}
                         >
@@ -106,7 +102,7 @@ const ClientList = ({ user, clients, setLoading, navigate }) => {
                         </CancelButton>
                         <ConfirmButton
                             onClick={async () => {
-                                await deleteClient(user, selectedClient, { setLoading, closeDeleteModal });
+                                await deleteApartment(user, selectedApartment, { setLoading, closeDeleteModal });
                             }}
                         >
                             Confirmar
@@ -118,4 +114,4 @@ const ClientList = ({ user, clients, setLoading, navigate }) => {
     )
 }
 
-export default ClientList;
+export default ApartmentList;

@@ -25,7 +25,7 @@ const Apartamentos = ({ user }) => {
     return (
         <div className='container'>
             <Navbar openSidebar={openSidebar} />
-            <AptMain />
+            <AptMain user={user} />
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
         </div>
     )

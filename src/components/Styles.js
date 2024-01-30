@@ -85,7 +85,7 @@ export const ButtonGroup = styled.div`
 
 //Input
 export const StyledTextInput = styled.input`
-    width: 280px;
+    width: ${(props) => props.width}px;
     padding: 15px;
     padding-left: 50px;
     font-size: 17px;
@@ -551,4 +551,29 @@ export const IconContactContaier = styled.a`
     font-size: 18px;
     color: ${colors.lightblue};
     margin-right: 10px;
+`;
+
+//apartment list
+export const ApartmentListHeader = styled.div`
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    height: 40px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background-color: ${colors.primary};
+    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+`;
+
+export const SingleApartment = styled.div`
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    height: 50px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    cursor: pointer;
 `;

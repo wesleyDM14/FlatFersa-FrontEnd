@@ -142,6 +142,7 @@ const ClientsMain = ({ user, navigate }) => {
                                                 label='Email'
                                                 placeholder='Digite o email'
                                                 icon={<FaMailBulk />}
+                                                width={350}
                                             />
                                             <TextInput
                                                 name='cpf'
@@ -149,6 +150,7 @@ const ClientsMain = ({ user, navigate }) => {
                                                 label='CPF'
                                                 placeholder='Digite o cpf'
                                                 icon={<FaRegAddressBook />}
+                                                width={350}
                                             />
                                             <TextInput
                                                 name='rg'
@@ -156,6 +158,7 @@ const ClientsMain = ({ user, navigate }) => {
                                                 label='RG'
                                                 placeholder='Digite o rg'
                                                 icon={<FaRegNewspaper />}
+                                                width={350}
                                             />
                                             <TextInput
                                                 name="phone"
@@ -211,7 +214,7 @@ const ClientsMain = ({ user, navigate }) => {
                             />
                         </LoadingContainer>
                     ) : (
-                        <ClientList clients={clients} navigate={navigate}/>
+                        <ClientList user={user} clients={clients} setLoading={setLoading} navigate={navigate} />
                     )
                 }
             </MainContainer>
