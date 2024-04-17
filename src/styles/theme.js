@@ -13,6 +13,12 @@ const theme = {
         success: '#28a745',
         error: '#dc3545',
         warning: '#ffc107',
+        pcolor: '#a5aaad',
+        titleColor: '#2e4a66',
+        lightBlue: '#469cac',
+        textRed: '#cc3d38',
+        textYellow: '#a98921',
+        textGreen: '#3b9668',
     },
     fonts: {
         primary: 'Arial, sans-serif',

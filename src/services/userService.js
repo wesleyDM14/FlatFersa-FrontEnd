@@ -8,10 +8,10 @@ export const loginUser = (credentials, navigate, setFieldError, setSubmitting) =
     }).then((response) => {
         const { data } = response;
         const userData = data;
-        const token = data.token;
+        const token = userData.accessToken;
 
         sessionService.saveSession(token).then(() => {
-            sessionService.saveUser(userData).then(() => {
+            sessionService.saveUser(token).then(() => {
                 navigate('/dashboard');
             }).catch(err => console.error(err));
         }).catch(err => console.error(err));

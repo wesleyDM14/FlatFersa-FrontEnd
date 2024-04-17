@@ -1,16 +1,81 @@
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
-    body {
-        font-family: ${({ theme }) => theme.fonts.primary};
-        margin: 0;
-        padding: 0;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+    @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+    ::-webkit-scrollbar {
+        width: 5px;
+        height: 6px;
     }
 
-    h1, h2, h3 {
-        font-family: ${({ theme }) => theme.fonts.secondary};
+    ::-webkit-scrollbar-track{
+        box-shadow: inset 0 0 5px #a5aaad;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb{
+        background: #3ea175;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a5aaad;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        box-sizing: border-box;
+        font-family: 'Lato', sans-serif;
+    }
+
+    .container {
+        display: grid;
+        height: 100vh;
+        grid-template-columns: 0.8fr repeat(3, 1fr);
+        grid-template-rows: 0.2fr 3fr;
+        grid-template-areas: 
+        'sidebar nav nav nav'
+        'sidebar main main main';
+    }
+
+    #sidebar {
+        background: #020509;
+        grid-area: sidebar;
+        overflow-y: auto;
+        padding: 20px;
+        -webkit-transition: all 0.5s;
+        transition: all 0.5s;
+    }
+
+    .active_menu_link {
+        background: rgba(62, 161, 171, 0.3);
+        color: #3ea175;
+    }
+
+    .active_menu_link > a{
+        color: #3ea175 !important;
+    }
+
+    .sidebar-responsive {
+        display: inline !important;
+        z-index: 9999 !important;
+        left: 0 !important;
+        position: absolute;
+    }
+
+    @media only screen and (max-width: 978px){
+        #sidebar {
+            display: none;
+        }
+        .container{
+            grid-template-columns: 1fr;
+            grid-template-rows: 0.2fr 3fr;
+            grid-template-areas: 'nav' 'main';
+        }
     }
 `;
 
