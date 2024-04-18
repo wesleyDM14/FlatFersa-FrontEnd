@@ -17,9 +17,9 @@ import {
 
 import {
     FaFile,
+    FaHome,
     FaHotel,
     FaHouseUser,
-    FaMinusSquare,
     FaMoneyBillWave,
     FaPowerOff,
     FaRegHandshake,
@@ -47,7 +47,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
             <Menu>
                 <MenuItem>
                     <IconItemContainer>
-                        <FaMinusSquare />
+                        <FaHome />
                     </IconItemContainer>
                     <ItemTitle>Home</ItemTitle>
                 </MenuItem>
@@ -95,7 +95,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
                     </IconItemContainer>
                     <ItemTitle>Política de Privacidade</ItemTitle>
                 </MenuItem>
-                <LogoutContainer>
+                <LogoutContainer onClick={() => logoutUser(navigate)}>
                     <IconItemContainer>
                         <FaPowerOff />
                     </IconItemContainer>

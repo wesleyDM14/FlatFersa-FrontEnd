@@ -42,8 +42,40 @@ export const NavbarShowIcon = styled.div`
 export const NavbarAvatar = styled.div`
     width: 30px;
     height: 30px;
-    background-image: url(${props => props.image});
+    background-image: url(${props => props.$image});
     background-size: cover;
     background-position: center;
     margin: auto;
+    cursor: pointer;
+    filter: opacity(0.5) drop-shadow(0 0 0 #a5aaad);
+`;
+
+export const NavbarMenuContainer = styled.div``;
+
+export const DropDownMenu = styled.div`
+    position: absolute;
+    top: 58px;
+    width: 150px;
+    transform: translateX(-75%);
+    background-color: #020509;
+    border: 1px solid #FFFa;
+    border-radius: 15px;
+    padding: 1rem;
+    overflow: hidden;
+    z-index: 9999;
+`;
+
+export const DropDownItem = styled.a`
+    height: 50px;
+    display: flex;
+    align-items: center;
+    border-radius: 15px;
+    transition: background 500ms;
+    padding: 0.5rem;
+    color: ${props => props.color ? props.color : props.theme.colors.success};
+    cursor: pointer;
+
+    &:hover{
+        background-color: rgba(62, 161, 117, 0.3);
+    }
 `;

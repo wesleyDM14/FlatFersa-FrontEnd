@@ -21,7 +21,7 @@ const Dashboard = () => {
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
-            <Navbar openSidebar={openSidebar} />
+            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate}/>
         </div>
     )
 }
