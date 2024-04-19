@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
-import { logoutUser } from "../../services/userService";
+import Navbar from '../../components/Navbar';
+import Sidebar from '../../components/Sidebar';
 
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+import { logoutUser } from '../../services/userService';
 
-const Dashboard = () => {
+const FianceiroPage = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -17,14 +17,13 @@ const Dashboard = () => {
     const closeSidebar = () => {
         setSidebarOpen(false);
     }
-
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
-            <h1>Dashboard</h1>
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate}/>
+            <h1>Financeiro</h1>
+            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>
-    )
+    );
 }
 
-export default Dashboard;
+export default FianceiroPage;

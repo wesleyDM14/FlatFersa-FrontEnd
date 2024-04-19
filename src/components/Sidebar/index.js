@@ -45,51 +45,51 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
                 </IconTitleContainer>
             </Header>
             <Menu>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/dashboard')}>
                     <IconItemContainer>
                         <FaHome />
                     </IconItemContainer>
                     <ItemTitle>Home</ItemTitle>
                 </MenuItem>
                 <SubTitle>ÁREA ADMINISTRATIVA</SubTitle>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/predios')}>
                     <IconItemContainer>
                         <FaHotel />
                     </IconItemContainer>
                     <ItemTitle>Prédio</ItemTitle>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/apartamentos')}>
                     <IconItemContainer>
                         <FaHouseUser />
                     </IconItemContainer>
                     <ItemTitle>Apartamentos</ItemTitle>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/clientes')}>
                     <IconItemContainer>
                         <FaUsers />
                     </IconItemContainer>
                     <ItemTitle>Clientes</ItemTitle>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/contratos')}>
                     <IconItemContainer>
                         <FaRegHandshake />
                     </IconItemContainer>
                     <ItemTitle>Contratos</ItemTitle>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/financeiro')}>
                     <IconItemContainer>
                         <FaMoneyBillWave />
                     </IconItemContainer>
                     <ItemTitle>Financeiro</ItemTitle>
                 </MenuItem>
                 <SubTitle>ÁREA PESSOAL</SubTitle>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/perfil')}>
                     <IconItemContainer>
                         <FaUser />
                     </IconItemContainer>
                     <ItemTitle>Perfil</ItemTitle>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={() => navigate('/politica-privacidade')}>
                     <IconItemContainer>
                         <FaFile />
                     </IconItemContainer>

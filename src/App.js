@@ -10,6 +10,13 @@ import PrivateRoute from "./components/PrivateRoute";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import Dashboard from "./pages/DashboardPage/DashboardPage";
 import HomePage from "./pages/HomePage/HomePage";
+import PredioPage from "./pages/PredioPage/PredioPage";
+import ClientPage from "./pages/ClientPage/ClientPage";
+import ApartamentoPage from "./pages/ApartamentoPage/ApartamentoPage";
+import ContractPage from "./pages/ContractPage/ContractPage";
+import FianceiroPage from "./pages/FinanceiroPage/FinanceiroPage";
+import PerfilPage from "./pages/PerfilPage/PerfilPage";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidadePage/PoliticaPrivacidadePage";
 
 const App = ({ checked }) => {
   return (
@@ -22,6 +29,13 @@ const App = ({ checked }) => {
               <Route path="/" element={<BasicRoute><HomePage /></BasicRoute>} />
               <Route path="/login" element={<BasicRoute><LoginPage /></BasicRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/predios" element={<PrivateRoute><PredioPage /></PrivateRoute>} />
+              <Route path="/clientes" element={<PrivateRoute><ClientPage /></PrivateRoute>} />
+              <Route path="/apartamentos" element={<PrivateRoute><ApartamentoPage /></PrivateRoute>} />
+              <Route path="/contratos" element={<PrivateRoute><ContractPage /></PrivateRoute>} />
+              <Route path="/financeiro" element={<PrivateRoute><FianceiroPage /></PrivateRoute>} />
+              <Route path="/perfil" element={<PrivateRoute><PerfilPage /></PrivateRoute>} />
+              <Route path="/politica-privacidade" element={<PrivateRoute><PoliticaPrivacidade /></PrivateRoute>} />
             </Routes>
           )
         }

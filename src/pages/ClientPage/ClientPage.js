@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
 
 import { logoutUser } from "../../services/userService";
 
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+const ClientPage = () => {
 
-const Dashboard = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -21,10 +22,10 @@ const Dashboard = () => {
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
-            <h1>Dashboard</h1>
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate}/>
+            <h1>Clientes</h1>
+            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>
-    )
+    );
 }
 
-export default Dashboard;
+export default ClientPage;
