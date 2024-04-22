@@ -29,6 +29,7 @@ const GlobalStyle = createGlobalStyle`
     body {
         box-sizing: border-box;
         font-family: 'Lato', sans-serif;
+        background: ${props => props.theme.colors.light};
     }
 
     .container {

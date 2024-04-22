@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 
 import Theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyles";
+
 import BasicRoute from "./components/BasicRoute";
 import PrivateRoute from "./components/PrivateRoute";
 
