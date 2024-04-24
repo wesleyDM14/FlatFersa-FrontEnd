@@ -34,7 +34,7 @@ const PoliticaPrivacidade = () => {
 
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} politicaActive={true} />
             <PoliticaContainer>
                 <ContentContainer>
                     <ContentHeader>
@@ -46,7 +46,7 @@ const PoliticaPrivacidade = () => {
                         </ContentParagraph>
                         <br />
                         <ContentParagraph>
-                            A Plataforma FlatFersa é uma plataforma online acessível na URL <Link href="/dashboard">link de acesso</Link>, por meio da qual a OffsetDev ("OffsetDev", "nós" ou "nossos"), disponibiliza uma plataforma de tecnologia para conectar Usuários ("Usuário", "você" ou "seu") a serviços tais como intermediação à abertura de contratos de locação com a FlatFersa, acompanhamento de contratos de aluguel, pagamentos, bem como outras funcionalidades que forem apresentadas na Plataforma ("Serviços").
+                            A Plataforma FlatFersa é uma plataforma online acessível na URL <Link href="/dashboard">https://flatfersa.com.br</Link>, por meio da qual a OffsetDev ("OffsetDev", "nós" ou "nossos"), disponibiliza uma plataforma de tecnologia para conectar Usuários ("Usuário", "você" ou "seu") a serviços tais como intermediação à abertura de contratos de locação com a FlatFersa, acompanhamento de contratos de aluguel, pagamentos, bem como outras funcionalidades que forem apresentadas na Plataforma ("Serviços").
                         </ContentParagraph>
                         <br />
                         <ContentParagraph>

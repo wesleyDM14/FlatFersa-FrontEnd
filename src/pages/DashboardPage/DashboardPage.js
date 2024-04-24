@@ -20,9 +20,9 @@ const Dashboard = () => {
 
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} homeActive={true} />
             <h1>Dashboard</h1>
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate}/>
+            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>
     )
 }

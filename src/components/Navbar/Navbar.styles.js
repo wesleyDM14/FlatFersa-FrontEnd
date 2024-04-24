@@ -59,10 +59,21 @@ export const DropDownMenu = styled.div`
     transform: translateX(-75%);
     background-color: #020509;
     border: 1px solid #FFFa;
-    border-radius: 15px;
+    border-radius: 8px;
     padding: 1rem;
-    overflow: hidden;
     z-index: 9999;
+`;
+
+export const Pinguelo = styled.div`
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 20px;
+    top: -8px;
+    z-index: 10;
+    background-color: #020509;
+    transform: rotate(45deg);
+    border-radius: 3px 10px 24px;
 `;
 
 export const DropDownItem = styled.a`

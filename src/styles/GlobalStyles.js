@@ -68,6 +68,19 @@ const GlobalStyle = createGlobalStyle`
         height: 100vh;
     }
 
+    .icon-responsive{
+        margin-right: 50px;
+    }
+
+    .icon-add-button{
+        margin-right: 5px;
+    }
+
+    .active-menu-item {
+        background-color: rgba(62, 161, 117, 0.3);
+        border-radius: 3px;
+    }
+
     @media only screen and (max-width: 978px){
         #sidebar {
             display: none;
@@ -76,6 +89,9 @@ const GlobalStyle = createGlobalStyle`
             grid-template-columns: 1fr;
             grid-template-rows: 0.2fr 3fr;
             grid-template-areas: 'nav' 'main';
+        }
+        .icon-responsive{
+            font-size: 90px;
         }
     }
 `;

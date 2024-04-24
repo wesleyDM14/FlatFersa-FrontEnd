@@ -3,11 +3,12 @@ import styled from "styled-components";
 export const PoliticaContainer = styled.main`
     padding-left: 30px;
     padding-right: 30px;
-    margin-top: 10px;
+    margin-top: 15px;
+    margin-bottom: 28px;
     grid-area: main;
 
     @media only screen and (max-width: 978px){
-        padding: 0;
+        padding: 0 10px;
     }
 `;
 
@@ -53,4 +54,7 @@ export const ContentListItem = styled.li`
     color: #545454;
 `;
 
-export const Link = styled.a``;
+export const Link = styled.a`
+    text-decoration: underline;
+    color: ${props => props.theme.colors.textGreen};
+`;

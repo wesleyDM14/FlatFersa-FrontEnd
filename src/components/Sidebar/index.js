@@ -1,4 +1,4 @@
-
+import React, { useState, useEffect } from 'react';
 import {
     Header,
     TitleContainer,
@@ -30,7 +30,30 @@ import {
 
 import logo from '../../assets/favicon.png';
 
-const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
+const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser, homeActive, predioActive, apartamentoActive, clienteActive, contratoActive, financeiroActive, perfilActive, politicaActive }) => {
+    const [home, setHome] = useState(false);
+    const [predio, setPredio] = useState(false);
+    const [apartamento, setApartamento] = useState(false);
+    const [cliente, setCliente] = useState(false);
+    const [contrato, setContrato] = useState(false);
+    const [financeiro, setFinanceiro] = useState(false);
+    const [perfil, setPerfil] = useState(false);
+    const [politica, setPolitica] = useState(false);
+
+    useEffect(() => {
+        function activePageSet() {
+            setHome(homeActive);
+            setPredio(predioActive);
+            setApartamento(apartamentoActive);
+            setCliente(clienteActive);
+            setContrato(contratoActive);
+            setFinanceiro(financeiroActive);
+            setPerfil(perfilActive);
+            setPolitica(politicaActive);
+        }
+        activePageSet();
+    }, []);
+
     return (
         <div className={sidebarOpen ? 'sidebar-responsive' : ""} id='sidebar'>
             <Header>
@@ -45,51 +68,51 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser }) => {
                 </IconTitleContainer>
             </Header>
             <Menu>
-                <MenuItem onClick={() => navigate('/dashboard')}>
+                <MenuItem onClick={() => navigate('/dashboard')} className={home && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaHome />
                     </IconItemContainer>
                     <ItemTitle>Home</ItemTitle>
                 </MenuItem>
                 <SubTitle>ÁREA ADMINISTRATIVA</SubTitle>
-                <MenuItem onClick={() => navigate('/predios')}>
+                <MenuItem onClick={() => navigate('/predios')} className={predio && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaHotel />
                     </IconItemContainer>
                     <ItemTitle>Prédio</ItemTitle>
                 </MenuItem>
-                <MenuItem onClick={() => navigate('/apartamentos')}>
+                <MenuItem onClick={() => navigate('/apartamentos')} className={apartamento && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaHouseUser />
                     </IconItemContainer>
                     <ItemTitle>Apartamentos</ItemTitle>
                 </MenuItem>
-                <MenuItem onClick={() => navigate('/clientes')}>
+                <MenuItem onClick={() => navigate('/clientes')} className={cliente && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaUsers />
                     </IconItemContainer>
                     <ItemTitle>Clientes</ItemTitle>
                 </MenuItem>
-                <MenuItem onClick={() => navigate('/contratos')}>
+                <MenuItem onClick={() => navigate('/contratos')} className={contrato && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaRegHandshake />
                     </IconItemContainer>
                     <ItemTitle>Contratos</ItemTitle>
                 </MenuItem>
-                <MenuItem onClick={() => navigate('/financeiro')}>
+                <MenuItem onClick={() => navigate('/financeiro')} className={financeiro && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaMoneyBillWave />
                     </IconItemContainer>
                     <ItemTitle>Financeiro</ItemTitle>
                 </MenuItem>
                 <SubTitle>ÁREA PESSOAL</SubTitle>
-                <MenuItem onClick={() => navigate('/perfil')}>
+                <MenuItem onClick={() => navigate('/perfil')} className={perfil && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaUser />
                     </IconItemContainer>
                     <ItemTitle>Perfil</ItemTitle>
                 </MenuItem>
-                <MenuItem onClick={() => navigate('/politica-privacidade')}>
+                <MenuItem onClick={() => navigate('/politica-privacidade')} className={politica && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaFile />
                     </IconItemContainer>

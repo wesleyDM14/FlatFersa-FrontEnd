@@ -19,7 +19,7 @@ const PerfilPage = () => {
     }
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} perfilActive={true} />
             <h1>Perfil</h1>
             <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>

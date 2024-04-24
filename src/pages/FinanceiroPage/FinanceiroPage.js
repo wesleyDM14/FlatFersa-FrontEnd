@@ -19,7 +19,7 @@ const FianceiroPage = () => {
     }
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} financeiroActive={true} />
             <h1>Financeiro</h1>
             <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>

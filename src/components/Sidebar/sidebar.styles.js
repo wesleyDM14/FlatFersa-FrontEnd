@@ -46,6 +46,7 @@ export const MenuItem = styled.div`
     padding: 10px;
     border-radius: 3px;
     margin-bottom: 5px;
+    cursor: pointer;
 
     &:hover{
         background-color: rgba(62, 161, 117, 0.3);
@@ -57,7 +58,6 @@ export const ItemTitle = styled.a`
     text-decoration: none;
     color: #a5aaad;
     font-weight: 700;
-    cursor: pointer;
 `;
 
 export const IconItemContainer = styled.div`

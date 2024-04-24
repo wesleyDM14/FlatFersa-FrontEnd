@@ -10,6 +10,7 @@ import {
     DropDownMenu,
     DropDownItem,
     NavbarMenuContainer,
+    Pinguelo,
 } from './Navbar.styles';
 
 import user from '../../assets/user.png';
@@ -32,6 +33,7 @@ const Navbar = ({ openSidebar, logout, navigate }) => {
                     {
                         open && (
                             <DropDownMenu>
+                                <Pinguelo />
                                 <DropDownItem onClick={() => navigate('/perfil')}>My Profile</DropDownItem>
                                 <DropDownItem onClick={() => logout(navigate)} color='#e65061'><FaPowerOff /> Logout</DropDownItem>
                             </DropDownMenu>
