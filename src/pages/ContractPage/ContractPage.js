@@ -62,7 +62,7 @@ const ContractPage = () => {
                                 <FaHandshake color='#6c757d' fontSize={150} className='icon-responsive' />
                                 <NoContentAvisoContainer>
                                     <TextContent>Nenhum contrato encontrado.</TextContent>
-                                    <AdicionarContratoButton >
+                                    <AdicionarContratoButton onClick={() => navigate('/contratos/novo')}>
                                         <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Contrato
                                     </AdicionarContratoButton>
                                 </NoContentAvisoContainer>

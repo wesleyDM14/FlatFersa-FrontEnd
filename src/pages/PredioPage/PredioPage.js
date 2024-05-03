@@ -34,13 +34,14 @@ const PredioPage = () => {
     const closeSidebar = () => {
         setSidebarOpen(false);
     }
+
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} predioActive={true} />
             <MainPredioContainer>
                 <HeaderPredioContainer>
                     <HeaderTitle>Prédios</HeaderTitle>
-                    <AddPredioHeaderButton>
+                    <AddPredioHeaderButton onClick={() => navigate('/predios/novo')}>
                         <FaPlus color='green' />
                         <AddButtonText>
                             Adicionar Novo
@@ -61,7 +62,7 @@ const PredioPage = () => {
                                 <FaBuilding color='#6c757d' fontSize={150} className='icon-responsive' />
                                 <NoContentAvisoContainer>
                                     <TextContent>Nenhum prédio encontrado.</TextContent>
-                                    <AdicionarPredioButton >
+                                    <AdicionarPredioButton onClick={() => navigate('/predios/novo')}>
                                         <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Prédio
                                     </AdicionarPredioButton>
                                 </NoContentAvisoContainer>

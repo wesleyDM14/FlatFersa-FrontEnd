@@ -43,7 +43,7 @@ const ApartamentoPage = () => {
             <MainApartamentoContainer>
                 <HeaderApartamentoContainer>
                     <HeaderTitle>Apartamentos</HeaderTitle>
-                    <AddApartamentoHeaderButton>
+                    <AddApartamentoHeaderButton onClick={() => navigate('/apartamentos/novo')}>
                         <FaPlus color='green' />
                         <AddButtonText>
                             Adicionar Novo
@@ -64,7 +64,7 @@ const ApartamentoPage = () => {
                                 <FaHouseUser color='#6c757d' fontSize={150} className='icon-responsive' />
                                 <NoContentAvisoContainer>
                                     <TextContent>Nenhum apartamento encontrado.</TextContent>
-                                    <AdicionarApartamentoButton >
+                                    <AdicionarApartamentoButton onClick={() => navigate('/apartamentos/novo')}>
                                         <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Apartamento
                                     </AdicionarApartamentoButton>
                                 </NoContentAvisoContainer>

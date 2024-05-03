@@ -63,7 +63,7 @@ const ClientPage = () => {
                                 <FaUsers color='#6c757d' fontSize={150} className='icon-responsive' />
                                 <NoContentAvisoContainer>
                                     <TextContent>Nenhum cliente encontrado.</TextContent>
-                                    <AdicionarClientButton >
+                                    <AdicionarClientButton onClick={() => navigate('/clientes/novo')}>
                                         <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Cliente
                                     </AdicionarClientButton>
                                 </NoContentAvisoContainer>

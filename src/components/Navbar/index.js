@@ -34,7 +34,7 @@ const Navbar = ({ openSidebar, logout, navigate }) => {
                         open && (
                             <DropDownMenu>
                                 <Pinguelo />
-                                <DropDownItem onClick={() => navigate('/perfil')}>My Profile</DropDownItem>
+                                <DropDownItem onClick={() => navigate('/perfil')}>Meu Perfil</DropDownItem>
                                 <DropDownItem onClick={() => logout(navigate)} color='#e65061'><FaPowerOff /> Logout</DropDownItem>
                             </DropDownMenu>
                         )

@@ -81,6 +81,14 @@ const GlobalStyle = createGlobalStyle`
         border-radius: 3px;
     }
 
+    ::-webkit-datetime-edit { 
+        padding: 1em; 
+    }
+
+    ::-webkit-datetime-edit-text { 
+        padding: 0 0.3em;
+    }
+
     @media only screen and (max-width: 978px){
         #sidebar {
             display: none;

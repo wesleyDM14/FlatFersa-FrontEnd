@@ -45,3 +45,20 @@ export const StyledIcon = styled.p`
     ${(props) => props.$right && `right: 15px;`};
     ${(props) => !props.$right && `left: 15px;`};
 `;
+
+export const StyledSelectArea = styled.div`
+    display: block;
+`;
+
+export const StyledSelectLabel = styled.p`
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+
+    &::after{
+        display: inline-block;
+        content: "*";
+        margin-left: 2px;
+        color: ${props => props.theme.colors.theme};
+    }
+`;
