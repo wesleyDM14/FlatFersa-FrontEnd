@@ -314,3 +314,94 @@ export const StyledFileInput = styled.input`
     height: 100%;
     cursor: pointer;
 `;
+
+export const PredioListContainer = styled.div`
+    display: flex;
+    margin-top: 10px;
+    flex-direction: column;
+`;
+
+export const PredioListHeader = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
+    height: 40px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background-color: ${props => props.theme.colors.primary};
+    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+`;
+
+export const ListLabel = styled.h5`
+    font-size: 14px;
+    color: #2e4a66;
+    margin-right: 10px;
+`;
+
+export const SinglePredio = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
+    height: 50px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    cursor: pointer;
+`;
+
+export const PredioSingleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
+export const StyledLabel = styled.h1`
+    font-size: 18px;
+    color: ${props => props.theme.colors.lightblue};
+    margin-right: 10px;
+`;
+
+export const PredioValue = styled.a`
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 30px;
+    text-decoration: none;
+    color: ${props => props.theme.colors.dark1};
+
+    @media (max-width: 1380px) {
+        font-weight: 300;
+    }
+`;
+
+export const AdminPredioContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const EditIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${props => props.theme.colors.lightblue};
+`;
+
+export const DeleteIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${props => props.theme.colors.red};
+`;
+
+export const LoadingContainer = styled.div`
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: main;
+
+    @media only screen and (max-width: 978px){
+        padding: 0 10px;
+    }
+`;

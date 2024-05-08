@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import {
     Header,
     TitleContainer,
@@ -30,7 +31,7 @@ import {
 
 import logo from '../../assets/favicon.png';
 
-const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser, homeActive, predioActive, apartamentoActive, clienteActive, contratoActive, financeiroActive, perfilActive, politicaActive }) => {
+const Sidebar = ({ user, sidebarOpen, closeSidebar, navigate, logoutUser, homeActive, predioActive, apartamentoActive, clienteActive, contratoActive, financeiroActive, perfilActive, politicaActive }) => {
     const [home, setHome] = useState(false);
     const [predio, setPredio] = useState(false);
     const [apartamento, setApartamento] = useState(false);
@@ -75,30 +76,46 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser, homeActive, 
                     <ItemTitle>Home</ItemTitle>
                 </MenuItem>
                 <SubTitle>ÁREA ADMINISTRATIVA</SubTitle>
-                <MenuItem onClick={() => navigate('/predios')} className={predio && 'active-menu-item'}>
-                    <IconItemContainer>
-                        <FaHotel />
-                    </IconItemContainer>
-                    <ItemTitle>Prédio</ItemTitle>
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/apartamentos')} className={apartamento && 'active-menu-item'}>
-                    <IconItemContainer>
-                        <FaHouseUser />
-                    </IconItemContainer>
-                    <ItemTitle>Apartamentos</ItemTitle>
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/clientes')} className={cliente && 'active-menu-item'}>
-                    <IconItemContainer>
-                        <FaUsers />
-                    </IconItemContainer>
-                    <ItemTitle>Clientes</ItemTitle>
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/contratos')} className={contrato && 'active-menu-item'}>
-                    <IconItemContainer>
-                        <FaRegHandshake />
-                    </IconItemContainer>
-                    <ItemTitle>Contratos</ItemTitle>
-                </MenuItem>
+                {
+                    user.isAdmin && (
+                        <MenuItem onClick={() => navigate('/predios')} className={predio && 'active-menu-item'}>
+                            <IconItemContainer>
+                                <FaHotel />
+                            </IconItemContainer>
+                            <ItemTitle>Prédio</ItemTitle>
+                        </MenuItem>
+                    )
+                }
+                {
+                    user.isAdmin && (
+                        <MenuItem onClick={() => navigate('/apartamentos')} className={apartamento && 'active-menu-item'}>
+                            <IconItemContainer>
+                                <FaHouseUser />
+                            </IconItemContainer>
+                            <ItemTitle>Apartamentos</ItemTitle>
+                        </MenuItem>
+                    )
+                }
+                {
+                    user.isAdmin && (
+                        <MenuItem onClick={() => navigate('/clientes')} className={cliente && 'active-menu-item'}>
+                            <IconItemContainer>
+                                <FaUsers />
+                            </IconItemContainer>
+                            <ItemTitle>Clientes</ItemTitle>
+                        </MenuItem>
+                    )
+                }
+                {
+                    user.isAdmin && (
+                        <MenuItem onClick={() => navigate('/contratos')} className={contrato && 'active-menu-item'}>
+                            <IconItemContainer>
+                                <FaRegHandshake />
+                            </IconItemContainer>
+                            <ItemTitle>Contratos</ItemTitle>
+                        </MenuItem>
+                    )
+                }
                 <MenuItem onClick={() => navigate('/financeiro')} className={financeiro && 'active-menu-item'}>
                     <IconItemContainer>
                         <FaMoneyBillWave />
@@ -129,4 +146,8 @@ const Sidebar = ({ sidebarOpen, closeSidebar, navigate, logoutUser, homeActive, 
     )
 }
 
-export default Sidebar;
+const mapStateToProps = ({ session }) => ({
+    user: session.user
+});
+
+export default connect(mapStateToProps)(Sidebar);

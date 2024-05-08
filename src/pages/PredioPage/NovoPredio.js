@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { connect } from "react-redux";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 
@@ -21,14 +22,18 @@ import {
     FormColum,
     FormInputArea,
     FormInputLabelRequired,
-    FormTextInput,
     ButtonGroup,
     BackButton,
     SubmitButton,
+    SubItensContainer,
+    Limitador,
 } from './PredioPage.styles';
 import { FaFileInvoice } from "react-icons/fa";
+import { FormInput } from "../../components/FormLib";
+import { createPredio } from "../../services/predioService";
+import { ThreeDots } from "react-loader-spinner";
 
-const NovoPredio = () => {
+const NovoPredio = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -61,6 +66,7 @@ const NovoPredio = () => {
                                 endereco: '',
                                 cidade: '',
                                 estado: '',
+                                bairro: '',
                                 numApt: 0,
                             }}
                             validationSchema={
@@ -69,11 +75,12 @@ const NovoPredio = () => {
                                     endereco: Yup.string().required("Obrigatótio"),
                                     cidade: Yup.string().required("Obrigatório"),
                                     estado: Yup.string().required("Obrigatório").min(2).max(2, 'Apenas a Sigla do estado'),
-                                    numApt: Yup.number()
+                                    bairro: Yup.string().required('Obrigatório'),
+                                    numApt: Yup.number().required('Obrigatório')
                                 })
                             }
-                            onSubmit={(values, { setSubmitting, setFieldError }) => {
-
+                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                await createPredio(values, user, navigate, setSubmitting, setFieldError);
                             }}
                         >
                             {
@@ -83,27 +90,81 @@ const NovoPredio = () => {
                                             <FormColum>
                                                 <FormInputArea>
                                                     <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                    <FormTextInput type="text" name="nome" placeholder="Nome Identificador do Prédio" />
+                                                    <FormInput
+                                                        type="text"
+                                                        name='nome'
+                                                        placeholder="Nome Identificador do Prédio"
+                                                    />
                                                 </FormInputArea>
                                                 <FormInputArea>
                                                     <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                    <FormTextInput type="text" name="endereco" placeholder="Endereço e Número" />
+                                                    <FormInput
+                                                        type="text"
+                                                        name='endereco'
+                                                        placeholder="Endereço e Número"
+                                                    />
                                                 </FormInputArea>
                                             </FormColum>
                                             <FormColum>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Estado</FormInputLabelRequired>
-                                                    <FormTextInput type="text" name="estado" placeholder="Sigla do Estado" />
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Cidade</FormInputLabelRequired>
-                                                    <FormTextInput type="text" name="cidade" placeholder="Cidade" />
-                                                </FormInputArea>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Estado</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <FormInput
+                                                                type="text"
+                                                                name='estado'
+                                                                placeholder="Sigla do Estado"
+                                                            />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Qnt Apartamentos</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <FormInput
+                                                                type="number"
+                                                                name='numApt'
+                                                                step='1'
+                                                                min='0'
+                                                            />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Cidade</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type="text"
+                                                            name='cidade'
+                                                            placeholder="Cidade"
+                                                        />
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Bairro</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type="text"
+                                                            name='bairro'
+                                                            placeholder="Bairro"
+                                                        />
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+
                                             </FormColum>
                                         </FormContent>
                                         <ButtonGroup>
                                             <BackButton onClick={() => navigate('/predios')}>Voltar</BackButton>
-                                            <SubmitButton>Salvar</SubmitButton>
+                                            {!isSubmitting && (
+                                                <SubmitButton type="submit">Salvar</SubmitButton>
+                                            )}
+                                            {
+                                                isSubmitting && (
+                                                    <ThreeDots
+                                                        color={'#4e4e4e'}
+                                                        height={49}
+                                                        width={100}
+                                                    />
+                                                )
+                                            }
+
                                         </ButtonGroup>
                                     </Form>
                                 )
@@ -117,4 +178,8 @@ const NovoPredio = () => {
     )
 }
 
-export default NovoPredio;
+const mapStateToProps = ({ session }) => ({
+    user: session.user
+});
+
+export default connect(mapStateToProps)(NovoPredio);

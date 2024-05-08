@@ -24,7 +24,7 @@ import NovoApartamento from "./pages/ApartamentoPage/NovoApartamento";
 import NovoClient from "./pages/ClientPage/NovoClient";
 import NovoContract from "./pages/ContractPage/NovoContract";
 
-const App = ({ checked }) => {
+const App = ({ checked, user }) => {
   return (
     <Theme>
       <GlobalStyle />

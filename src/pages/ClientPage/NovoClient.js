@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Formik, Form, Field } from "formik";
-import { useMask } from "@react-input/mask";
+import { connect } from "react-redux";
+import { Formik, Form } from "formik";
+//import { useMask } from "@react-input/mask";
 import * as Yup from 'yup';
 
 import Sidebar from "../../components/Sidebar";
@@ -35,12 +36,16 @@ import {
     SubmitButton,
 } from "./ClientPage.styles";
 import { FaCloudUploadAlt, FaFileInvoice } from "react-icons/fa";
+import { FormInput, StyledDatePicker } from "../../components/FormLib";
+import { createCliente } from "../../services/clientService";
+import { ThreeDots } from "react-loader-spinner";
 
-const NovoClient = () => {
+const NovoClient = ({ user }) => {
     const navigate = useNavigate();
-    const phoneMask = useMask({ mask: '(__) _____-____', replacement: { _: /\d/ } });
-    const cpfMask = useMask({ mask: '___.___.___-__', replacement: { _: /\d/ } });
+    /*const phoneMask = useMask({ mask: '(__) _____-____', replacement: { _: /\d/ } });
+    const cpfMask = useMask({ mask: '___.___.___-__', replacement: { _: /\d/ } });*/
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [startDate, setStartDate] = useState(new Date());
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -67,21 +72,25 @@ const NovoClient = () => {
                     <StyledFormArea>
                         <Formik
                             initialValues={{
-                                nome: '',
+                                name: '',
                                 cpf: '',
                                 rg: '',
                                 dateBirth: new Date(),
                                 phone: '',
                                 address: '',
+                                email: '',
                             }}
                             validationSchema={
                                 Yup.object({
-                                    nome: Yup.string().required('Obrigatório'),
+                                    name: Yup.string().required('Obrigatório'),
                                     phone: Yup.string().required('Obrigatório'),
+                                    email: Yup.string().required('Obrigatório'),
                                 })
                             }
-                            onSubmit={(values, { setSubmitting, setFieldError }) => {
-
+                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                values.dateBirth = startDate;
+                                console.log(values);
+                                await createCliente(values, user, navigate, setSubmitting, setFieldError);
                             }}
                         >
                             {
@@ -91,19 +100,67 @@ const NovoClient = () => {
                                             <FormColum>
                                                 <FormInputArea>
                                                     <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                    <FormTextInput />
+                                                    <FormInput
+                                                        type='text'
+                                                        name='name'
+                                                        placeholder='Nome do cliente'
+                                                    />
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Email</FormInputLabelRequired>
+                                                    <FormInput
+                                                        type='text'
+                                                        name='email'
+                                                        placeholder='Email do cliente'
+                                                    />
                                                 </FormInputArea>
                                                 <SubItensContainer>
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>CPF</FormInputLabelRequired>
                                                         <Limitador>
-                                                            <FormTextInput ref={cpfMask} />
+                                                            <FormInput
+                                                                name='cpf'
+                                                                type='text'
+                                                                placeholder='CPF do cliente'
+                                                            />
                                                         </Limitador>
                                                     </FormInputArea>
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>RG</FormInputLabelRequired>
                                                         <Limitador>
-                                                            <FormTextInput />
+                                                            <FormInput
+                                                                name='rg'
+                                                                type='text'
+                                                                placeholder='RG do cliente'
+                                                            />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                            </FormColum>
+                                            <FormColum>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Endereço</FormInputLabelRequired>
+                                                    <FormInput
+                                                        type='text'
+                                                        name='address'
+                                                        placeholder='Endereço do cliente'
+                                                    />
+                                                </FormInputArea>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Telefone</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <FormInput
+                                                                name='phone'
+                                                                type='text'
+                                                                placeholder='Telefone'
+                                                            />
                                                         </Limitador>
                                                     </FormInputArea>
                                                 </SubItensContainer>
@@ -118,26 +175,6 @@ const NovoClient = () => {
                                                         <StyledFileInput type="file" />
                                                     </StyledFileArea>
                                                 </FormInputArea>
-                                            </FormColum>
-                                            <FormColum>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                    <FormTextInput />
-                                                </FormInputArea>
-                                                <SubItensContainer>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormTextInput type="date" />
-                                                        </Limitador>
-                                                    </FormInputArea>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormTextInput ref={phoneMask} />
-                                                        </Limitador>
-                                                    </FormInputArea>
-                                                </SubItensContainer>
                                                 <FormInputArea>
                                                     <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
                                                     <StyledFileArea>
@@ -153,7 +190,18 @@ const NovoClient = () => {
                                         </FormContent>
                                         <ButtonGroup>
                                             <BackButton onClick={() => navigate('/clientes')}>Voltar</BackButton>
-                                            <SubmitButton>Salvar</SubmitButton>
+                                            {!isSubmitting && (
+                                                <SubmitButton type="submit">Salvar</SubmitButton>
+                                            )}
+                                            {
+                                                isSubmitting && (
+                                                    <ThreeDots
+                                                        color={'#4e4e4e'}
+                                                        height={49}
+                                                        width={100}
+                                                    />
+                                                )
+                                            }
                                         </ButtonGroup>
                                     </Form>
                                 )
@@ -167,4 +215,8 @@ const NovoClient = () => {
     );
 }
 
-export default NovoClient;
+const mapStateToProps = ({ session }) => ({
+    user: session.user
+});
+
+export default connect(mapStateToProps)(NovoClient);

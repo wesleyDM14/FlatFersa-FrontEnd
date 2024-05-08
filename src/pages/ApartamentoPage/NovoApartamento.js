@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { connect } from "react-redux";
 import { Formik, Form, Field } from "formik";
 import * as Yup from 'yup';
 
@@ -18,10 +19,10 @@ import {
     FormContent,
     FormInputArea,
     FormInputLabelRequired,
-    FormTextInput,
     HeaderApartamentoContainer,
     HeaderTitle,
     Limitador,
+    LoadingContainer,
     MainApartamentoContainer,
     RadioContainer,
     RadioItemContainer,
@@ -31,21 +32,26 @@ import {
     SubmitButton
 } from "./ApartamentoPage.styles";
 import { FaFileInvoice } from "react-icons/fa";
-import { PredioSelect } from "../../components/FormLib";
+import { FormInput, PredioSelect } from "../../components/FormLib";
+import { getPredios } from "../../services/predioService";
+import { ThreeDots } from "react-loader-spinner";
+import { createApartamento } from "../../services/apartamentoService";
 
-const NovoApartamento = () => {
+const NovoApartamento = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [predios, setPredios] = useState([]);
     const [selectedPredio, setSelectedPredio] = useState({});
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        function loadData() {
-            /*let temp = [{ nome: 'FlatFersa', id: 'adsadsadasdas' }];
-            setPredios(temp);*/
+        async function loadData() {
+            if (loading) {
+                await getPredios(user, setPredios, setLoading);
+            }
         }
         loadData();
-    }, []);
+    }, [loading, user]);
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -58,89 +64,135 @@ const NovoApartamento = () => {
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} apartamentoActive={true} />
-            <MainApartamentoContainer>
-                <HeaderApartamentoContainer>
-                    <HeaderTitle>Adicionar Novo Apartamento</HeaderTitle>
-                </HeaderApartamentoContainer>
-                <ContentApartamentoContainer>
-                    <ContentApartamentoHeader>
-                        <ContentIconContainer>
-                            <FaFileInvoice />
-                        </ContentIconContainer>
-                        <ApartamentoCounter>Dados do Apartamento</ApartamentoCounter>
-                    </ContentApartamentoHeader>
-                    <StyledFormArea>
-                        <Formik
-                            initialValues={{
-                                numeroContrato: '',
-                                numero: '',
-                                valorBase: '',
-                                climatizado: false,
-                            }}
-                            validationSchema={
-                                Yup.object({
+            {
+                loading ? (
+                    <LoadingContainer>
+                        <ThreeDots
+                            color={'#4e4e4e'}
+                            height={49}
+                            width={100}
+                        />
+                    </LoadingContainer>
+                ) : (
+                    <MainApartamentoContainer>
+                        <HeaderApartamentoContainer>
+                            <HeaderTitle>Adicionar Novo Apartamento</HeaderTitle>
+                        </HeaderApartamentoContainer>
+                        <ContentApartamentoContainer>
+                            <ContentApartamentoHeader>
+                                <ContentIconContainer>
+                                    <FaFileInvoice />
+                                </ContentIconContainer>
+                                <ApartamentoCounter>Dados do Apartamento</ApartamentoCounter>
+                            </ContentApartamentoHeader>
+                            <StyledFormArea>
+                                <Formik
+                                    initialValues={{
+                                        numeroContrato: '',
+                                        numero: '',
+                                        valorBase: '',
+                                        climatizado: false,
+                                        predioId: '',
+                                    }}
+                                    validationSchema={
+                                        Yup.object({
 
-                                })
-                            }
-                            onSubmit={(values, { setSubmitting, setFieldError }) => {
-
-                            }}
-                        >
-                            {
-                                ({ isSubmitting }) => (
-                                    <Form>
-                                        <FormContent>
-                                            <FormColum>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Nº Conta Contrato</FormInputLabelRequired>
-                                                    <FormTextInput type="text" name="numeroContrato" placeholder="Conta contrato da COSERN" />
-                                                </FormInputArea>
-                                                <SubItensContainer>
-                                                    <RadioContainer>
-                                                        <RadioItemContainer>
-                                                            <RadioLabel>Climatizado?</RadioLabel>
-                                                            <Field
-                                                                name='climatizado'
-                                                                type='checkbox'
+                                        })
+                                    }
+                                    onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                        values.predioId = selectedPredio.value;
+                                        console.log(values);
+                                        await createApartamento(values, user, navigate, setSubmitting, setFieldError);
+                                    }}
+                                >
+                                    {
+                                        ({ isSubmitting }) => (
+                                            <Form>
+                                                <FormContent>
+                                                    <FormColum>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Nº Conta Contrato</FormInputLabelRequired>
+                                                            <FormInput
+                                                                type="text"
+                                                                name="numeroContrato"
+                                                                placeholder="Conta contrato da COSERN"
                                                             />
-                                                        </RadioItemContainer>
-                                                    </RadioContainer>
-                                                </SubItensContainer>
-                                            </FormColum>
-                                            <FormColum>
-                                                <FormInputArea>
-                                                    <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} />
-                                                </FormInputArea>
-                                                <SubItensContainer>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Nº do Apartamento</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormTextInput type="number" min="0" step="1" name="numero" placeholder="Número do Apartamento" />
-                                                        </Limitador>
-                                                    </FormInputArea>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormTextInput type="number" min="0.00" step="0.01" name="valorBase" placeholder="Valor do Aluguel" />
-                                                        </Limitador>
-                                                    </FormInputArea>
-                                                </SubItensContainer>
-                                            </FormColum>
-                                        </FormContent>
-                                        <ButtonGroup>
-                                            <BackButton onClick={() => navigate('/apartamentos')}>Voltar</BackButton>
-                                            <SubmitButton>Salvar</SubmitButton>
-                                        </ButtonGroup>
-                                    </Form>
-                                )
-                            }
-                        </Formik>
-                    </StyledFormArea>
-                </ContentApartamentoContainer>
-            </MainApartamentoContainer>
+                                                        </FormInputArea>
+                                                        <SubItensContainer>
+                                                            <RadioContainer>
+                                                                <RadioItemContainer>
+                                                                    <RadioLabel>Climatizado?</RadioLabel>
+                                                                    <Field
+                                                                        name='climatizado'
+                                                                        type='checkbox'
+                                                                    />
+                                                                </RadioItemContainer>
+                                                            </RadioContainer>
+                                                        </SubItensContainer>
+                                                    </FormColum>
+                                                    <FormColum>
+                                                        <FormInputArea>
+                                                            <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} />
+                                                        </FormInputArea>
+                                                        <SubItensContainer>
+                                                            <FormInputArea>
+                                                                <FormInputLabelRequired>Nº do Apartamento</FormInputLabelRequired>
+                                                                <Limitador>
+                                                                    <FormInput
+                                                                        type="number"
+                                                                        min="0"
+                                                                        step="1"
+                                                                        name="numero"
+                                                                        placeholder="Número do Apartamento"
+                                                                    />
+                                                                </Limitador>
+                                                            </FormInputArea>
+                                                            <FormInputArea>
+                                                                <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
+                                                                <Limitador>
+                                                                    <FormInput
+                                                                        type="number"
+                                                                        min="0.00"
+                                                                        step="0.01"
+                                                                        name="valorBase"
+                                                                        placeholder="Valor do Aluguel"
+                                                                    />
+                                                                </Limitador>
+                                                            </FormInputArea>
+                                                        </SubItensContainer>
+                                                    </FormColum>
+                                                </FormContent>
+                                                <ButtonGroup>
+                                                    <BackButton onClick={() => navigate('/apartamentos')}>Voltar</BackButton>
+                                                    {!isSubmitting && (
+                                                        <SubmitButton type="submit">Salvar</SubmitButton>
+                                                    )}
+                                                    {
+                                                        isSubmitting && (
+                                                            <ThreeDots
+                                                                color={'#4e4e4e'}
+                                                                height={49}
+                                                                width={100}
+                                                            />
+                                                        )
+                                                    }
+                                                </ButtonGroup>
+                                            </Form>
+                                        )
+                                    }
+                                </Formik>
+                            </StyledFormArea>
+                        </ContentApartamentoContainer>
+                    </MainApartamentoContainer>
+                )
+            }
             <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
         </div>
     )
 }
 
-export default NovoApartamento;
+const mapStateToProps = ({ session }) => ({
+    user: session.user
+});
+
+export default connect(mapStateToProps)(NovoApartamento);

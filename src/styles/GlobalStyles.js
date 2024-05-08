@@ -81,6 +81,43 @@ const GlobalStyle = createGlobalStyle`
         border-radius: 3px;
     }
 
+    .react-datepicker__input-container>input {
+        width: 100%;
+        background-color: #fff;
+        border-color: #dbdbdb;
+        border-radius: 4px;
+        color: #363636;
+        align-items: center;
+        border: 1px solid #0a0a0a0d;
+        display: inline-flex;
+        font-size: 1rem;
+        height: 2.5em;
+        justify-content: flex-start;
+        padding-bottom: calc(.5em - 1px);
+        padding-left: calc(.75em - 1px);
+        padding-right: calc(.75em - 1px);
+        padding-top: calc(.5em - 1px);
+        line-height: 1.5;
+    }
+
+    .react-datepicker-wrapper{
+        max-width: 100%;
+        width: 90%;
+        background-color: #fff;
+        border-color: #dbdbdb;
+        border-radius: 4px;
+        color: #363636;
+        align-items: center;
+        border: 1px solid #0a0a0a0d;
+        display: flex;
+        font-size: 1rem;
+        height: 2.5em;
+        justify-content: flex-start;
+        padding-bottom: calc(.5em - 1px);
+        padding-top: calc(.5em - 1px);
+        line-height: 1.5;
+    }
+
     ::-webkit-datetime-edit { 
         padding: 1em; 
     }

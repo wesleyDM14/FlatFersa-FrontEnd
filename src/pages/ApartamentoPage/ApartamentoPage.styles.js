@@ -1,5 +1,8 @@
 import styled from "styled-components";
 
+import AptLayout from '../../assets/aptLayout.png';
+import AptLayoutAlt from '../../assets/aptLayoutAlt.png';
+
 export const MainApartamentoContainer = styled.main`
     padding-left: 30px;
     padding-right: 30px;
@@ -165,37 +168,6 @@ export const FormInputLabel = styled.p`
     margin-bottom: 5px;
 `;
 
-export const FormTextInput = styled.input`
-    max-width: 100%;
-    width: 90%;
-    background-color: #fff;
-    border-color: #dbdbdb;
-    border-radius: 4px;
-    color: #363636;
-    align-items: center;
-    border: 1px solid #0a0a0a0d;
-    border-radius: 4px;
-    display: inline-flex;
-    font-size: 1rem;
-    height: 2.5em;
-    justify-content: flex-start;
-    padding-bottom: calc(.5em - 1px);
-    padding-left: calc(.75em - 1px);
-    padding-right: calc(.75em - 1px);
-    padding-top: calc(.5em - 1px);
-    line-height: 1.5;
-
-    &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    &::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-`;
-
 export const ButtonGroup = styled.div`
     display: flex;
     flex-direction: row;
@@ -281,4 +253,233 @@ export const RadioLabel = styled.span`
 `;
 
 export const RadioItemContainer = styled.label`
+`;
+
+export const LayoutSwitchContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const LayoutSwitchTitle = styled.h2`
+    font-size: 16px;
+    color: ${props => props.theme.colors.titleColor};
+    font-weight: 700;
+`;
+
+export const LayoutSwitchButton = styled.label`
+    background: #fff;
+    width: 4rem;
+    height: 2rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 5px;
+
+    input {
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+    }
+
+    span {
+        position: absolute;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 1rem;
+        background: lightgray;
+        left: 0;
+        box-shadow: 2px 2px 4px gray;
+        cursor: pointer;
+        transition: 0.5s;
+    }
+
+    input:checked + span {
+        left: 50%;
+        background: green;
+    }
+`;
+
+export const PlantaBaixaContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: #fff;
+    height: 650px;
+    margin-top: 25px;
+    border: 1px solid #eee;
+    position: relative;
+`;
+
+export const PlantaBaixaApt = styled.div`
+    width: 15%;
+    height: 100px;
+    background-image: url(${AptLayout});
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size:100% 100%;
+    filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
+    border: 3px solid green;
+    cursor: pointer;
+    margin-right: 1px;
+
+    &:hover{
+        width: 17%;
+        height: 105px;
+    }
+`;
+
+export const PlantaAltContainer = styled.div`
+    display: flex;
+    width: 15%;
+    margin-left: 25px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+`;
+
+export const PlantaBaixaAlt = styled.div`
+    width: 90%;
+    height: 100px;
+    background-image: url(${AptLayoutAlt});
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size:100% 100%;
+    filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
+    border: 3px solid green;
+    cursor: pointer;
+    margin-bottom: 1px;
+    
+    &:hover{
+        width: 92%;
+        height: 105px;
+    }
+`;
+
+export const PlantaTerreoColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 15%;
+    margin: 5px 5px;
+`;
+
+export const PlantaTerreoRow = styled.div`
+    display: flex;
+    margin: 5px 5px;
+`;
+
+export const PlantaTerreoRowContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    justify-content: space-between;
+`;
+
+export const PlantaTerreo = styled.div`
+    display: flex;
+    width: 100%;
+    background: #fff;
+    height: 650px;
+    margin-top: 25px;
+    border: 1px solid #eee;
+    position: relative;
+    overflow: hidden;
+`;
+
+export const LoadingContainer = styled.div`
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: main;
+
+    @media only screen and (max-width: 978px){
+        padding: 0 10px;
+    }
+`;
+
+export const PredioListContainer = styled.div`
+    display: flex;
+    margin-top: 10px;
+    flex-direction: column;
+`;
+
+export const PredioListHeader = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
+    height: 40px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background-color: ${props => props.theme.colors.primary};
+    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+`;
+
+export const ListLabel = styled.h5`
+    font-size: 14px;
+    color: #2e4a66;
+    margin-right: 10px;
+`;
+
+export const SinglePredio = styled.div`
+    display: grid;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
+    height: 50px;
+    width: 100%;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    cursor: pointer;
+`;
+
+export const PredioSingleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+`;
+
+export const StyledLabel = styled.h1`
+    font-size: 18px;
+    color: ${props => props.theme.colors.lightblue};
+    margin-right: 10px;
+`;
+
+export const PredioValue = styled.a`
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 30px;
+    text-decoration: none;
+    color: ${props => props.theme.colors.dark1};
+
+    @media (max-width: 1380px) {
+        font-weight: 300;
+    }
+`;
+
+export const AdminPredioContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const EditIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${props => props.theme.colors.lightblue};
+`;
+
+export const DeleteIcon = styled.div`
+    font-size: 18px;
+    margin-left: 10px;
+    color: ${props => props.theme.colors.red};
 `;
