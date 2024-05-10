@@ -59,7 +59,6 @@ const FianceiroPage = ({ user }) => {
                             width={100}
                         />
                     </LoadingContainer>
-
                 ) : (
                     <MainFinanceiroContainer>
                         <HeaderFinanceiroContainer>

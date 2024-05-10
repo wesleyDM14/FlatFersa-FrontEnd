@@ -258,6 +258,8 @@ export const PredioListContainer = styled.div`
     display: flex;
     margin-top: 10px;
     flex-direction: column;
+    padding-right: 30px;
+    margin-bottom: 28px;
 `;
 
 export const PredioListHeader = styled.div`

@@ -327,6 +327,9 @@ export const PlantaBaixaApt = styled.div`
     border: 3px solid green;
     cursor: pointer;
     margin-right: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover{
         width: 17%;
@@ -356,6 +359,9 @@ export const PlantaBaixaAlt = styled.div`
     border: 3px solid green;
     cursor: pointer;
     margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover{
         width: 92%;
@@ -411,6 +417,8 @@ export const PredioListContainer = styled.div`
     display: flex;
     margin-top: 10px;
     flex-direction: column;
+    padding-right: 30px;
+    margin-bottom: 28px;
 `;
 
 export const PredioListHeader = styled.div`
@@ -482,4 +490,10 @@ export const DeleteIcon = styled.div`
     font-size: 18px;
     margin-left: 10px;
     color: ${props => props.theme.colors.red};
+`;
+
+export const NumAptLabel = styled.p`
+    color: #000;
+    font-size: 28px;
+    font-weight: 700;
 `;

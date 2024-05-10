@@ -13,7 +13,6 @@ import {
     StyledSelectArea,
     StyledSelectLabel,
     FormTextInput,
-    DatePickerContainer,
 } from './styles';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 

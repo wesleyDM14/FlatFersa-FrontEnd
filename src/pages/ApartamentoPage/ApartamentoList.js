@@ -12,7 +12,6 @@ import {
     StyledLabel
 } from "./ApartamentoPage.styles";
 
-
 const ApartamentoList = ({ apartamentos, user, setLoading, navigate }) => {
     return (
         <PredioListContainer>

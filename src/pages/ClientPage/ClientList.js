@@ -12,7 +12,6 @@ import {
     StyledLabel
 } from "./ClientPage.styles";
 
-
 const ClientList = ({ clientes, user, setLoading, navigate }) => {
     return (
         <PredioListContainer>

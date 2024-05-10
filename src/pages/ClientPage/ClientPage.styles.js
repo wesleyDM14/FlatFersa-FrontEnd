@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { InputMask } from "@react-input/mask";
 
 export const MainClientContainer = styled.main`
     padding-left: 30px;
@@ -319,6 +318,8 @@ export const PredioListContainer = styled.div`
     display: flex;
     margin-top: 10px;
     flex-direction: column;
+    padding-right: 30px;
+    margin-bottom: 28px;
 `;
 
 export const PredioListHeader = styled.div`
