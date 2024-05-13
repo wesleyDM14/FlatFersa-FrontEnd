@@ -41,7 +41,7 @@ const FianceiroPage = ({ user }) => {
     useEffect(() => {
         async function teste() {
             if (loading) {
-                await getParcelas(user, setParcelas, setLoading);
+                user.accessToken && await getParcelas(user, setParcelas, setLoading);
             }
         }
         teste();

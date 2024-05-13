@@ -2,18 +2,34 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 export const getContratos = async (user, setContratos, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        setContratos(response.data);
-        setLoading(false);
-    }).catch((err) => {
-        setLoading(false);
-        console.log(err.message);
-    });
+    if (user.isAdmin) {
+        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        }).then((response) => {
+            setContratos(response.data);
+            setLoading(false);
+        }).catch((err) => {
+            setLoading(false);
+            console.log(err.message);
+        });
+    } else {
+        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos-cliente', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        }).then((response) => {
+            setContratos(response.data);
+            setLoading(false);
+        }).catch((err) => {
+            setLoading(false);
+            console.log(err.message);
+        });
+    }
+
 }
 
 export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {

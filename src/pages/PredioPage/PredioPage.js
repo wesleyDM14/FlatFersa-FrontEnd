@@ -45,63 +45,65 @@ const PredioPage = ({ user }) => {
     useEffect(() => {
         async function teste() {
             if (loading) {
-                await getPredios(user, setPredios, setLoading);
+                user.accessToken && await getPredios(user, setPredios, setLoading);
             }
         }
         teste();
     }, [user, loading]);
 
     return (
-        <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} predioActive={true} />
-            {
-                loading ? (
-                    <LoadingContainer>
-                        <ThreeDots
-                            color={'#4e4e4e'}
-                            height={49}
-                            width={100}
-                        />
-                    </LoadingContainer>
+        user.isAdmin && (
+            <div className="container">
+                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} predioActive={true} />
+                {
+                    loading ? (
+                        <LoadingContainer>
+                            <ThreeDots
+                                color={'#4e4e4e'}
+                                height={49}
+                                width={100}
+                            />
+                        </LoadingContainer>
 
-                ) : (
-                    <MainPredioContainer>
-                        <HeaderPredioContainer>
-                            <HeaderTitle>Prédios</HeaderTitle>
-                            <AddPredioHeaderButton onClick={() => navigate('/predios/novo')}>
-                                <FaPlus color='green' />
-                                <AddButtonText>
-                                    Adicionar Novo
-                                </AddButtonText>
-                            </AddPredioHeaderButton>
-                        </HeaderPredioContainer>
-                        <ContentPredioContainer>
-                            <ContentPredioHeader>
-                                <PredioCounter>Prédios ({predios.length})</PredioCounter>
-                                <SearcherContainer>
-                                </SearcherContainer>
-                            </ContentPredioHeader>
-                            {
-                                predios.length === 0 ? (
-                                    <NoContentContainer>
-                                        <FaBuilding color='#6c757d' fontSize={150} className='icon-responsive' />
-                                        <NoContentAvisoContainer>
-                                            <TextContent>Nenhum prédio encontrado.</TextContent>
-                                            <AdicionarPredioButton onClick={() => navigate('/predios/novo')}>
-                                                <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Prédio
-                                            </AdicionarPredioButton>
-                                        </NoContentAvisoContainer>
-                                    </NoContentContainer>
-                                ) : (
-                                    <PredioList predios={predios} user={user} navigate={navigate} setLoading={setLoading} />
-                                )
-                            }
-                        </ContentPredioContainer>
-                    </MainPredioContainer>
-                )
-            }
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-        </div>
+                    ) : (
+                        <MainPredioContainer>
+                            <HeaderPredioContainer>
+                                <HeaderTitle>Prédios</HeaderTitle>
+                                <AddPredioHeaderButton onClick={() => navigate('/predios/novo')}>
+                                    <FaPlus color='green' />
+                                    <AddButtonText>
+                                        Adicionar Novo
+                                    </AddButtonText>
+                                </AddPredioHeaderButton>
+                            </HeaderPredioContainer>
+                            <ContentPredioContainer>
+                                <ContentPredioHeader>
+                                    <PredioCounter>Prédios ({predios.length})</PredioCounter>
+                                    <SearcherContainer>
+                                    </SearcherContainer>
+                                </ContentPredioHeader>
+                                {
+                                    predios.length === 0 ? (
+                                        <NoContentContainer>
+                                            <FaBuilding color='#6c757d' fontSize={150} className='icon-responsive' />
+                                            <NoContentAvisoContainer>
+                                                <TextContent>Nenhum prédio encontrado.</TextContent>
+                                                <AdicionarPredioButton onClick={() => navigate('/predios/novo')}>
+                                                    <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Prédio
+                                                </AdicionarPredioButton>
+                                            </NoContentAvisoContainer>
+                                        </NoContentContainer>
+                                    ) : (
+                                        <PredioList predios={predios} user={user} navigate={navigate} setLoading={setLoading} />
+                                    )
+                                }
+                            </ContentPredioContainer>
+                        </MainPredioContainer>
+                    )
+                }
+                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
+            </div>
+        )
     );
 }
 

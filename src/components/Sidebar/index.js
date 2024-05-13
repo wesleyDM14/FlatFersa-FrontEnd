@@ -107,14 +107,12 @@ const Sidebar = ({ user, sidebarOpen, closeSidebar, navigate, logoutUser, homeAc
                     )
                 }
                 {
-                    user.isAdmin && (
-                        <MenuItem onClick={() => navigate('/contratos')} className={contrato && 'active-menu-item'}>
-                            <IconItemContainer>
-                                <FaRegHandshake />
-                            </IconItemContainer>
-                            <ItemTitle>Contratos</ItemTitle>
-                        </MenuItem>
-                    )
+                    <MenuItem onClick={() => navigate('/contratos')} className={contrato && 'active-menu-item'}>
+                        <IconItemContainer>
+                            <FaRegHandshake />
+                        </IconItemContainer>
+                        <ItemTitle>Contratos</ItemTitle>
+                    </MenuItem>
                 }
                 <MenuItem onClick={() => navigate('/financeiro')} className={financeiro && 'active-menu-item'}>
                     <IconItemContainer>

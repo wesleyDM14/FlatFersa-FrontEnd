@@ -15,8 +15,7 @@ export const getParcelas = async (user, setParcelas, setLoading) => {
             console.log(err.message);
         });
     } else {
-        console.log('entrou');
-        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/aluguel/cliente', {
+        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/aluguel-cliente', {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${user.accessToken}`,
@@ -29,5 +28,4 @@ export const getParcelas = async (user, setParcelas, setLoading) => {
             console.log(err.message);
         });
     }
-
 }

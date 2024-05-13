@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { Formik, Form } from "formik";
-//import { useMask } from "@react-input/mask";
 import * as Yup from 'yup';
 
 import Sidebar from "../../components/Sidebar";
@@ -21,7 +20,6 @@ import {
     FormInputArea,
     FormInputLabel,
     FormInputLabelRequired,
-    FormTextInput,
     HeaderClientContainer,
     HeaderTitle,
     Limitador,
@@ -56,162 +54,164 @@ const NovoClient = ({ user }) => {
     }
 
     return (
-        <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} clienteActive={true} />
-            <MainClientContainer>
-                <HeaderClientContainer>
-                    <HeaderTitle>Adicionar Novo Cliente</HeaderTitle>
-                </HeaderClientContainer>
-                <ContentClientContainer>
-                    <ContentClientHeader>
-                        <ContentIconContainer>
-                            <FaFileInvoice />
-                        </ContentIconContainer>
-                        <ClientCounter>Dados do Cliente</ClientCounter>
-                    </ContentClientHeader>
-                    <StyledFormArea>
-                        <Formik
-                            initialValues={{
-                                name: '',
-                                cpf: '',
-                                rg: '',
-                                dateBirth: new Date(),
-                                phone: '',
-                                address: '',
-                                email: '',
-                            }}
-                            validationSchema={
-                                Yup.object({
-                                    name: Yup.string().required('Obrigatório'),
-                                    phone: Yup.string().required('Obrigatório'),
-                                    email: Yup.string().required('Obrigatório'),
-                                })
-                            }
-                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                values.dateBirth = startDate;
-                                console.log(values);
-                                await createCliente(values, user, navigate, setSubmitting, setFieldError);
-                            }}
-                        >
-                            {
-                                ({ isSubmitting }) => (
-                                    <Form>
-                                        <FormContent>
-                                            <FormColum>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                    <FormInput
-                                                        type='text'
-                                                        name='name'
-                                                        placeholder='Nome do cliente'
-                                                    />
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Email</FormInputLabelRequired>
-                                                    <FormInput
-                                                        type='text'
-                                                        name='email'
-                                                        placeholder='Email do cliente'
-                                                    />
-                                                </FormInputArea>
-                                                <SubItensContainer>
+        user.isAdmin && (
+            <div className="container">
+                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} clienteActive={true} />
+                <MainClientContainer>
+                    <HeaderClientContainer>
+                        <HeaderTitle>Adicionar Novo Cliente</HeaderTitle>
+                    </HeaderClientContainer>
+                    <ContentClientContainer>
+                        <ContentClientHeader>
+                            <ContentIconContainer>
+                                <FaFileInvoice />
+                            </ContentIconContainer>
+                            <ClientCounter>Dados do Cliente</ClientCounter>
+                        </ContentClientHeader>
+                        <StyledFormArea>
+                            <Formik
+                                initialValues={{
+                                    name: '',
+                                    cpf: '',
+                                    rg: '',
+                                    dateBirth: new Date(),
+                                    phone: '',
+                                    address: '',
+                                    email: '',
+                                }}
+                                validationSchema={
+                                    Yup.object({
+                                        name: Yup.string().required('Obrigatório'),
+                                        phone: Yup.string().required('Obrigatório'),
+                                        email: Yup.string().required('Obrigatório'),
+                                    })
+                                }
+                                onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                    values.dateBirth = startDate;
+                                    console.log(values);
+                                    await createCliente(values, user, navigate, setSubmitting, setFieldError);
+                                }}
+                            >
+                                {
+                                    ({ isSubmitting }) => (
+                                        <Form>
+                                            <FormContent>
+                                                <FormColum>
                                                     <FormInputArea>
-                                                        <FormInputLabelRequired>CPF</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormInput
-                                                                name='cpf'
-                                                                type='text'
-                                                                placeholder='CPF do cliente'
-                                                            />
-                                                        </Limitador>
+                                                        <FormInputLabelRequired>Nome</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type='text'
+                                                            name='name'
+                                                            placeholder='Nome do cliente'
+                                                        />
                                                     </FormInputArea>
                                                     <FormInputArea>
-                                                        <FormInputLabelRequired>RG</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormInput
-                                                                name='rg'
-                                                                type='text'
-                                                                placeholder='RG do cliente'
-                                                            />
-                                                        </Limitador>
+                                                        <FormInputLabelRequired>Email</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type='text'
+                                                            name='email'
+                                                            placeholder='Email do cliente'
+                                                        />
                                                     </FormInputArea>
-                                                </SubItensContainer>
-                                            </FormColum>
-                                            <FormColum>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                    <FormInput
-                                                        type='text'
-                                                        name='address'
-                                                        placeholder='Endereço do cliente'
-                                                    />
-                                                </FormInputArea>
-                                                <SubItensContainer>
+                                                    <SubItensContainer>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>CPF</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput
+                                                                    name='cpf'
+                                                                    type='text'
+                                                                    placeholder='CPF do cliente'
+                                                                />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>RG</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput
+                                                                    name='rg'
+                                                                    type='text'
+                                                                    placeholder='RG do cliente'
+                                                                />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                    </SubItensContainer>
+                                                </FormColum>
+                                                <FormColum>
                                                     <FormInputArea>
-                                                        <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
-                                                        </Limitador>
+                                                        <FormInputLabelRequired>Endereço</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type='text'
+                                                            name='address'
+                                                            placeholder='Endereço do cliente'
+                                                        />
+                                                    </FormInputArea>
+                                                    <SubItensContainer>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Telefone</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput
+                                                                    name='phone'
+                                                                    type='text'
+                                                                    placeholder='Telefone'
+                                                                />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                    </SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
+                                                        <StyledFileArea>
+                                                            <StyledFileIconContainer>
+                                                                <FaCloudUploadAlt />
+                                                            </StyledFileIconContainer>
+                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                            <StyledFileInput type="file" />
+                                                        </StyledFileArea>
                                                     </FormInputArea>
                                                     <FormInputArea>
-                                                        <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                        <Limitador>
-                                                            <FormInput
-                                                                name='phone'
-                                                                type='text'
-                                                                placeholder='Telefone'
-                                                            />
-                                                        </Limitador>
+                                                        <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
+                                                        <StyledFileArea>
+                                                            <StyledFileIconContainer>
+                                                                <FaCloudUploadAlt />
+                                                            </StyledFileIconContainer>
+                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                            <StyledFileInput type="file" />
+                                                        </StyledFileArea>
                                                     </FormInputArea>
-                                                </SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
-                                                    <StyledFileArea>
-                                                        <StyledFileIconContainer>
-                                                            <FaCloudUploadAlt />
-                                                        </StyledFileIconContainer>
-                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                        <StyledFileInput type="file" />
-                                                    </StyledFileArea>
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
-                                                    <StyledFileArea>
-                                                        <StyledFileIconContainer>
-                                                            <FaCloudUploadAlt />
-                                                        </StyledFileIconContainer>
-                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                        <StyledFileInput type="file" />
-                                                    </StyledFileArea>
-                                                </FormInputArea>
-                                            </FormColum>
-                                        </FormContent>
-                                        <ButtonGroup>
-                                            <BackButton onClick={() => navigate('/clientes')}>Voltar</BackButton>
-                                            {!isSubmitting && (
-                                                <SubmitButton type="submit">Salvar</SubmitButton>
-                                            )}
-                                            {
-                                                isSubmitting && (
-                                                    <ThreeDots
-                                                        color={'#4e4e4e'}
-                                                        height={49}
-                                                        width={100}
-                                                    />
-                                                )
-                                            }
-                                        </ButtonGroup>
-                                    </Form>
-                                )
-                            }
-                        </Formik>
-                    </StyledFormArea>
-                </ContentClientContainer>
-            </MainClientContainer>
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-        </div >
+                                                </FormColum>
+                                            </FormContent>
+                                            <ButtonGroup>
+                                                <BackButton onClick={() => navigate('/clientes')}>Voltar</BackButton>
+                                                {!isSubmitting && (
+                                                    <SubmitButton type="submit">Salvar</SubmitButton>
+                                                )}
+                                                {
+                                                    isSubmitting && (
+                                                        <ThreeDots
+                                                            color={'#4e4e4e'}
+                                                            height={49}
+                                                            width={100}
+                                                        />
+                                                    )
+                                                }
+                                            </ButtonGroup>
+                                        </Form>
+                                    )
+                                }
+                            </Formik>
+                        </StyledFormArea>
+                    </ContentClientContainer>
+                </MainClientContainer>
+                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
+            </div >
+        )
     );
 }
 
