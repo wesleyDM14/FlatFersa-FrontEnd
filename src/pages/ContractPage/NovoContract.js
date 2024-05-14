@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import { connect } from "react-redux";
+import Modal from "react-modal";
 //import { useMask } from "@react-input/mask";
 import * as Yup from 'yup';
 
@@ -11,6 +12,9 @@ import Navbar from "../../components/Navbar";
 import { logoutUser } from "../../services/userService";
 
 import {
+    AlertButton,
+    AlertContainer,
+    AlertText,
     BackButton,
     ButtonGroup,
     ContentContratoContainer,
@@ -26,18 +30,23 @@ import {
     Limitador,
     LoadingContainer,
     MainContratoContainer,
+    SelectedAptTitle,
+    SelectedAptTitleContainer,
     StyledFormArea,
     SubItensContainer,
     SubmitButton,
 } from "./ContractPage.styles";
 import { FaFileInvoice } from "react-icons/fa";
-import { ApartamentoSelect, ClientSelect, FormInput, StyledDatePicker, StyledSelect } from "../../components/FormLib";
+import { ClientSelect, FormInput, StyledDatePicker, StyledSelect } from "../../components/FormLib";
 import { ThreeDots } from "react-loader-spinner";
 import { getApartamentos } from "../../services/apartamentoService";
 import { getClientes } from "../../services/clientService";
 import { createContrato } from "../../services/contratoService";
+import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
+import { modalStyles } from "../../styles/ModalStyles";
 
 const NovoContract = ({ user }) => {
+    Modal.setAppElement(document.getElementById('root'));
     const navigate = useNavigate();
     const [clientes, setClientes] = useState([]);
     const [selectedClient, setSelectedClient] = useState({});
@@ -46,6 +55,7 @@ const NovoContract = ({ user }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(true);
+    const [modalAlertIsOpen, setModalAlertIsOpen] = useState(false);
 
     const [periocidade, setPeriocidade] = useState([
         { label: 'Anualmente', value: 'anualmente' },
@@ -63,20 +73,42 @@ const NovoContract = ({ user }) => {
         setSidebarOpen(false);
     }
 
+    const openAlertModal = () => {
+        setModalAlertIsOpen(true);
+    }
+
+    const closeAlertModal = () => {
+        setModalAlertIsOpen(false);
+        setSelectedApartamento({});
+    }
+
     useEffect(() => {
         async function loadData() {
             if (loading) {
-                await getApartamentos(user, setApatamentos, setLoading);
+                user.accessToken && await getApartamentos(user, setApatamentos, setLoading);
             }
-            if (loading2) {
-                await getClientes(user, setClientes, setLoading2);
+            if (user.isAdmin && loading2) {
+                user.accessToken && await getClientes(user, setClientes, setLoading2);
             }
         }
         loadData();
     }, [loading, user, loading2]);
 
+    useEffect(() => {
+        function verifyApartment() {
+            if (selectedApartamento.status) {
+                if (selectedApartamento.status === 'OCUPADO') {
+                    setModalAlertIsOpen(true);
+                } else {
+                    window.alert(`Apartamento ${selectedApartamento.numero} selecionado.`);
+                }
+            }
+        }
+        verifyApartment();
+    }, [selectedApartamento]);
+
     return (
-        user.isAdmin && (
+        user.isAdmin ? (
             <div className="container">
                 <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
                 {
@@ -136,9 +168,6 @@ const NovoContract = ({ user }) => {
                                                         <FormColum>
                                                             <FormInputArea>
                                                                 <ClientSelect clientes={clientes} setSelectedClient={setSelectedClient} />
-                                                            </FormInputArea>
-                                                            <FormInputArea>
-                                                                <ApartamentoSelect apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
                                                             </FormInputArea>
                                                             <SubItensContainer>
                                                                 <FormInputArea>
@@ -211,6 +240,10 @@ const NovoContract = ({ user }) => {
                                                             </SubItensContainer>
                                                         </FormColum>
                                                     </FormContent>
+                                                    <SelectedAptTitleContainer>
+                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
+                                                    </SelectedAptTitleContainer>
+                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
                                                     <ButtonGroup>
                                                         <BackButton onClick={() => navigate('/contratos')}>Voltar</BackButton>
                                                         {!isSubmitting && (
@@ -235,8 +268,155 @@ const NovoContract = ({ user }) => {
                         </MainContratoContainer >
                     )
                 }
-
+                <Modal
+                    isOpen={modalAlertIsOpen}
+                    onRequestClose={closeAlertModal}
+                    style={modalStyles}
+                >
+                    <AlertContainer>
+                        <AlertText>Apartamento Ocupado</AlertText>
+                        <AlertButton onClick={() => {
+                            closeAlertModal();
+                            setSelectedApartamento({});
+                        }}>Fechar</AlertButton>
+                    </AlertContainer>
+                </Modal>
                 <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
+            </div >
+        ) : (
+            <div className="container">
+                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
+                {
+                    loading ? (
+                        <LoadingContainer>
+                            <ThreeDots
+                                color={'#4e4e4e'}
+                                height={49}
+                                width={100}
+                            />
+                        </LoadingContainer>
+                    ) : (
+                        <MainContratoContainer>
+                            <HeaderContratoContainer>
+                                <HeaderTitle>Nova Solicitaçãode Contrato</HeaderTitle>
+                            </HeaderContratoContainer >
+                            <ContentContratoContainer>
+                                <ContentContratoHeader>
+                                    <ContentIconContainer>
+                                        <FaFileInvoice />
+                                        <ContratoCounter>Dados da Solicitação</ContratoCounter>
+                                    </ContentIconContainer>
+                                </ContentContratoHeader>
+                                <StyledFormArea>
+                                    <Formik
+                                        initialValues={{
+                                            dataInicio: new Date(),
+                                            duracaoContrato: '',
+                                            diaVencimentoAluguel: '',
+                                            aptId: '',
+                                        }}
+                                        validationSchema={
+                                            Yup.object({
+                                                duracaoContrato: Yup.number().required('Obrigatório').min(6, 'Mínimo de 6 meses'),
+                                                diaVencimentoAluguel: Yup.number().required('Obrigatório').min(1, 'Dia não pode ser menor que 1').max(31, 'Dia não pode ser maior que 31'),
+                                            })
+                                        }
+                                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                            values.dataInicio = selectedDate;
+                                            values.aptId = selectedApartamento.value;
+                                            console.log(values);
+                                            //await createContrato(values, user, navigate, setSubmitting, setFieldError);
+                                        }}
+                                    >
+                                        {
+                                            ({ isSubmitting }) => (
+                                                <Form>
+                                                    <FormContent>
+                                                        <FormColum>
+                                                            <SubItensContainer>
+                                                                <FormInputArea>
+                                                                    <FormInputLabelRequired>Data Início</FormInputLabelRequired>
+                                                                    <Limitador>
+                                                                        <StyledDatePicker
+                                                                            selectedDate={selectedDate}
+                                                                            setSelectedDate={setSelectedDate}
+                                                                        />
+                                                                    </Limitador>
+                                                                </FormInputArea>
+                                                                <FormInputArea>
+                                                                    <FormInputLabelRequired>Duração (meses)</FormInputLabelRequired>
+                                                                    <Limitador>
+                                                                        <FormInput
+                                                                            type="number"
+                                                                            min="0"
+                                                                            step="1"
+                                                                            name="duracaoContrato"
+                                                                            placeholder="Duração do Contrato"
+                                                                        />
+                                                                    </Limitador>
+                                                                </FormInputArea>
+                                                            </SubItensContainer>
+                                                        </FormColum>
+                                                        <FormColum>
+                                                            <SubItensContainer>
+                                                                <FormInputArea>
+                                                                    <FormInputLabelRequired>Dia de Vencimento</FormInputLabelRequired>
+                                                                    <Limitador>
+                                                                        <FormInput
+                                                                            type="number"
+                                                                            min="1"
+                                                                            max='31'
+                                                                            step="1"
+                                                                            name="diaVencimentoAluguel"
+                                                                            placeholder="Dia de Vencimento"
+                                                                        />
+                                                                    </Limitador>
+                                                                </FormInputArea>
+                                                            </SubItensContainer>
+                                                        </FormColum>
+                                                    </FormContent>
+                                                    <SelectedAptTitleContainer>
+                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
+                                                    </SelectedAptTitleContainer>
+                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                    <ButtonGroup>
+                                                        <BackButton onClick={() => navigate('/contratos')}>Voltar</BackButton>
+                                                        {!isSubmitting && (
+                                                            <SubmitButton type="submit">Salvar</SubmitButton>
+                                                        )}
+                                                        {
+                                                            isSubmitting && (
+                                                                <ThreeDots
+                                                                    color={'#4e4e4e'}
+                                                                    height={49}
+                                                                    width={100}
+                                                                />
+                                                            )
+                                                        }
+                                                    </ButtonGroup>
+                                                </Form>
+                                            )
+                                        }
+                                    </Formik>
+                                </StyledFormArea>
+                            </ContentContratoContainer>
+                        </MainContratoContainer >
+                    )
+                }
+                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
+                <Modal
+                    isOpen={modalAlertIsOpen}
+                    onRequestClose={closeAlertModal}
+                    style={modalStyles}
+                >
+                    <AlertContainer>
+                        <AlertText>Apartamento Ocupado</AlertText>
+                        <AlertButton onClick={() => {
+                            closeAlertModal();
+                            setSelectedApartamento({});
+                        }}>Fechar</AlertButton>
+                    </AlertContainer>
+                </Modal>
             </div >
         )
     );

@@ -32,6 +32,7 @@ const ContractPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [contratos, setContratos] = useState([]);
+    const [contratoAtivo, setContratoAtivo] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const openSidebar = () => {
@@ -45,7 +46,7 @@ const ContractPage = ({ user }) => {
     useEffect(() => {
         async function teste() {
             if (loading) {
-                user.accessToken && await getContratos(user, setContratos, setLoading);
+                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo);
             }
         }
         teste();
@@ -118,6 +119,18 @@ const ContractPage = ({ user }) => {
                         <MainContratoContainer>
                             <HeaderContratoContainer>
                                 <HeaderTitle>Contratos</HeaderTitle>
+                                {
+                                    !contratoAtivo && (
+                                        <AddContratoHeaderButton onClick={() => {
+                                            navigate('/contratos/novo');
+                                        }}>
+                                            <FaPlus color='green' />
+                                            <AddButtonText>
+                                                Nova Solicitação
+                                            </AddButtonText>
+                                        </AddContratoHeaderButton>
+                                    )
+                                }
                             </HeaderContratoContainer>
                             <ContentContratoContainer>
                                 <ContentContratoHeader>
@@ -131,6 +144,13 @@ const ContractPage = ({ user }) => {
                                             <FaHandshake color='#6c757d' fontSize={150} className='icon-responsive' />
                                             <NoContentAvisoContainer>
                                                 <TextContent>Nenhum contrato encontrado.</TextContent>
+                                                {
+                                                    !contratoAtivo && (
+                                                        <AdicionarContratoButton onClick={() => navigate('/contratos/novo')}>
+                                                            <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Nova Solicitação
+                                                        </AdicionarContratoButton>
+                                                    )
+                                                }
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (

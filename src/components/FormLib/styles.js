@@ -48,6 +48,7 @@ export const StyledIcon = styled.p`
 
 export const StyledSelectArea = styled.div`
     display: block;
+    margin-bottom: 15px;
 `;
 
 export const StyledSelectLabel = styled.p`

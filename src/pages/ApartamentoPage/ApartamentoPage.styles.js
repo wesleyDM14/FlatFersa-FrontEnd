@@ -323,13 +323,15 @@ export const PlantaBaixaApt = styled.div`
     background-position: center;
     background-repeat: no-repeat;
     background-size:100% 100%;
-    filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
+    //filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
     border: 3px solid green;
     cursor: pointer;
     margin-right: 1px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    ${({ $statusMatch }) => $statusMatch && "filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);"}
 
     &:hover{
         width: 17%;
@@ -355,13 +357,15 @@ export const PlantaBaixaAlt = styled.div`
     background-repeat: no-repeat;
     background-position: center;
     background-size:100% 100%;
-    filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
+    //filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);
     border: 3px solid green;
     cursor: pointer;
     margin-bottom: 1px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    ${({ $statusMatch }) => $statusMatch && "filter: opacity(0.5) drop-shadow(0 0 0 #ff0000);"}
     
     &:hover{
         width: 92%;
@@ -423,7 +427,7 @@ export const PredioListContainer = styled.div`
 
 export const PredioListHeader = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
+    grid-template-columns: 5fr 2fr 1fr;
     height: 40px;
     width: 100%;
     align-items: center;
@@ -442,7 +446,7 @@ export const ListLabel = styled.h5`
 
 export const SinglePredio = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
+    grid-template-columns: 5fr 2fr 1fr;
     height: 50px;
     width: 100%;
     align-items: center;
@@ -489,11 +493,16 @@ export const EditIcon = styled.div`
 export const DeleteIcon = styled.div`
     font-size: 18px;
     margin-left: 10px;
-    color: ${props => props.theme.colors.red};
+    color: ${props => props.theme.colors.textRed};
 `;
 
 export const NumAptLabel = styled.p`
     color: #000;
-    font-size: 28px;
+    font-size: 18px;
     font-weight: 700;
+
+    @media only screen and (max-width: 978px){
+        font-size: 12px;
+        text-transform: lowercase;
+    }
 `;

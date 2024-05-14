@@ -201,6 +201,7 @@ export const ButtonGroup = styled.div`
     flex-direction: row;
     justify-content: flex-end;
     padding: 0px 35px;
+    margin-top: 15px;
 
     @media only screen and (max-width: 978px){
         justify-content: center;
@@ -360,4 +361,53 @@ export const DeleteIcon = styled.div`
     font-size: 18px;
     margin-left: 10px;
     color: ${props => props.theme.colors.red};
+`;
+
+export const SelectedAptTitleContainer = styled.div`
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const SelectedAptTitle = styled.h1`
+    font-size: 18px;
+    color: ${props => props.theme.colors.lightblue};
+    margin-right: 10px;
+`;
+
+export const AlertContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+`;
+
+export const AlertText = styled.h1`
+    font-size: 28px;
+    color: #ed3d3e;
+    margin-bottom: 15px;
+`;
+
+export const AlertButton = styled.button`
+    cursor: pointer;
+    margin-right: 15px;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: transparent;
+    color: ${props => props.theme.colors.secondary};
+
+    &:hover{
+        background-color: ${props => props.theme.colors.light2};
+    }
+
+    @media only screen and (max-width: 978px){
+        min-width: 45%;
+    }
 `;

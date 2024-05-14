@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setLoading) => {
+export const getContratos = async (user, setContratos, setLoading, setContratoAtivo) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
@@ -22,7 +22,15 @@ export const getContratos = async (user, setContratos, setLoading) => {
                 "Authorization": `Bearer ${user.accessToken}`,
             }
         }).then((response) => {
-            setContratos(response.data);
+            let contratos = response.data;
+            for (let index = 0; index < contratos.length; index++) {
+                const element = contratos[index];
+                if (element.statusContrato === 'Ativo') {
+                    setContratoAtivo(true);
+                    break;
+                }
+            }
+            setContratos(contratos);
             setLoading(false);
         }).catch((err) => {
             setLoading(false);
