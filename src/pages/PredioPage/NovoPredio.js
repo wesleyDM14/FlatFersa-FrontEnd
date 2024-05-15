@@ -155,7 +155,7 @@ const NovoPredio = ({ user }) => {
                                                 </FormColum>
                                             </FormContent>
                                             <ButtonGroup>
-                                                <BackButton onClick={() => navigate('/predios')}>Voltar</BackButton>
+                                                <BackButton type='button' onClick={() => navigate('/predios')}>Voltar</BackButton>
                                                 {!isSubmitting && (
                                                     <SubmitButton type="submit">Salvar</SubmitButton>
                                                 )}

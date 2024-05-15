@@ -506,3 +506,23 @@ export const NumAptLabel = styled.p`
         text-transform: lowercase;
     }
 `;
+
+export const DeleteContainer = styled.div`
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+`;
+
+export const DeleteTitle = styled.h1`
+    font-size: 20px;
+    color: #2e4a66;
+`;
+
+export const DeleteButtonContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 25px;
+`;

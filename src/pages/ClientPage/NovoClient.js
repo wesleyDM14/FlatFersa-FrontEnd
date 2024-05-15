@@ -188,7 +188,7 @@ const NovoClient = ({ user }) => {
                                                 </FormColum>
                                             </FormContent>
                                             <ButtonGroup>
-                                                <BackButton onClick={() => navigate('/clientes')}>Voltar</BackButton>
+                                                <BackButton type='button' onClick={() => navigate('/clientes')}>Voltar</BackButton>
                                                 {!isSubmitting && (
                                                     <SubmitButton type="submit">Salvar</SubmitButton>
                                                 )}

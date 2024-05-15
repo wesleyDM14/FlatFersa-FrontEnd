@@ -58,8 +58,8 @@ const NovoContract = ({ user }) => {
     const [modalAlertIsOpen, setModalAlertIsOpen] = useState(false);
 
     const [periocidade, setPeriocidade] = useState([
-        { label: 'Anualmente', value: 'anualmente' },
-        { label: 'Semestralmente', value: 'semestralmente' },
+        { label: 'Anualmente', value: 'ANUALMENTE' },
+        { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
     ]);
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
 
@@ -156,7 +156,7 @@ const NovoContract = ({ user }) => {
                                             values.dataInicio = selectedDate;
                                             values.periocidade = selectedPeriocidade.value;
                                             values.clienteId = selectedClient.value;
-                                            values.aptId = selectedApartamento.value;
+                                            values.aptId = selectedApartamento.numeroContrato;
                                             console.log(values);
                                             await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
@@ -245,7 +245,7 @@ const NovoContract = ({ user }) => {
                                                     </SelectedAptTitleContainer>
                                                     <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
                                                     <ButtonGroup>
-                                                        <BackButton onClick={() => navigate('/contratos')}>Voltar</BackButton>
+                                                        <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
                                                         {!isSubmitting && (
                                                             <SubmitButton type="submit">Salvar</SubmitButton>
                                                         )}
@@ -380,7 +380,7 @@ const NovoContract = ({ user }) => {
                                                     </SelectedAptTitleContainer>
                                                     <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
                                                     <ButtonGroup>
-                                                        <BackButton onClick={() => navigate('/contratos')}>Voltar</BackButton>
+                                                        <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
                                                         {!isSubmitting && (
                                                             <SubmitButton type="submit">Salvar</SubmitButton>
                                                         )}

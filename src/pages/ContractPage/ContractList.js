@@ -18,22 +18,27 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
     return (
         <PredioListContainer>
             <PredioListHeader>
-                <ListLabel>Contrato</ListLabel>
                 <ListLabel>Cliente</ListLabel>
+                <ListLabel>Apartamento</ListLabel>
+                <ListLabel>Status</ListLabel>
                 <ListLabel>Opções</ListLabel>
             </PredioListHeader>
             {
                 contratos.map((contrato) => (
-                    <SinglePredio key={contrato.id}>
+                    <SinglePredio key={contrato.contrato.id}>
                         <PredioSingleContainer onClick={async () => {
                             await downloadContract(user, contrato.id);
                         }}>
-                            <StyledLabel>Contrato: </StyledLabel>
-                            <PredioValue>{contrato.id}</PredioValue>
+                            <StyledLabel>Cliente: </StyledLabel>
+                            <PredioValue>{contrato.cliente.name}</PredioValue>
                         </PredioSingleContainer>
                         <PredioSingleContainer>
-                            <StyledLabel>Cliente: </StyledLabel>
-                            <PredioValue>{contrato.clientId}</PredioValue>
+                            <StyledLabel>Apartamento: </StyledLabel>
+                            <PredioValue>{contrato.apartamento.numero}</PredioValue>
+                        </PredioSingleContainer>
+                        <PredioSingleContainer>
+                            <StyledLabel>Status: </StyledLabel>
+                            <PredioValue>{contrato.contrato.statusContrato}</PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
                             <EditIcon>

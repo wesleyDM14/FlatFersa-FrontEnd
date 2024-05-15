@@ -84,170 +84,170 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <Modal
-                                isOpen={modalEditIsOpen}
-                                onRequestClose={closeEditModal}
-                                style={modalStyles}
-                            >
-                                <StyledFormArea>
-                                    <div style={{ display: 'flex', marginBottom: '30px' }}>
-                                        <ContentIconContainer>
-                                            <FaFileInvoice />
-                                        </ContentIconContainer>
-                                        <PredioCounter>Editar Prédio</PredioCounter>
-                                    </div>
-                                    <Formik
-                                        initialValues={{
-                                            nome: selectedPredio.nome,
-                                            endereco: selectedPredio.endereco,
-                                            cidade: selectedPredio.cidade,
-                                            estado: selectedPredio.estado,
-                                            bairro: selectedPredio.bairro,
-                                            numApt: selectedPredio.numApt,
-                                        }}
-                                        validationSchema={
-                                            Yup.object({
-                                                nome: Yup.string().required("Obrigatório"),
-                                                endereco: Yup.string().required("Obrigatótio"),
-                                                cidade: Yup.string().required("Obrigatório"),
-                                                estado: Yup.string().required("Obrigatório").min(2).max(2, 'Apenas a Sigla do estado'),
-                                                bairro: Yup.string().required('Obrigatório'),
-                                                numApt: Yup.number().required('Obrigatório')
-                                            })
-                                        }
-                                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                            //await createPredio(values, user, navigate, setSubmitting, setFieldError);
-                                        }}
-                                    >
-                                        {
-                                            ({ isSubmitting }) => (
-                                                <Form>
-                                                    <FormContent>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                                <FormInput
-                                                                    type="text"
-                                                                    name='nome'
-                                                                    placeholder="Nome Identificador do Prédio"
-                                                                />
-                                                            </FormInputArea>
-                                                            <FormInputArea>
-                                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                                <FormInput
-                                                                    type="text"
-                                                                    name='endereco'
-                                                                    placeholder="Endereço e Número"
-                                                                />
-                                                            </FormInputArea>
-                                                        </FormColum>
-                                                        <FormColum>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Estado</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="text"
-                                                                            name='estado'
-                                                                            placeholder="Sigla do Estado"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Qnt Apartamentos</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            name='numApt'
-                                                                            step='1'
-                                                                            min='0'
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <Limitador>
-                                                                        <FormInputLabelRequired>Cidade</FormInputLabelRequired>
-                                                                        <FormInput
-                                                                            type="text"
-                                                                            name='cidade'
-                                                                            placeholder="Cidade"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <Limitador>
-                                                                        <FormInputLabelRequired>Bairro</FormInputLabelRequired>
-                                                                        <FormInput
-                                                                            type="text"
-                                                                            name='bairro'
-                                                                            placeholder="Bairro"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                    </FormContent>
-                                                    <ButtonGroup>
-                                                        <BackButton onClick={() => {
-                                                            closeEditModal();
-                                                            setSelectedPredio({});
-                                                        }}>
-                                                            Voltar
-                                                        </BackButton>
-                                                        {!isSubmitting && (
-                                                            <SubmitButton type="submit">Salvar</SubmitButton>
-                                                        )}
-                                                        {
-                                                            isSubmitting && (
-                                                                <ThreeDots
-                                                                    color={'#4e4e4e'}
-                                                                    height={49}
-                                                                    width={100}
-                                                                />
-                                                            )
-                                                        }
-
-                                                    </ButtonGroup>
-                                                </Form>
-                                            )
-                                        }
-                                    </Formik>
-                                </StyledFormArea>
-                            </Modal>
                             <DeleteIcon onClick={() => {
                                 setSelectedPredio(predio);
                                 openDeleteModal();
                             }}>
                                 <FaTrash />
                             </DeleteIcon>
-                            <Modal
-                                isOpen={modalDeleteIsOpen}
-                                onRequestClose={closeDeleteModal}
-                                style={modalStyles}
-                            >
-                                <DeleteContainer>
-                                    <DeleteTitle>Deseja excluir o Prédio {predio.nome}?</DeleteTitle>
-                                    <DeleteButtonContainer>
-                                        <BackButton onClick={() => {
-                                            setSelectedPredio({});
-                                            closeDeleteModal();
-                                        }}>
-                                            Cancelar
-                                        </BackButton>
-                                        <SubmitButton onClick={() => {
-
-                                        }}>
-                                            Excluir
-                                        </SubmitButton>
-                                    </DeleteButtonContainer>
-                                </DeleteContainer>
-                            </Modal>
                         </AdminPredioContainer>
                     </SinglePredio>
                 ))
             }
+            <Modal
+                isOpen={modalEditIsOpen}
+                onRequestClose={closeEditModal}
+                style={modalStyles}
+            >
+                <StyledFormArea>
+                    <div style={{ display: 'flex', marginBottom: '30px' }}>
+                        <ContentIconContainer>
+                            <FaFileInvoice />
+                        </ContentIconContainer>
+                        <PredioCounter>Editar Prédio</PredioCounter>
+                    </div>
+                    <Formik
+                        initialValues={{
+                            nome: selectedPredio.nome,
+                            endereco: selectedPredio.endereco,
+                            cidade: selectedPredio.cidade,
+                            estado: selectedPredio.estado,
+                            bairro: selectedPredio.bairro,
+                            numApt: selectedPredio.numApt,
+                        }}
+                        validationSchema={
+                            Yup.object({
+                                nome: Yup.string().required("Obrigatório"),
+                                endereco: Yup.string().required("Obrigatótio"),
+                                cidade: Yup.string().required("Obrigatório"),
+                                estado: Yup.string().required("Obrigatório").min(2).max(2, 'Apenas a Sigla do estado'),
+                                bairro: Yup.string().required('Obrigatório'),
+                                numApt: Yup.number().required('Obrigatório')
+                            })
+                        }
+                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                            //await createPredio(values, user, navigate, setSubmitting, setFieldError);
+                        }}
+                    >
+                        {
+                            ({ isSubmitting }) => (
+                                <Form>
+                                    <FormContent>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
+                                                <FormInput
+                                                    type="text"
+                                                    name='nome'
+                                                    placeholder="Nome Identificador do Prédio"
+                                                />
+                                            </FormInputArea>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
+                                                <FormInput
+                                                    type="text"
+                                                    name='endereco'
+                                                    placeholder="Endereço e Número"
+                                                />
+                                            </FormInputArea>
+                                        </FormColum>
+                                        <FormColum>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Estado</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            type="text"
+                                                            name='estado'
+                                                            placeholder="Sigla do Estado"
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Qnt Apartamentos</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            type="number"
+                                                            name='numApt'
+                                                            step='1'
+                                                            min='0'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <Limitador>
+                                                        <FormInputLabelRequired>Cidade</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type="text"
+                                                            name='cidade'
+                                                            placeholder="Cidade"
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <Limitador>
+                                                        <FormInputLabelRequired>Bairro</FormInputLabelRequired>
+                                                        <FormInput
+                                                            type="text"
+                                                            name='bairro'
+                                                            placeholder="Bairro"
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                    </FormContent>
+                                    <ButtonGroup>
+                                        <BackButton type='button' onClick={() => {
+                                            closeEditModal();
+                                            setSelectedPredio({});
+                                        }}>
+                                            Voltar
+                                        </BackButton>
+                                        {!isSubmitting && (
+                                            <SubmitButton type="submit">Salvar</SubmitButton>
+                                        )}
+                                        {
+                                            isSubmitting && (
+                                                <ThreeDots
+                                                    color={'#4e4e4e'}
+                                                    height={49}
+                                                    width={100}
+                                                />
+                                            )
+                                        }
+
+                                    </ButtonGroup>
+                                </Form>
+                            )
+                        }
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
+            <Modal
+                isOpen={modalDeleteIsOpen}
+                onRequestClose={closeDeleteModal}
+                style={modalStyles}
+            >
+                <DeleteContainer>
+                    <DeleteTitle>Deseja excluir o Prédio {selectedPredio.nome}?</DeleteTitle>
+                    <DeleteButtonContainer>
+                        <BackButton onClick={() => {
+                            setSelectedPredio({});
+                            closeDeleteModal();
+                        }}>
+                            Cancelar
+                        </BackButton>
+                        <SubmitButton onClick={() => {
+
+                        }}>
+                            Excluir
+                        </SubmitButton>
+                    </DeleteButtonContainer>
+                </DeleteContainer>
+            </Modal>
         </PredioListContainer >
     );
 }

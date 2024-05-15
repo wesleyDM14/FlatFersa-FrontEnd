@@ -164,7 +164,7 @@ const NovoApartamento = ({ user }) => {
                                                         </FormColum>
                                                     </FormContent>
                                                     <ButtonGroup>
-                                                        <BackButton onClick={() => navigate('/apartamentos')}>Voltar</BackButton>
+                                                        <BackButton type='button' onClick={() => navigate('/apartamentos')}>Voltar</BackButton>
                                                         {!isSubmitting && (
                                                             <SubmitButton type="submit">Salvar</SubmitButton>
                                                         )}

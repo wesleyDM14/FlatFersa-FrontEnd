@@ -56,6 +56,7 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
     const closeDeleteModal = () => {
         setModalDeleteIsOpen(false);
     }
+
     return (
         <PredioListContainer>
             <PredioListHeader>
@@ -81,148 +82,150 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <Modal
-                                isOpen={modalEditIsOpen}
-                                onRequestClose={closeEditModal}
-                                style={modalStyles}
-                            >
-                                <StyledFormArea>
-                                    <div style={{ display: 'flex', marginBottom: '30px' }}>
-                                        <ContentIconContainer>
-                                            <FaFileInvoice />
-                                        </ContentIconContainer>
-                                        <ClientCounter>Editar Cliente</ClientCounter>
-                                    </div>
-                                    <Formik
-                                        initialValues={{
-                                            name: selectedClient.name,
-                                            cpf: selectedClient.cpf,
-                                            rg: selectedClient.rg,
-                                            phone: selectedClient.phone,
-                                            address: selectedClient.address,
-                                        }}
-                                        validationSchema={
-                                            Yup.object({
-                                                name: Yup.string().required('Obrigatório'),
-                                                phone: Yup.string().required('Obrigatório'),
-                                            })
-                                        }
-                                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
-
-                                        }}
-                                    >
-                                        {
-                                            ({ isSubmitting }) => (
-                                                <Form>
-                                                    <FormContent>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                                <FormInput
-                                                                    type='text'
-                                                                    name='name'
-                                                                    placeholder='Nome do cliente'
-                                                                />
-                                                            </FormInputArea>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>CPF</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            name='cpf'
-                                                                            type='text'
-                                                                            placeholder='CPF do cliente'
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>RG</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            name='rg'
-                                                                            type='text'
-                                                                            placeholder='RG do cliente'
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                                <FormInput
-                                                                    type='text'
-                                                                    name='address'
-                                                                    placeholder='Endereço do cliente'
-                                                                />
-                                                            </FormInputArea>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            name='phone'
-                                                                            type='text'
-                                                                            placeholder='Telefone'
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                    </FormContent>
-                                                    <ButtonGroup>
-                                                        <BackButton onClick={() => closeEditModal()}>Voltar</BackButton>
-                                                        {!isSubmitting && (
-                                                            <SubmitButton type="submit">Salvar</SubmitButton>
-                                                        )}
-                                                        {
-                                                            isSubmitting && (
-                                                                <ThreeDots
-                                                                    color={'#4e4e4e'}
-                                                                    height={49}
-                                                                    width={100}
-                                                                />
-                                                            )
-                                                        }
-                                                    </ButtonGroup>
-                                                </Form>
-                                            )
-                                        }
-                                    </Formik>
-                                </StyledFormArea>
-                            </Modal>
                             <DeleteIcon onClick={() => {
                                 setSelectedClient(cliente);
                                 openDeleteModal();
                             }}>
                                 <FaTrash />
                             </DeleteIcon>
-                            <Modal
-                                isOpen={modalDeleteIsOpen}
-                                onRequestClose={closeDeleteModal}
-                                style={modalStyles}
-                            >
-                                <DeleteContainer>
-                                    <DeleteTitle>Deseja excluir o Cliente {cliente.name}?</DeleteTitle>
-                                    <DeleteButtonContainer>
-                                        <BackButton onClick={() => {
-                                            setSelectedClient({});
-                                            closeDeleteModal();
-                                        }}>
-                                            Cancelar
-                                        </BackButton>
-                                        <SubmitButton onClick={() => {
-
-                                        }}>
-                                            Excluir
-                                        </SubmitButton>
-                                    </DeleteButtonContainer>
-                                </DeleteContainer>
-                            </Modal>
                         </AdminPredioContainer>
                     </SinglePredio >
                 ))
             }
+            <Modal
+                isOpen={modalDeleteIsOpen}
+                onRequestClose={closeDeleteModal}
+                style={modalStyles}
+            >
+                <DeleteContainer>
+                    <DeleteTitle>Deseja excluir o Cliente {selectedClient.name}?</DeleteTitle>
+                    <DeleteButtonContainer>
+                        <BackButton onClick={() => {
+                            setSelectedClient({});
+                            closeDeleteModal();
+                        }}>
+                            Cancelar
+                        </BackButton>
+                        <SubmitButton onClick={() => {
+
+                        }}>
+                            Excluir
+                        </SubmitButton>
+                    </DeleteButtonContainer>
+                </DeleteContainer>
+            </Modal>
+            <Modal
+                isOpen={modalEditIsOpen}
+                onRequestClose={closeEditModal}
+                style={modalStyles}
+            >
+                <StyledFormArea>
+                    <div style={{ display: 'flex', marginBottom: '30px' }}>
+                        <ContentIconContainer>
+                            <FaFileInvoice />
+                        </ContentIconContainer>
+                        <ClientCounter>Editar Cliente</ClientCounter>
+                    </div>
+                    <Formik
+                        initialValues={{
+                            name: selectedClient.name,
+                            cpf: selectedClient.cpf,
+                            rg: selectedClient.rg,
+                            phone: selectedClient.phone,
+                            address: selectedClient.address,
+                        }}
+                        validationSchema={
+                            Yup.object({
+                                name: Yup.string().required('Obrigatório'),
+                                phone: Yup.string().required('Obrigatório'),
+                            })
+                        }
+                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+
+                        }}
+                    >
+                        {
+                            ({ isSubmitting }) => (
+                                <Form>
+                                    <FormContent>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
+                                                <FormInput
+                                                    type='text'
+                                                    name='name'
+                                                    placeholder='Nome do cliente'
+                                                />
+                                            </FormInputArea>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>CPF</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            name='cpf'
+                                                            type='text'
+                                                            placeholder='CPF do cliente'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>RG</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            name='rg'
+                                                            type='text'
+                                                            placeholder='RG do cliente'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
+                                                <FormInput
+                                                    type='text'
+                                                    name='address'
+                                                    placeholder='Endereço do cliente'
+                                                />
+                                            </FormInputArea>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Telefone</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            name='phone'
+                                                            type='text'
+                                                            placeholder='Telefone'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                    </FormContent>
+                                    <ButtonGroup>
+                                        <BackButton type='button' onClick={() => closeEditModal()}>Voltar</BackButton>
+                                        {
+                                            !isSubmitting && (
+                                                <SubmitButton type="submit">Salvar</SubmitButton>
+                                            )
+                                        }
+                                        {
+                                            isSubmitting && (
+                                                <ThreeDots
+                                                    color={'#4e4e4e'}
+                                                    height={49}
+                                                    width={100}
+                                                />
+                                            )
+                                        }
+                                    </ButtonGroup>
+                                </Form>
+                            )
+                        }
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
         </PredioListContainer >
     );
 }

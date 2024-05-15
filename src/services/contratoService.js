@@ -1,16 +1,27 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setLoading, setContratoAtivo) => {
+export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${user.accessToken}`,
             }
-        }).then((response) => {
+        }).then(async (response) => {
             setContratos(response.data);
-            setLoading(false);
+            await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos-infos', {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.accessToken}`,
+                }
+            }).then((response) => {
+                setContratosInfo(response.data);
+                setLoading(false);
+            }).catch((err) => {
+                setLoading(false);
+                console.log(err.message);
+            });
         }).catch((err) => {
             setLoading(false);
             console.log(err.message);
@@ -51,8 +62,7 @@ export const createContrato = async (contrato, user, navigate, setSubmitting, se
         navigate('/contratos');
     }).catch((err) => {
         setSubmitting(false);
-        setFieldError('valorAluguel', err.message);
-        console.log(err.message);
+        setFieldError('valorAluguel', err.response.data.message);
     });
 }
 
@@ -71,9 +81,10 @@ export const getContratoById = async (user, contratoId, setContrato) => {
 }
 
 export const downloadContract = async (user, contratoId) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/testePDF/${contratoId}`, {
+    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/download/${contratoId}`, {
         headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${user.accessToken}`,
         },
         responseType: 'arraybuffer'
     }

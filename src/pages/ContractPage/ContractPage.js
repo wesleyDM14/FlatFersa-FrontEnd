@@ -32,6 +32,7 @@ const ContractPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [contratos, setContratos] = useState([]);
+    const [contratosInfo, setContratosInfo] = useState([]);
     const [contratoAtivo, setContratoAtivo] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -46,7 +47,7 @@ const ContractPage = ({ user }) => {
     useEffect(() => {
         async function teste() {
             if (loading) {
-                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo);
+                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo, setContratosInfo);
             }
         }
         teste();
@@ -94,7 +95,7 @@ const ContractPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ContractList user={user} contratos={contratos} navigate={navigate} setLoading={setLoading} />
+                                        <ContractList user={user} contratos={contratosInfo} navigate={navigate} setLoading={setLoading} />
                                     )
                                 }
                             </ContentContratoContainer>

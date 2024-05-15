@@ -360,7 +360,7 @@ export const EditIcon = styled.div`
 export const DeleteIcon = styled.div`
     font-size: 18px;
     margin-left: 10px;
-    color: ${props => props.theme.colors.red};
+    color: ${props => props.theme.colors.textRed};
 `;
 
 export const SelectedAptTitleContainer = styled.div`
