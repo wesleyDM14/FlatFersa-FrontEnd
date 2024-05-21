@@ -245,6 +245,10 @@ export const RadioContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
+
+    @media only screen and (max-width: 978px){
+        margin-bottom: 15px;
+    }
 `;
 
 export const RadioLabel = styled.span`
@@ -436,6 +440,10 @@ export const PredioListHeader = styled.div`
     border-top-left-radius: 5px;
     background-color: ${props => props.theme.colors.primary};
     box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+
+    @media only screen and (max-width: 978px){
+        grid-template-columns: 1fr 2fr 0.5fr;
+    }
 `;
 
 export const ListLabel = styled.h5`
@@ -453,6 +461,10 @@ export const SinglePredio = styled.div`
     padding: 15px;
     background-color: #fff;
     cursor: pointer;
+
+    @media only screen and (max-width: 978px){
+        grid-template-columns: 1fr 2fr 0.5fr;
+    }
 `;
 
 export const PredioSingleContainer = styled.div`
@@ -465,6 +477,10 @@ export const StyledLabel = styled.h1`
     font-size: 18px;
     color: ${props => props.theme.colors.lightblue};
     margin-right: 10px;
+
+    @media only screen and (max-width: 978px){
+        display: none;
+    }
 `;
 
 export const PredioValue = styled.a`
@@ -475,13 +491,17 @@ export const PredioValue = styled.a`
     color: ${props => props.theme.colors.dark1};
 
     @media (max-width: 1380px) {
-        font-weight: 300;
+        font-weight: 400;
     }
 `;
 
 export const AdminPredioContainer = styled.div`
     display: flex;
     flex-direction: column;
+
+    @media only screen and (max-width: 978px){
+        flex-direction: row;
+    }
 `;
 
 export const EditIcon = styled.div`

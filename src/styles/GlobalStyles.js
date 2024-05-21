@@ -118,6 +118,22 @@ const GlobalStyle = createGlobalStyle`
         line-height: 1.5;
     }
 
+    .active {
+        background-color: rgba(62, 161, 117, 0.3);
+    }
+
+    .modal-responsive {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        margin-right: -50%;
+        transform: translate(-50%,-50%);
+        max-height: 600px;
+        padding: 0;
+        position: absolute;
+    }
+
     ::-webkit-datetime-edit { 
         padding: 1em; 
     }
@@ -137,6 +153,9 @@ const GlobalStyle = createGlobalStyle`
         }
         .icon-responsive{
             font-size: 90px;
+        }
+        .modal-responsive {
+            right: 10%;
         }
     }
 `;

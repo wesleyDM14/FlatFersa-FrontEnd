@@ -17,21 +17,29 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
 
     return (
         <PredioListContainer>
-            <PredioListHeader>
-                <ListLabel>Cliente</ListLabel>
+            <PredioListHeader $isadmin={user.isAdmin.toString()}>
+                {
+                    user.isAdmin && (<ListLabel>Cliente</ListLabel>)
+                }
                 <ListLabel>Apartamento</ListLabel>
                 <ListLabel>Status</ListLabel>
-                <ListLabel>Opções</ListLabel>
+                {
+                    user.isAdmin && (<ListLabel>Opções</ListLabel>)
+                }
             </PredioListHeader>
             {
                 contratos.map((contrato) => (
-                    <SinglePredio key={contrato.contrato.id}>
-                        <PredioSingleContainer onClick={async () => {
-                            await downloadContract(user, contrato.id);
-                        }}>
-                            <StyledLabel>Cliente: </StyledLabel>
-                            <PredioValue>{contrato.cliente.name}</PredioValue>
-                        </PredioSingleContainer>
+                    <SinglePredio key={contrato.contrato.id} $isadmin={user.isAdmin.toString()}>
+                        {
+                            user.isAdmin && (
+                                <PredioSingleContainer onClick={async () => {
+                                    await downloadContract(user, contrato.contrato.id);
+                                }}>
+                                    <StyledLabel>Cliente: </StyledLabel>
+                                    <PredioValue>{contrato.cliente.name}</PredioValue>
+                                </PredioSingleContainer>
+                            )
+                        }
                         <PredioSingleContainer>
                             <StyledLabel>Apartamento: </StyledLabel>
                             <PredioValue>{contrato.apartamento.numero}</PredioValue>
@@ -40,14 +48,18 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                             <StyledLabel>Status: </StyledLabel>
                             <PredioValue>{contrato.contrato.statusContrato}</PredioValue>
                         </PredioSingleContainer>
-                        <AdminPredioContainer>
-                            <EditIcon>
-                                <FaEdit />
-                            </EditIcon>
-                            <DeleteIcon>
-                                <FaTrash />
-                            </DeleteIcon>
-                        </AdminPredioContainer>
+                        {
+                            user.isAdmin && (
+                                <AdminPredioContainer>
+                                    <EditIcon>
+                                        <FaEdit />
+                                    </EditIcon>
+                                    <DeleteIcon>
+                                        <FaTrash />
+                                    </DeleteIcon>
+                                </AdminPredioContainer>
+                            )
+                        }
                     </SinglePredio>
                 ))
             }

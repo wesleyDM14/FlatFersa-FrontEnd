@@ -294,7 +294,7 @@ export const PredioListContainer = styled.div`
 
 export const PredioListHeader = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
+    grid-template-columns: ${props => props.$isadmin === 'true' ? '5fr 2fr 2fr 1fr' : '2fr 2fr'};
     height: 40px;
     width: 100%;
     align-items: center;
@@ -303,6 +303,10 @@ export const PredioListHeader = styled.div`
     border-top-left-radius: 5px;
     background-color: ${props => props.theme.colors.primary};
     box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
+
+    @media only screen and (max-width: 978px){
+        grid-template-columns: ${props => props.$isadmin === 'true' ? '1fr 1fr 1fr 0.2fr' : '2fr 2fr'};
+    }
 `;
 
 export const ListLabel = styled.h5`
@@ -313,13 +317,17 @@ export const ListLabel = styled.h5`
 
 export const SinglePredio = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
+    grid-template-columns: ${props => props.$isadmin === 'true' ? '5fr 2fr 2fr 1fr' : '2fr 2fr'};
     height: 50px;
     width: 100%;
     align-items: center;
     padding: 15px;
     background-color: #fff;
     cursor: pointer;
+
+    @media only screen and (max-width: 978px){
+        grid-template-columns: ${props => props.$isadmin === 'true' ? '1fr 1fr 1fr 0.2fr' : '2fr 2fr'};
+    }
 `;
 
 export const PredioSingleContainer = styled.div`
@@ -332,6 +340,10 @@ export const StyledLabel = styled.h1`
     font-size: 18px;
     color: ${props => props.theme.colors.lightblue};
     margin-right: 10px;
+
+    @media only screen and (max-width: 978px){
+        display: none;
+    }
 `;
 
 export const PredioValue = styled.a`
@@ -341,14 +353,20 @@ export const PredioValue = styled.a`
     text-decoration: none;
     color: ${props => props.theme.colors.dark1};
 
-    @media (max-width: 1380px) {
-        font-weight: 300;
+    @media only screen and (max-width: 978px){
+        font-weight: 400;
+        overflow: hidden;
+        white-space: nowrap;
     }
 `;
 
 export const AdminPredioContainer = styled.div`
     display: flex;
     flex-direction: column;
+
+    @media only screen and (max-width: 978px){
+        flex-direction: row;
+    }
 `;
 
 export const EditIcon = styled.div`
@@ -411,3 +429,56 @@ export const AlertButton = styled.button`
         min-width: 45%;
     }
 `;
+
+export const ContratoCardsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+`;
+
+export const Card = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    padding: 25px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+    cursor: pointer;
+    transition: 0.5s ease;
+
+    &:hover{
+        -webkit-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        transform: scale(1.1);
+        transition: 0.5s ease;
+    }
+
+    @media only screen and (max-width: 978px){
+        width: 80%;
+    }
+`;
+
+export const CardTitle = styled.h1`
+    font-size: 25px;
+    font-weight: bold;
+    color: ${props => props.theme.colors.titleColor};
+`;
+
+export const CardIconContainer = styled.div`
+    font-size: 35px;
+    color: ${props => props.theme.colors.dark1};
+    text-align: center;
+    margin-top: 15px;
+`;
+
+export const CardContent = styled.p``;

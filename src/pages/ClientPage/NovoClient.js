@@ -22,6 +22,7 @@ import {
     FormInputLabelRequired,
     HeaderClientContainer,
     HeaderTitle,
+    Image,
     Limitador,
     MainClientContainer,
     StyledFileArea,
@@ -44,6 +45,8 @@ const NovoClient = ({ user }) => {
     const cpfMask = useMask({ mask: '___.___.___-__', replacement: { _: /\d/ } });*/
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
+    const [selectedBackImage, setSelectedBackImage] = useState();
+    const [selectedFrontImage, setSelectedFrontImage] = useState();
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -78,12 +81,16 @@ const NovoClient = ({ user }) => {
                                     phone: '',
                                     address: '',
                                     email: '',
+                                    documentFront: null,
+                                    documentBack: null
                                 }}
                                 validationSchema={
                                     Yup.object({
                                         name: Yup.string().required('Obrigatório'),
                                         phone: Yup.string().required('Obrigatório'),
                                         email: Yup.string().required('Obrigatório'),
+                                        //documentBack: Yup.mixed().required('Document back is required'),
+                                        //documentFront: Yup.mixed().required('Document Front is required')
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -93,7 +100,7 @@ const NovoClient = ({ user }) => {
                                 }}
                             >
                                 {
-                                    ({ isSubmitting }) => (
+                                    ({ isSubmitting, setFieldValue }) => (
                                         <Form>
                                             <FormContent>
                                                 <FormColum>
@@ -166,23 +173,60 @@ const NovoClient = ({ user }) => {
                                                     <FormInputArea>
                                                         <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
                                                         <StyledFileArea>
-                                                            <StyledFileIconContainer>
-                                                                <FaCloudUploadAlt />
-                                                            </StyledFileIconContainer>
-                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                            <StyledFileInput type="file" />
+                                                            {
+                                                                selectedFrontImage ? (
+                                                                    <Image 
+                                                                        src={selectedFrontImage}
+                                                                    />
+                                                                ) : (
+                                                                    <div>
+                                                                        <StyledFileIconContainer>
+                                                                            <FaCloudUploadAlt />
+                                                                        </StyledFileIconContainer>
+                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                                    </div>
+                                                                )
+                                                            }
+
+                                                            <StyledFileInput
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(event) => {
+                                                                    const file = event.target.files[0];
+                                                                    setFieldValue('documentFront', file);
+                                                                    setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
+                                                                }}
+                                                            />
                                                         </StyledFileArea>
                                                     </FormInputArea>
                                                     <FormInputArea>
                                                         <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
                                                         <StyledFileArea>
-                                                            <StyledFileIconContainer>
-                                                                <FaCloudUploadAlt />
-                                                            </StyledFileIconContainer>
-                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                            <StyledFileInput type="file" />
+                                                            {
+                                                                selectedBackImage ? (
+                                                                    <Image 
+                                                                        src={selectedBackImage}
+                                                                    />
+                                                                ) : (
+                                                                    <div>
+                                                                        <StyledFileIconContainer>
+                                                                            <FaCloudUploadAlt />
+                                                                        </StyledFileIconContainer>
+                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            <StyledFileInput
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(event) => {
+                                                                    const file = event.target.files[0];
+                                                                    setFieldValue('documentBack', file);
+                                                                    setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
+                                                                }}
+                                                            />
                                                         </StyledFileArea>
                                                     </FormInputArea>
                                                 </FormColum>
@@ -208,7 +252,7 @@ const NovoClient = ({ user }) => {
                             </Formik>
                         </StyledFormArea>
                     </ContentClientContainer>
-                </MainClientContainer>
+                </MainClientContainer >
                 <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
             </div >
         )

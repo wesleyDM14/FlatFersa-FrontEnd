@@ -25,6 +25,17 @@ export const loginUser = (credentials, navigate, setFieldError, setSubmitting) =
     });
 }
 
+export const getUserInfo = async (user, setUserInfo, setLoading) => {
+    if (user.isAdmin) {
+        let userInfo = {};
+        userInfo.name = 'Admin';
+        setUserInfo(userInfo);
+        setLoading(false);
+    } else {
+
+    }
+}
+
 export const logoutUser = (navigate) => {
     sessionService.deleteSession();
     sessionService.deleteUser();

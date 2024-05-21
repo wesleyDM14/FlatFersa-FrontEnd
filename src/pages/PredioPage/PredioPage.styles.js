@@ -302,6 +302,10 @@ export const StyledLabel = styled.h1`
     font-size: 18px;
     color: ${props => props.theme.colors.lightblue};
     margin-right: 10px;
+
+    @media only screen and (max-width: 978px){
+        display: none;
+    }
 `;
 
 export const PredioValue = styled.a`
@@ -312,13 +316,17 @@ export const PredioValue = styled.a`
     color: ${props => props.theme.colors.dark1};
 
     @media (max-width: 1380px) {
-        font-weight: 300;
+        font-weight: 400;
     }
 `;
 
 export const AdminPredioContainer = styled.div`
     display: flex;
     flex-direction: column;
+
+    @media only screen and (max-width: 978px){
+        flex-direction: row;
+    }
 `;
 
 export const EditIcon = styled.div`

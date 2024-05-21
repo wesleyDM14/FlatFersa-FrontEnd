@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo) => {
+export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
@@ -17,6 +17,22 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                 }
             }).then((response) => {
                 setContratosInfo(response.data);
+                let contratos = response.data;
+
+                let ativos = [];
+                let solicitacoes = [];
+
+                for (let index = 0; index < contratos.length; index++) {
+                    const contrato = contratos[index];
+                    if (contrato.contrato.statusContrato === 'ATIVO') {
+                        ativos.push(contrato);
+                    } else if (contrato.contrato.statusContrato === 'AGUARDANDO') {
+                        solicitacoes.push(contrato)
+                    }
+                }
+                
+                setContratosAtivos(ativos);
+                setContratosSolicitacao(solicitacoes);
                 setLoading(false);
             }).catch((err) => {
                 setLoading(false);
@@ -36,7 +52,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
             let contratos = response.data;
             for (let index = 0; index < contratos.length; index++) {
                 const element = contratos[index];
-                if (element.statusContrato === 'Ativo') {
+                if (element.contrato.statusContrato === 'ATIVO') {
                     setContratoAtivo(true);
                     break;
                 }

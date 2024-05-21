@@ -323,7 +323,7 @@ const NovoContract = ({ user }) => {
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                             values.dataInicio = selectedDate;
-                                            values.aptId = selectedApartamento.value;
+                                            values.aptId = selectedApartamento.numeroContrato;
                                             console.log(values);
                                             //await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}

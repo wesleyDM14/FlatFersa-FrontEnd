@@ -117,6 +117,7 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}
+                //className='modal-responsive'
                 style={modalStyles}
             >
                 <StyledFormArea>

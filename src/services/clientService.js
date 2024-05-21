@@ -18,7 +18,7 @@ export const getClientes = async (user, setClients, setLoading) => {
 export const createCliente = async (cliente, user, navigate, setSubmitting, setFieldError) => {
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/clients', cliente, {
         headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
