@@ -52,6 +52,7 @@ export const deletePredioById = async (user, predioId, setLoading) => {
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
+        console.log(response.data);
         setLoading(true);
     }).catch((err) => {
         console.log(err.message);

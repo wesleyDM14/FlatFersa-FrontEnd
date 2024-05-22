@@ -97,7 +97,9 @@ const NovoApartamento = ({ user }) => {
                                         }}
                                         validationSchema={
                                             Yup.object({
-
+                                                numeroContrato: Yup.string().required("Obrigatório"),
+                                                numero: Yup.number().required("Obrigatório"),
+                                                valorBase: Yup.number().required("Obrigatótio"),
                                             })
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {

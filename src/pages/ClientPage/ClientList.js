@@ -34,6 +34,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
+import { deleteClientById } from "../../services/clientService";
 
 const ClientList = ({ clientes, user, setLoading, navigate }) => {
     Modal.setAppElement(document.getElementById('root'));
@@ -92,6 +93,7 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
                     </SinglePredio >
                 ))
             }
+
             <Modal
                 isOpen={modalDeleteIsOpen}
                 onRequestClose={closeDeleteModal}
@@ -106,18 +108,18 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
                         }}>
                             Cancelar
                         </BackButton>
-                        <SubmitButton onClick={() => {
-
+                        <SubmitButton onClick={async () => {
+                            await deleteClientById(user, selectedClient.id, setLoading);
                         }}>
                             Excluir
                         </SubmitButton>
                     </DeleteButtonContainer>
                 </DeleteContainer>
             </Modal>
+
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}
-                //className='modal-responsive'
                 style={modalStyles}
             >
                 <StyledFormArea>

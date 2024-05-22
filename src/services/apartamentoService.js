@@ -15,6 +15,21 @@ export const getApartamentos = async (user, setApartamentos, setLoading) => {
     });
 }
 
+export const getApartamentosWithInfos = async (user, setApartamentosInfo, setLoading2) => {
+    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos-infos', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        setApartamentosInfo(response.data);
+        setLoading2(false);
+    }).catch((err) => {
+        setLoading2(false);
+        console.log(err.message);
+    });
+}
+
 export const createApartamento = async (apartamento, user, navigate, setSubmitting, setFieldError) => {
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', apartamento, {
         headers: {
@@ -45,14 +60,16 @@ export const getApartamentoById = async (user, apartamentoId, setApartamento) =>
     });
 }
 
-export const deleteApartamentoById = async (user, apartamentoId, setLoading) => {
+export const deleteApartamentoById = async (user, apartamentoId, setLoading, setLoading2) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
+        console.log(response.data);
         setLoading(true);
+        setLoading2(true);
     }).catch((err) => {
         console.log(err.message);
     });

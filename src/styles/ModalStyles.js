@@ -1,6 +1,5 @@
 function isSmallScreen() {
     if (typeof window !== 'undefined') {
-        console.log(window.innerWidth);
         return window.innerWidth < 978;
     }
     return false;

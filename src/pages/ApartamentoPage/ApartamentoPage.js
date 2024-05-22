@@ -24,7 +24,7 @@ import {
     TextContent,
 } from './ApartamentoPage.styles';
 import { FaHouseUser, FaPlus } from "react-icons/fa";
-import { getApartamentos } from "../../services/apartamentoService";
+import { getApartamentos, getApartamentosWithInfos } from "../../services/apartamentoService";
 import { ThreeDots } from "react-loader-spinner";
 import ApartamentoList from "./ApartamentoList";
 
@@ -33,7 +33,9 @@ const ApartamentoPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [apartamentos, setApartamentos] = useState([]);
+    const [apartamentoInfos, setApartamentosInfo] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(true);
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -52,12 +54,21 @@ const ApartamentoPage = ({ user }) => {
         loadData();
     }, [loading, user]);
 
+    useEffect(() => {
+        async function loadData() {
+            if (loading2) {
+                user.accessToken && await getApartamentosWithInfos(user, setApartamentosInfo, setLoading2);
+            }
+        }
+        loadData();
+    }, [loading2, user]);
+
     return (
         user.isAdmin && (
             <div className="container">
                 <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} apartamentoActive={true} />
                 {
-                    loading ? (
+                    loading && loading2 ? (
                         <LoadingContainer>
                             <ThreeDots
                                 color={'#4e4e4e'}
@@ -94,7 +105,7 @@ const ApartamentoPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ApartamentoList apartamentos={apartamentos} user={user} setLoading={setLoading} navigate={navigate} />
+                                        <ApartamentoList apartamentos={apartamentoInfos} user={user} setLoading={setLoading} setLoading2={setLoading2} navigate={navigate} />
                                     )
                                 }
                             </ContentApartamentoContainer>

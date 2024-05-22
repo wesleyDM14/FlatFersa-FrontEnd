@@ -30,7 +30,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                         solicitacoes.push(contrato)
                     }
                 }
-                
+
                 setContratosAtivos(ativos);
                 setContratosSolicitacao(solicitacoes);
                 setLoading(false);
@@ -120,6 +120,7 @@ export const deleteContratoById = async (user, contratoId, setLoading) => {
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
+        console.log(response.data);
         setLoading(true);
     }).catch((err) => {
         console.log(err.message);

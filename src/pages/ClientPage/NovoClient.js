@@ -89,8 +89,6 @@ const NovoClient = ({ user }) => {
                                         name: Yup.string().required('Obrigatório'),
                                         phone: Yup.string().required('Obrigatório'),
                                         email: Yup.string().required('Obrigatório'),
-                                        //documentBack: Yup.mixed().required('Document back is required'),
-                                        //documentFront: Yup.mixed().required('Document Front is required')
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {

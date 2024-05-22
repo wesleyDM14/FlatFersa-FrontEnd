@@ -34,6 +34,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
+import { deletePredioById } from "../../services/predioService";
 
 
 
@@ -94,6 +95,7 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </SinglePredio>
                 ))
             }
+
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}
@@ -226,6 +228,7 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </Formik>
                 </StyledFormArea>
             </Modal>
+
             <Modal
                 isOpen={modalDeleteIsOpen}
                 onRequestClose={closeDeleteModal}
@@ -240,8 +243,8 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                         }}>
                             Cancelar
                         </BackButton>
-                        <SubmitButton onClick={() => {
-
+                        <SubmitButton onClick={async () => {
+                            await deletePredioById(user, selectedPredio.id, setLoading);
                         }}>
                             Excluir
                         </SubmitButton>

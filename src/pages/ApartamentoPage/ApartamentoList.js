@@ -37,8 +37,9 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
+import { deleteApartamentoById } from "../../services/apartamentoService";
 
-const ApartamentoList = ({ apartamentos, user, setLoading, navigate }) => {
+const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate }) => {
     Modal.setAppElement(document.getElementById('root'));
 
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
@@ -70,24 +71,24 @@ const ApartamentoList = ({ apartamentos, user, setLoading, navigate }) => {
             </PredioListHeader>
             {
                 apartamentos.map((apartamento) => (
-                    <SinglePredio key={apartamento.numeroContrato}>
+                    <SinglePredio key={apartamento.apartamento.numeroContrato}>
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
-                            <PredioValue>{apartamento.numero}</PredioValue>
+                            <PredioValue>{apartamento.apartamento.numero}</PredioValue>
                         </PredioSingleContainer>
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>
-                            <PredioValue>FlatFersa</PredioValue>
+                            <PredioValue>{apartamento.predio.nome}</PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
                             <EditIcon onClick={() => {
-                                setSelectedApartamento(apartamento);
+                                setSelectedApartamento(apartamento.apartamento);
                                 openEditModal();
                             }}>
                                 <FaEdit />
                             </EditIcon>
                             <DeleteIcon onClick={() => {
-                                setSelectedApartamento(apartamento);
+                                setSelectedApartamento(apartamento.apartamento);
                                 openDeleteModal();
                             }}>
                                 <FaTrash />
@@ -110,8 +111,8 @@ const ApartamentoList = ({ apartamentos, user, setLoading, navigate }) => {
                         }}>
                             Cancelar
                         </BackButton>
-                        <SubmitButton onClick={() => {
-
+                        <SubmitButton onClick={async () => {
+                            await deleteApartamentoById(user, selectedApartamento.numeroContrato, setLoading, setLoading2);
                         }}>
                             Excluir
                         </SubmitButton>
@@ -139,7 +140,9 @@ const ApartamentoList = ({ apartamentos, user, setLoading, navigate }) => {
                         }}
                         validationSchema={
                             Yup.object({
-
+                                numeroContrato: Yup.string().required("Obrigatório"),
+                                numero: Yup.number().required("Obrigatório"),
+                                valorBase: Yup.number().required("Obrigatótio"),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
