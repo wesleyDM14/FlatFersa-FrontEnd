@@ -29,8 +29,8 @@ const LoginPage = ({ loginUser }) => {
     return (
         <StyledContainer>
             <StyledFormArea>
-                <Avatar image={logo} />
-                <StyledTitle size={30} color={props => props.theme.colors.theme}>Área de Login</StyledTitle>
+                <Avatar $image={logo} />
+                <StyledTitle size={30}>Área de Login</StyledTitle>
                 <Formik
                     initialValues={{
                         email: "",
@@ -73,7 +73,6 @@ const LoginPage = ({ loginUser }) => {
                                 {
                                     isSubmitting && (
                                         <ThreeDots
-                                            color={props => props.theme.colors.theme}
                                             height={49}
                                             width={100}
                                         />

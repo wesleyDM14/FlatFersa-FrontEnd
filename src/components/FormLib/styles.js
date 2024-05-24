@@ -20,6 +20,10 @@ export const StyledTextInput = styled.input`
         background-color: ${props => props.theme.colors.dark2};
         color: ${props => props.theme.colors.primary};
     }
+
+    @media only screen and (max-width: 978px){
+       width: auto;
+    }
 `;
 
 export const StyledLabel = styled.p`

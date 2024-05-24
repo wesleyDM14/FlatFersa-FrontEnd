@@ -12,11 +12,10 @@ export const loginUser = (credentials, navigate, setFieldError, setSubmitting) =
 
         sessionService.saveSession(token).then(() => {
             sessionService.saveUser(token).then(() => {
+                setSubmitting(false);
                 navigate('/dashboard');
             }).catch(err => console.error(err));
         }).catch(err => console.error(err));
-
-        setSubmitting(false);
     }).catch((err) => {
         const { data } = err.response;
         setFieldError('email', data.error);

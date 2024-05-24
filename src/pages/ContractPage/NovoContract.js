@@ -325,7 +325,7 @@ const NovoContract = ({ user }) => {
                                             values.dataInicio = selectedDate;
                                             values.aptId = selectedApartamento.numeroContrato;
                                             console.log(values);
-                                            //await createContrato(values, user, navigate, setSubmitting, setFieldError);
+                                            await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >
                                         {

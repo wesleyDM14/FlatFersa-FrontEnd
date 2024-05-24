@@ -10,16 +10,16 @@ export const Avatar = styled.div`
     width: 85px;
     height: 85px;
     border-radius: 50px;
-    background-image: url(${props => props.image});
+    background-image: url(${props => props.$image});
     background-size: cover;
     background-position: center;
     margin: auto;
 `;
 
 export const StyledTitle = styled.h2`
-    font-size: ${(porps) => porps.size}px;
+    font-size: ${(props) => props.size}px;
     text-align: center;
-    color: ${(props) => props.color ? props.color : props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.theme};
     padding: 5px;
     margin-bottom: 20px;
 `;

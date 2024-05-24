@@ -17,7 +17,7 @@ const HomePage = () => {
         <StyledContainer>
             <Container>
                 <LogoContainer>
-                    <Avatar image={logo} />
+                    <Avatar $image={logo} />
                 </LogoContainer>
                 <StyledTitle size={65}> Bem Vindo ao Flat Fersa</StyledTitle>
                 <StyledSubTitle size={27}>

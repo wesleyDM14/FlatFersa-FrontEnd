@@ -266,7 +266,6 @@ export const StyledSelect = ({ options, setSelectedOption, label }) => {
                     setSelectedOption(value);
                 }}
                 menuPlacement="auto"
-                menuPosition="fixed"
                 styles={{
                     control: (baseStyles, state) => ({
                         maxWidth: '100%',

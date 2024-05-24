@@ -52,7 +52,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
             let contratos = response.data;
             for (let index = 0; index < contratos.length; index++) {
                 const element = contratos[index];
-                if (element.contrato.statusContrato === 'ATIVO') {
+                if (element.contrato.statusContrato === 'ATIVO' || element.contrato.statusContrato === 'AGUARDANDO') {
                     setContratoAtivo(true);
                     break;
                 }
@@ -68,18 +68,37 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
 }
 
 export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos', contrato, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        setSubmitting(false);
-        navigate('/contratos');
-    }).catch((err) => {
-        setSubmitting(false);
-        setFieldError('valorAluguel', err.response.data.message);
-    });
+
+    if (user.isAdmin) {
+        await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos', contrato, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        }).then((response) => {
+            console.log(response.data);
+            setSubmitting(false);
+            navigate('/contratos');
+        }).catch((err) => {
+            setSubmitting(false);
+            setFieldError('valorAluguel', err.response.data.message);
+        });
+    } else {
+        await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/solicitar', contrato, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        }).then((response) => {
+            console.log(response.data);
+            setSubmitting(false);
+            navigate('/contratos');
+        }).catch((err) => {
+            setSubmitting(false);
+            setFieldError('duracaoContrato', err.response.data.message);
+        });
+    }
+
 }
 
 export const getContratoById = async (user, contratoId, setContrato) => {

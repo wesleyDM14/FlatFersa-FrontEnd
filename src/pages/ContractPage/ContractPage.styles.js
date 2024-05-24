@@ -227,7 +227,7 @@ export const BackButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
-        min-width: 45%;
+        //min-width: 45%;
     }
 `;
 
@@ -248,7 +248,29 @@ export const SubmitButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
-        min-width: 45%;
+        //min-width: 45%;
+    }
+`;
+
+export const RejectButton = styled.button`
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    margin-right: 15px;
+    transition: all .2s ease-out;
+    background-color: ${props => props.theme.colors.textRed};
+    color: ${props => props.theme.colors.primary};
+
+    &:hover{
+        background-color: #F00;
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
     }
 `;
 
@@ -482,3 +504,127 @@ export const CardIconContainer = styled.div`
 `;
 
 export const CardContent = styled.p``;
+
+export const DeleteContainer = styled.div`
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+`;
+
+export const DeleteTitle = styled.h1`
+    font-size: 20px;
+    color: #2e4a66;
+`;
+
+export const DeleteButtonContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 25px;
+`;
+
+export const SolicitacaoModalContainer = styled.div`
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 15px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+`;
+
+export const SolicitacaoTitleContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+`;
+
+export const SolicitacaoModalTitle = styled.h1`
+    font-size: 30px;
+    color: #2e4a66;
+
+    @media only screen and (max-width: 978px){
+        font-size: 24px;
+    }
+`;
+
+export const SolicitacaoModalContent = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 25px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+        margin-top: 0;
+    }
+
+`;
+
+export const DataSection = styled.div`
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 15px;
+
+    @media only screen and (max-width: 978px){
+        margin-top: 15px;
+    }
+`;
+
+export const DataColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const DataContainer = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
+export const DataIconContainer = styled.div`
+    font-size: 18px;
+    color: ${props => props.theme.colors.dark1};
+    margin-right: 15px;
+    align-items: center;
+
+    @media only screen and (max-width: 978px){
+        font-size: 16px;
+    }
+`;
+
+export const SubTitle = styled.h2`
+    font-size: 18px;
+    color: ${props => props.theme.colors.dark1};
+
+    @media only screen and (max-width: 978px){
+        font-size: 16px;
+    }
+`;
+
+export const SolicitacaoModalContentLabel = styled.h3`
+    font-size: 18px;
+    color: ${props => props.theme.colors.dark2};
+    margin-right: 15px;
+
+    @media only screen and (max-width: 978px){
+        font-size: 16px;
+    }
+`;
+
+export const SolicitacaoModalContentValue = styled.p`
+    font-size: 18px;
+    color: ${props => props.theme.colors.dark1};
+    margin-right: 15px;
+
+    @media only screen and (max-width: 978px){
+        font-size: 16px;
+    }
+`;
+
+export const SolicitacaoContratoDataContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-top: 25px;
+`;
