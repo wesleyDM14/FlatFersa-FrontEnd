@@ -58,3 +58,20 @@ export const deletePredioById = async (user, predioId, setLoading) => {
         console.log(err.message);
     });
 }
+
+export const updatePredio = async (user, predio, setSubmitting, setFieldError, setLoading) => {
+    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predio.id}`, predio, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setSubmitting(false);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err.message);
+        setSubmitting(false);
+        setFieldError('nome', err.message);
+    });
+}

@@ -628,3 +628,139 @@ export const SolicitacaoContratoDataContainer = styled.div`
     flex-direction: column;
     margin-top: 25px;
 `;
+
+export const DetailContractContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+`;
+
+export const DetailContractHeaderContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const DetailContractHeaderTitle = styled.h2``;
+
+export const DetailContractHeaderSubTitle = styled.h3`
+    margin-top: 5px;
+`;
+
+export const DetailContractDataContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 15px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+    }
+`;
+
+export const DetailContractDataColumnLeft = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const DetailContractDataColumnRight = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-left: 15px;
+
+    @media only screen and (max-width: 978px){
+        margin-left: 0;
+    }
+`;
+
+export const DetailContractDataSectionContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const DetailContractDataSectionTitle = styled.h2`
+    font-size: 18px;
+    color: ${props => props.theme.colors.dark3};
+    margin-bottom: 15px;
+    margin-top: 5px;
+
+    @media only screen and (max-width: 978px){
+        font-size: 16px;
+    }
+`;
+
+export const DetailContractDataLabel = styled.span`
+    font-size: 15px;
+    color: ${props => props.theme.colors.dark1};
+    font-weight: 700;
+
+    @media only screen and (max-width: 978px){
+        font-size: 13px;
+    }
+`;
+
+export const DetailContractValueContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+`;
+
+export const DetailContractDataValue = styled.span`
+    font-size: 15px;
+    color: ${props => props.theme.colors.dark1};
+    font-weight: 500;
+
+    @media only screen and (max-width: 978px){
+        font-size: 13px;
+    }
+`;
+
+export const DetailContractButtonGroup = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+`;
+
+export const DetailContractBackButton = styled.button`
+    cursor: pointer;
+    margin-right: 15px;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: transparent;
+    color: ${props => props.theme.colors.secondary};
+
+    &:hover{
+        background-color: ${props => props.theme.colors.light2};
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
+`;
+
+export const DetailContractDownloadButton = styled.button`
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: #000;;
+    color: ${props => props.theme.colors.primary};
+
+    &:hover{
+        background-color: #000A;
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
+`;

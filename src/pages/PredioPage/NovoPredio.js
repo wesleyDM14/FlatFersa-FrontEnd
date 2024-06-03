@@ -27,6 +27,7 @@ import {
     SubmitButton,
     SubItensContainer,
     Limitador,
+    LimitadorAlt,
 } from './PredioPage.styles';
 import { FaFileInvoice } from "react-icons/fa";
 import { FormInput } from "../../components/FormLib";
@@ -69,6 +70,7 @@ const NovoPredio = ({ user }) => {
                                     estado: '',
                                     bairro: '',
                                     numApt: 0,
+                                    kwhPrice: 0,
                                 }}
                                 validationSchema={
                                     Yup.object({
@@ -77,10 +79,12 @@ const NovoPredio = ({ user }) => {
                                         cidade: Yup.string().required("Obrigatório"),
                                         estado: Yup.string().required("Obrigatório").min(2).max(2, 'Apenas a Sigla do estado'),
                                         bairro: Yup.string().required('Obrigatório'),
-                                        numApt: Yup.number().required('Obrigatório')
+                                        numApt: Yup.number().required('Obrigatório'),
+                                        kwhPrice: Yup.number().required('Obrigatório'),
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                    console.log(values);
                                     await createPredio(values, user, navigate, setSubmitting, setFieldError);
                                 }}
                             >
@@ -109,16 +113,6 @@ const NovoPredio = ({ user }) => {
                                                 <FormColum>
                                                     <SubItensContainer>
                                                         <FormInputArea>
-                                                            <FormInputLabelRequired>Estado</FormInputLabelRequired>
-                                                            <Limitador>
-                                                                <FormInput
-                                                                    type="text"
-                                                                    name='estado'
-                                                                    placeholder="Sigla do Estado"
-                                                                />
-                                                            </Limitador>
-                                                        </FormInputArea>
-                                                        <FormInputArea>
                                                             <FormInputLabelRequired>Qnt Apartamentos</FormInputLabelRequired>
                                                             <Limitador>
                                                                 <FormInput
@@ -129,6 +123,29 @@ const NovoPredio = ({ user }) => {
                                                                 />
                                                             </Limitador>
                                                         </FormInputArea>
+                                                        <SubItensContainer>
+                                                            <FormInputArea>
+                                                                <FormInputLabelRequired>Estado</FormInputLabelRequired>
+                                                                <LimitadorAlt>
+                                                                    <FormInput
+                                                                        type="text"
+                                                                        name='estado'
+                                                                        placeholder="Sigla"
+                                                                    />
+                                                                </LimitadorAlt>
+                                                            </FormInputArea>
+                                                            <FormInputArea>
+                                                                <FormInputLabelRequired>kWh (R$)</FormInputLabelRequired>
+                                                                <LimitadorAlt>
+                                                                    <FormInput
+                                                                        type="number"
+                                                                        name='kwhPrice'
+                                                                        step='0.01'
+                                                                        min='0'
+                                                                    />
+                                                                </LimitadorAlt>
+                                                            </FormInputArea>
+                                                        </SubItensContainer>
                                                     </SubItensContainer>
                                                     <SubItensContainer>
                                                         <FormInputArea>

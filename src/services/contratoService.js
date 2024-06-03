@@ -115,7 +115,7 @@ export const getContratoById = async (user, contratoId, setContrato) => {
     });
 }
 
-export const downloadContract = async (user, contratoId) => {
+export const downloadContract = async (user, contratoId, setIsDownloading) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/download/${contratoId}`, {
         headers: {
             'Content-Type': 'multipart/form-data',
@@ -127,8 +127,41 @@ export const downloadContract = async (user, contratoId) => {
         const { data } = response;
         const blob = new Blob([data], { type: 'application/pdf' });
         saveAs(blob, 'contrato.pdf');
+        setIsDownloading(false);
     }).catch((err) => {
         console.log(err.message);
+        setIsDownloading(false);
+    });
+}
+
+export const approveContract = async (user, contract, setSubmitting, setFieldError, setLoading) => {
+    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/aprovar', contract, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setSubmitting(false);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err.message);
+        setFieldError('limiteKwh', err.message);
+    });
+}
+
+export const desapproveContract = async (user, contratoId, setLoading) => {
+    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/reprovar/${contratoId}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err.message);
+        window.alert('Error: ', err.message);
     });
 }
 

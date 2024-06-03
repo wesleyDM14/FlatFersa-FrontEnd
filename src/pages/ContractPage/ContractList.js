@@ -17,6 +17,21 @@ import {
     DeleteContainer,
     DeleteIcon,
     DeleteTitle,
+    DetailContractBackButton,
+    DetailContractButtonGroup,
+    DetailContractContainer,
+    DetailContractDataColumnLeft,
+    DetailContractDataColumnRight,
+    DetailContractDataContainer,
+    DetailContractDataLabel,
+    DetailContractDataSectionContainer,
+    DetailContractDataSectionTitle,
+    DetailContractDataValue,
+    DetailContractDownloadButton,
+    DetailContractHeaderContainer,
+    DetailContractHeaderSubTitle,
+    DetailContractHeaderTitle,
+    DetailContractValueContainer,
     EditIcon,
     FormColum,
     FormContent,
@@ -44,7 +59,7 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { downloadContract } from "../../services/contratoService";
+import { approveContract, desapproveContract, downloadContract } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
@@ -57,6 +72,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
     const [modalContractIsOpen, setModalContractIsOpen] = useState(false);
     const [selectedContrato, setSelectedContrato] = useState({});
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const [periocidade, setPeriocidade] = useState([
         { label: 'Anualmente', value: 'ANUALMENTE' },
@@ -106,15 +122,12 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                         $isadmin={user.isAdmin.toString()}
                         onClick={() => {
                             setSelectedContrato(contrato);
-                            console.log(selectedContrato);
                             openContractModal();
                         }}
                     >
                         {
                             user.isAdmin && (
-                                <PredioSingleContainer //onClick={async () => {
-                                //await downloadContract(user, contrato.contrato.id);
-                                >
+                                <PredioSingleContainer>
                                     <StyledLabel>Cliente: </StyledLabel>
                                     <PredioValue>{contrato.cliente.name}</PredioValue>
                                 </PredioSingleContainer>
@@ -229,8 +242,9 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                     <StyledFormArea>
                                         <Formik
                                             initialValues={{
-                                                contractoId: selectedContrato.contrato.id,
+                                                contratoId: selectedContrato.contrato.id,
                                                 valorAluguel: selectedContrato.apartamento.valorBase,
+                                                periocidade: '',
                                                 limiteKwh: 0,
                                             }}
 
@@ -239,8 +253,9 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                                 limiteKwh: Yup.number().required('Obrigatório'),
                                             })}
 
-                                            onSubmit={(values, { setSubmitting, setFieldError }) => {
-                                                console.log(values);
+                                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                                values.periocidade = selectedPeriocidade.value;
+                                                await approveContract(user, values, setSubmitting, setFieldError, setLoading);
                                             }}
                                         >
                                             {
@@ -293,7 +308,9 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                                             </BackButton>
                                                             <RejectButton
                                                                 type='button'
-                                                                onClick={() => console.log('rejeitou')}
+                                                                onClick={async () => {
+                                                                    await desapproveContract(user, selectedContrato.contrato.id, setLoading);
+                                                                }}
                                                             >
                                                                 Rejeitar
                                                             </RejectButton>
@@ -318,10 +335,59 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                 </SolicitacaoModalContainer>
                             </div>
                         ) : (
-                            <div>
-                                <h1>Detalhes do contrato</h1>
-                                <p>Histórico do Contrato</p>
-                            </div>
+                            <DetailContractContainer>
+                                <DetailContractHeaderContainer>
+                                    <DetailContractHeaderTitle>Detalhes do Contrato</DetailContractHeaderTitle>
+                                    <DetailContractHeaderSubTitle>Contrato {selectedContrato.contrato.statusContrato}</DetailContractHeaderSubTitle>
+                                </DetailContractHeaderContainer>
+                                <DetailContractDataContainer>
+                                    <DetailContractDataColumnLeft>
+                                        <DetailContractDataSectionTitle>Dados do Cliente</DetailContractDataSectionTitle>
+                                        <DetailContractDataSectionContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Nome: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.cliente.name}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>CPF: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.cliente.cpf}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>RG: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.cliente.rg}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                        </DetailContractDataSectionContainer>
+                                        <DetailContractDataSectionTitle>Dados do Apartamento</DetailContractDataSectionTitle>
+                                        <DetailContractDataSectionContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Numero: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.apartamento.numero}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Climatizado: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.apartamento.climatizado ? <FaCheck /> : <FaTimes />}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                        </DetailContractDataSectionContainer>
+                                    </DetailContractDataColumnLeft>
+                                    <DetailContractDataColumnRight>
+                                        <DetailContractDataSectionTitle>Financeiro</DetailContractDataSectionTitle>
+                                    </DetailContractDataColumnRight>
+                                </DetailContractDataContainer>
+                                <DetailContractButtonGroup>
+                                    <DetailContractBackButton onClick={() => closeContractModal()}>Voltar</DetailContractBackButton>
+                                    {!(selectedContrato.contrato.statusContrato === 'CANCELADO') && (
+                                        isDownloading ?
+                                            <ThreeDots />
+                                            :
+                                            <DetailContractDownloadButton onClick={async () => {
+                                                setIsDownloading(true);
+                                                await downloadContract(user, selectedContrato.contrato.id, setIsDownloading);
+                                            }}>
+                                                Download
+                                            </DetailContractDownloadButton>
+                                    )}
+                                </DetailContractButtonGroup>
+                            </DetailContractContainer>
                         )
                     )
                 }
@@ -343,7 +409,6 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                     <ContratoCounter>Cliente: {selectedContrato.cliente && (selectedContrato.cliente.name)} / Apartamento: {selectedContrato.apartamento && (selectedContrato.apartamento.numero)}</ContratoCounter>
                     <DeleteButtonContainer>
                         <BackButton onClick={() => {
-                            console.log(selectedContrato);
                             setSelectedContrato({});
                             closeDeleteModal();
                         }}>

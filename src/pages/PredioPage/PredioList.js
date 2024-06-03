@@ -15,6 +15,7 @@ import {
     FormInputArea,
     FormInputLabelRequired,
     Limitador,
+    LimitadorAlt,
     ListLabel,
     PredioCounter,
     PredioListContainer,
@@ -34,7 +35,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
-import { deletePredioById } from "../../services/predioService";
+import { deletePredioById, updatePredio } from "../../services/predioService";
 
 
 
@@ -110,12 +111,14 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </div>
                     <Formik
                         initialValues={{
+                            id: selectedPredio.id,
                             nome: selectedPredio.nome,
                             endereco: selectedPredio.endereco,
                             cidade: selectedPredio.cidade,
                             estado: selectedPredio.estado,
                             bairro: selectedPredio.bairro,
                             numApt: selectedPredio.numApt,
+                            kwhPrice: selectedPredio.kwhPrice,
                         }}
                         validationSchema={
                             Yup.object({
@@ -124,11 +127,12 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                                 cidade: Yup.string().required("Obrigatório"),
                                 estado: Yup.string().required("Obrigatório").min(2).max(2, 'Apenas a Sigla do estado'),
                                 bairro: Yup.string().required('Obrigatório'),
-                                numApt: Yup.number().required('Obrigatório')
+                                numApt: Yup.number().required('Obrigatório'),
+                                kwhPrice: Yup.number().required('Obrigatório'),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            //await createPredio(values, user, navigate, setSubmitting, setFieldError);
+                            await updatePredio(user, values, setSubmitting, setFieldError, setLoading);
                         }}
                     >
                         {
@@ -156,16 +160,6 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                                         <FormColum>
                                             <SubItensContainer>
                                                 <FormInputArea>
-                                                    <FormInputLabelRequired>Estado</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            type="text"
-                                                            name='estado'
-                                                            placeholder="Sigla do Estado"
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                                <FormInputArea>
                                                     <FormInputLabelRequired>Qnt Apartamentos</FormInputLabelRequired>
                                                     <Limitador>
                                                         <FormInput
@@ -176,6 +170,30 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                                                         />
                                                     </Limitador>
                                                 </FormInputArea>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Estado</FormInputLabelRequired>
+                                                        <LimitadorAlt>
+                                                            <FormInput
+                                                                type="text"
+                                                                name='estado'
+                                                                placeholder="Sigla"
+                                                            />
+                                                        </LimitadorAlt>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>kWh (R$)</FormInputLabelRequired>
+                                                        <LimitadorAlt>
+                                                            <FormInput
+                                                                type="number"
+                                                                min="0.00"
+                                                                step="0.01"
+                                                                name="kwhPrice"
+                                                                placeholder="R$"
+                                                            />
+                                                        </LimitadorAlt>
+                                                    </FormInputArea>
+                                                </SubItensContainer>
                                             </SubItensContainer>
                                             <SubItensContainer>
                                                 <FormInputArea>

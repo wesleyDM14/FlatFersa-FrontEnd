@@ -360,3 +360,11 @@ export const DeleteButtonContainer = styled.div`
     justify-content: space-between;
     margin-top: 25px;
 `;
+
+export const LimitadorAlt = styled.div`
+    max-width: 60%;
+
+@media only screen and (max-width: 978px){
+    max-width: 100%;
+}
+`;
