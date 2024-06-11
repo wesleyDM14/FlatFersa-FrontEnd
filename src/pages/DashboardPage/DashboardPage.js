@@ -14,6 +14,7 @@ import {
     MainDashboardContainer,
 } from "./DashboardPage.styles";
 import { ThreeDots } from "react-loader-spinner";
+import EmConstrucaoPage from "../EmConstrucaoPage/EmConstrucaoPage";
 
 const Dashboard = ({ user }) => {
     const navigate = useNavigate();
@@ -53,6 +54,9 @@ const Dashboard = ({ user }) => {
                         </LoadingContainer>
                     ) : (
                         <MainDashboardContainer>
+                            <EmConstrucaoPage />
+                            {
+                            /*<MainDashboardContainer>
                             <DashBoardHeaderContainer>
                                 <HeaderTitle>Bem vindo {userInfo.name}</HeaderTitle>
                             </DashBoardHeaderContainer >
@@ -85,11 +89,12 @@ const Dashboard = ({ user }) => {
                                 <h1>Layout dos Apartamentos</h1>
                             </div>
                         </MainDashboardContainer >
+                        */}
+                        </MainDashboardContainer>
                     )
-
                 ) : (
                     <MainDashboardContainer>
-
+                        <EmConstrucaoPage />
                     </MainDashboardContainer>
                 )
             }

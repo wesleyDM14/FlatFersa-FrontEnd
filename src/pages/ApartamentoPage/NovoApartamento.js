@@ -89,7 +89,6 @@ const NovoApartamento = ({ user }) => {
                                 <StyledFormArea>
                                     <Formik
                                         initialValues={{
-                                            numeroContrato: '',
                                             numero: '',
                                             valorBase: '',
                                             climatizado: false,
@@ -97,14 +96,12 @@ const NovoApartamento = ({ user }) => {
                                         }}
                                         validationSchema={
                                             Yup.object({
-                                                numeroContrato: Yup.string().required("Obrigatório"),
                                                 numero: Yup.number().required("Obrigatório"),
                                                 valorBase: Yup.number().required("Obrigatótio"),
                                             })
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                             values.predioId = selectedPredio.value;
-                                            console.log(values);
                                             await createApartamento(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >
@@ -112,27 +109,6 @@ const NovoApartamento = ({ user }) => {
                                             ({ isSubmitting }) => (
                                                 <Form>
                                                     <FormContent>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <FormInputLabelRequired>Nº Conta Contrato</FormInputLabelRequired>
-                                                                <FormInput
-                                                                    type="text"
-                                                                    name="numeroContrato"
-                                                                    placeholder="Conta contrato da COSERN"
-                                                                />
-                                                            </FormInputArea>
-                                                            <SubItensContainer>
-                                                                <RadioContainer>
-                                                                    <RadioItemContainer>
-                                                                        <RadioLabel>Climatizado?</RadioLabel>
-                                                                        <Field
-                                                                            name='climatizado'
-                                                                            type='checkbox'
-                                                                        />
-                                                                    </RadioItemContainer>
-                                                                </RadioContainer>
-                                                            </SubItensContainer>
-                                                        </FormColum>
                                                         <FormColum>
                                                             <FormInputArea>
                                                                 <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} />
@@ -162,6 +138,19 @@ const NovoApartamento = ({ user }) => {
                                                                         />
                                                                     </Limitador>
                                                                 </FormInputArea>
+                                                            </SubItensContainer>
+                                                        </FormColum>
+                                                        <FormColum>
+                                                            <SubItensContainer>
+                                                                <RadioContainer>
+                                                                    <RadioItemContainer>
+                                                                        <RadioLabel>Climatizado?</RadioLabel>
+                                                                        <Field
+                                                                            name='climatizado'
+                                                                            type='checkbox'
+                                                                        />
+                                                                    </RadioItemContainer>
+                                                                </RadioContainer>
                                                             </SubItensContainer>
                                                         </FormColum>
                                                     </FormContent>

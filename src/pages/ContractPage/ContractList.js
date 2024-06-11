@@ -3,7 +3,7 @@ import { Formik, Form } from "formik";
 import Modal from "react-modal";
 import * as Yup from 'yup';
 
-import { FaCheck, FaEdit, FaFileContract, FaTimes, FaTrash, FaUserAlt } from "react-icons/fa";
+import { FaCheck, FaClock, FaEdit, FaFileContract, FaTimes, FaTrash, FaUserAlt } from "react-icons/fa";
 import {
     AdminPredioContainer,
     BackButton,
@@ -33,6 +33,11 @@ import {
     DetailContractHeaderTitle,
     DetailContractValueContainer,
     EditIcon,
+    FinanceiroList,
+    FinanceiroListElement,
+    FinanceiroListElementContainer,
+    FinanceiroListIconContainer,
+    FinanceiroListValue,
     FormColum,
     FormContent,
     FormInputArea,
@@ -59,7 +64,7 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { approveContract, desapproveContract, downloadContract } from "../../services/contratoService";
+import { approveContract, desapproveContract, downloadContract, gerarCodigoPix } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
@@ -73,6 +78,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
     const [selectedContrato, setSelectedContrato] = useState({});
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
+    const [imgb64, setImgb64] = useState({});
 
     const [periocidade, setPeriocidade] = useState([
         { label: 'Anualmente', value: 'ANUALMENTE' },
@@ -239,99 +245,103 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                             <SolicitacaoModalContentValue>Todo dia {selectedContrato.contrato.diaVencimentoPagamento}</SolicitacaoModalContentValue>
                                         </DataContainer>
                                     </SolicitacaoContratoDataContainer>
-                                    <StyledFormArea>
-                                        <Formik
-                                            initialValues={{
-                                                contratoId: selectedContrato.contrato.id,
-                                                valorAluguel: selectedContrato.apartamento.valorBase,
-                                                periocidade: '',
-                                                limiteKwh: 0,
-                                            }}
+                                    {
+                                        user.isAdmin && (
+                                            <StyledFormArea>
+                                                <Formik
+                                                    initialValues={{
+                                                        contratoId: selectedContrato.contrato.id,
+                                                        valorAluguel: selectedContrato.apartamento.valorBase,
+                                                        periocidade: '',
+                                                        limiteKwh: 0,
+                                                    }}
 
-                                            validationSchema={Yup.object({
-                                                valorAluguel: Yup.number().required('Obrigatório'),
-                                                limiteKwh: Yup.number().required('Obrigatório'),
-                                            })}
+                                                    validationSchema={Yup.object({
+                                                        valorAluguel: Yup.number().required('Obrigatório'),
+                                                        limiteKwh: Yup.number().required('Obrigatório'),
+                                                    })}
 
-                                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                                values.periocidade = selectedPeriocidade.value;
-                                                await approveContract(user, values, setSubmitting, setFieldError, setLoading);
-                                            }}
-                                        >
-                                            {
-                                                ({ isSubmitting }) => (
-                                                    <Form>
-                                                        <FormContent>
-                                                            <FormColum>
-                                                                <FormInputArea>
-                                                                    <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
-                                                                </FormInputArea>
-                                                            </FormColum>
-                                                            <FormColum>
-                                                                <SubItensContainer>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Limite de KWh</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                type="number"
-                                                                                min="0"
-                                                                                step="1"
-                                                                                name="limiteKwh"
-                                                                                placeholder="Valor limite de KWh"
+                                                    onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                                        values.periocidade = selectedPeriocidade.value;
+                                                        await approveContract(user, values, setSubmitting, setFieldError, setLoading);
+                                                    }}
+                                                >
+                                                    {
+                                                        ({ isSubmitting }) => (
+                                                            <Form>
+                                                                <FormContent>
+                                                                    <FormColum>
+                                                                        <FormInputArea>
+                                                                            <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
+                                                                        </FormInputArea>
+                                                                    </FormColum>
+                                                                    <FormColum>
+                                                                        <SubItensContainer>
+                                                                            <FormInputArea>
+                                                                                <FormInputLabelRequired>Limite de KWh</FormInputLabelRequired>
+                                                                                <Limitador>
+                                                                                    <FormInput
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        step="1"
+                                                                                        name="limiteKwh"
+                                                                                        placeholder="Valor limite de KWh"
+                                                                                    />
+                                                                                </Limitador>
+                                                                            </FormInputArea>
+                                                                            <FormInputArea>
+                                                                                <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
+                                                                                <Limitador>
+                                                                                    <FormInput
+                                                                                        type="number"
+                                                                                        min="0.00"
+                                                                                        step="0.01"
+                                                                                        name="valorAluguel"
+                                                                                        placeholder="Valor do Aluguel"
+                                                                                    />
+                                                                                </Limitador>
+                                                                            </FormInputArea>
+                                                                        </SubItensContainer>
+                                                                    </FormColum>
+                                                                </FormContent>
+                                                                <ButtonGroup>
+                                                                    <BackButton
+                                                                        type='button'
+                                                                        onClick={() => {
+                                                                            setSelectedContrato({});
+                                                                            closeContractModal();
+                                                                        }}
+                                                                    >
+                                                                        Fechar
+                                                                    </BackButton>
+                                                                    <RejectButton
+                                                                        type='button'
+                                                                        onClick={async () => {
+                                                                            await desapproveContract(user, selectedContrato.contrato.id, setLoading);
+                                                                        }}
+                                                                    >
+                                                                        Rejeitar
+                                                                    </RejectButton>
+                                                                    {!isSubmitting && (
+                                                                        <SubmitButton type="submit">Aprovar</SubmitButton>
+                                                                    )}
+                                                                    {
+                                                                        isSubmitting && (
+                                                                            <ThreeDots
+                                                                                color={'#4e4e4e'}
+                                                                                height={49}
+                                                                                width={100}
                                                                             />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                type="number"
-                                                                                min="0.00"
-                                                                                step="0.01"
-                                                                                name="valorAluguel"
-                                                                                placeholder="Valor do Aluguel"
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                </SubItensContainer>
-                                                            </FormColum>
-                                                        </FormContent>
-                                                        <ButtonGroup>
-                                                            <BackButton
-                                                                type='button'
-                                                                onClick={() => {
-                                                                    setSelectedContrato({});
-                                                                    closeContractModal();
-                                                                }}
-                                                            >
-                                                                Fechar
-                                                            </BackButton>
-                                                            <RejectButton
-                                                                type='button'
-                                                                onClick={async () => {
-                                                                    await desapproveContract(user, selectedContrato.contrato.id, setLoading);
-                                                                }}
-                                                            >
-                                                                Rejeitar
-                                                            </RejectButton>
-                                                            {!isSubmitting && (
-                                                                <SubmitButton type="submit">Aprovar</SubmitButton>
-                                                            )}
-                                                            {
-                                                                isSubmitting && (
-                                                                    <ThreeDots
-                                                                        color={'#4e4e4e'}
-                                                                        height={49}
-                                                                        width={100}
-                                                                    />
-                                                                )
-                                                            }
-                                                        </ButtonGroup>
-                                                    </Form>
-                                                )
-                                            }
-                                        </Formik>
-                                    </StyledFormArea>
+                                                                        )
+                                                                    }
+                                                                </ButtonGroup>
+                                                            </Form>
+                                                        )
+                                                    }
+                                                </Formik>
+                                            </StyledFormArea>
+                                        )
+                                    }
                                 </SolicitacaoModalContainer>
                             </div>
                         ) : (
@@ -365,12 +375,31 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                             </DetailContractValueContainer>
                                             <DetailContractValueContainer>
                                                 <DetailContractDataLabel>Climatizado: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.apartamento.climatizado ? <FaCheck /> : <FaTimes />}</DetailContractDataValue>
+                                                <DetailContractDataValue>{selectedContrato.apartamento.climatizado ? <FaCheck color="#0F0" /> : <FaTimes color="#F00" />}</DetailContractDataValue>
                                             </DetailContractValueContainer>
                                         </DetailContractDataSectionContainer>
                                     </DetailContractDataColumnLeft>
                                     <DetailContractDataColumnRight>
                                         <DetailContractDataSectionTitle>Financeiro</DetailContractDataSectionTitle>
+                                        <FinanceiroList>
+                                            {
+                                                selectedContrato.financeiro.map((parcela) => (
+                                                    <FinanceiroListElementContainer onClick={async () => {
+                                                        await gerarCodigoPix(user, parcela.id, setImgb64);
+                                                    }}>
+                                                        <FinanceiroListElement>
+                                                            <FinanceiroListValue>
+                                                                {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo} - {parcela.statusPagamento}
+                                                                <FinanceiroListIconContainer>
+                                                                    <FaClock />
+                                                                </FinanceiroListIconContainer>
+                                                            </FinanceiroListValue>
+                                                        </FinanceiroListElement>
+                                                    </FinanceiroListElementContainer>
+                                                ))
+                                            }
+                                            <img src={imgb64} />
+                                        </FinanceiroList>
                                     </DetailContractDataColumnRight>
                                 </DetailContractDataContainer>
                                 <DetailContractButtonGroup>
@@ -383,7 +412,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                                 setIsDownloading(true);
                                                 await downloadContract(user, selectedContrato.contrato.id, setIsDownloading);
                                             }}>
-                                                Download
+                                                Download PDF
                                             </DetailContractDownloadButton>
                                     )}
                                 </DetailContractButtonGroup>
@@ -414,7 +443,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                         }}>
                             Cancelar
                         </BackButton>
-                        <SubmitButton onClick={() => {
+                        <SubmitButton onClick={async () => {
 
                         }}>
                             Excluir

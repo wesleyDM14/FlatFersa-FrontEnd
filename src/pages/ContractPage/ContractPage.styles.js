@@ -667,7 +667,7 @@ export const DetailContractDataColumnLeft = styled.div`
 export const DetailContractDataColumnRight = styled.div`
     display: flex;
     flex-direction: column;
-    margin-left: 15px;
+    margin-left: 25px;
 
     @media only screen and (max-width: 978px){
         margin-left: 0;
@@ -763,4 +763,37 @@ export const DetailContractDownloadButton = styled.button`
     @media only screen and (max-width: 978px){
         //min-width: 45%;
     }
+`;
+
+export const FinanceiroList = styled.dt``;
+
+export const FinanceiroListElement = styled.dd`
+    display: flex;
+`;
+
+export const FinanceiroListValue = styled.span`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    cursor: pointer;
+
+    &:hover{
+        text-decoration: underline;
+        color: #00F;
+    }
+`;
+
+export const FinanceiroListIconContainer = styled.div`
+    display: flex;
+    margin-left: 5px;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: ${props => props.theme.colors.dark2};
+`;
+
+export const FinanceiroListElementContainer = styled.div`
+    display: flex;
+    flex-direction: row;
 `;

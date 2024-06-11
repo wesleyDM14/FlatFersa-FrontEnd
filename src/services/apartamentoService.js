@@ -37,11 +37,12 @@ export const createApartamento = async (apartamento, user, navigate, setSubmitti
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
+        console.log(response.data);
         setSubmitting(false);
         navigate('/apartamentos');
     }).catch((err) => {
         setSubmitting(false);
-        setFieldError('numeroContrato', err.message);
+        setFieldError('numero', err.message);
         console.log(err.message);
     });
 }
@@ -57,6 +58,24 @@ export const getApartamentoById = async (user, apartamentoId, setApartamento) =>
         setApartamento(apartamento);
     }).catch((err) => {
         console.log(err);
+    });
+}
+
+export const updateApartamento = async (user, values, setLoading, setLoading2, setSubmitting, setFieldError) => {
+    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${values.id}`, values, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setSubmitting(false);
+        setLoading(true);
+        setLoading2(true);
+    }).catch((err) => {
+        console.log(err.message);
+        setSubmitting(false);
+        setFieldError('numero', err.message);
     });
 }
 

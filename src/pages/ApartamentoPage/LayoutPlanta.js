@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Modal from "react-modal";
+import { modalStyles } from "../../styles/ModalStyles";
 import {
     ContentApartamentoContainer,
     LayoutSwitchButton,
@@ -16,6 +18,7 @@ import {
 } from './ApartamentoPage.styles';
 
 const LayoutPlanta = ({ apartamentos, setSelectedApartamento }) => {
+    Modal.setAppElement(document.getElementById('root'));
     const [isChecked, setChecked] = useState(false);
     const [apt01, setApt01] = useState({});
     const [apt02, setApt02] = useState({});
@@ -47,6 +50,15 @@ const LayoutPlanta = ({ apartamentos, setSelectedApartamento }) => {
     const [apt28, setApt28] = useState({});
     const [apt29, setApt29] = useState({});
     const [apt30, setApt30] = useState({});
+    const [modalDetailIsOpen, setModalDetailIsOpen] = useState(false);
+
+    const openDetailModal = () => {
+        setModalDetailIsOpen(true);
+    }
+
+    const closeDetailModal = () => {
+        setModalDetailIsOpen(false);
+    }
 
     const handleCheck = () => {
         setChecked(!isChecked);
@@ -267,13 +279,20 @@ const LayoutPlanta = ({ apartamentos, setSelectedApartamento }) => {
                                     transform: 'scaleY(-1)',
                                 }} $statusMatch={'OCUPADO' === apt01.status} onClick={() => setSelectedApartamento(apt01)}>
                                     <NumAptLabel style={{ transform: 'scaleY(-1)' }}>01</NumAptLabel>
-                                    <NumAptLabel style={{ transform: 'scaleY(-1)' }}>OCUPADO</NumAptLabel>
+                                    <NumAptLabel style={{ transform: 'scaleY(-1)' }}>{apt01.status}</NumAptLabel>
                                 </PlantaBaixaApt>
                             </PlantaTerreoRow>
                         </PlantaTerreoRowContainer>
                     </PlantaTerreo>
                 )
             }
+            <Modal
+                isOpen={modalDetailIsOpen}
+                onRequestClose={closeDetailModal}
+                style={modalStyles}
+            >
+                
+            </Modal>
         </ContentApartamentoContainer>
     );
 }

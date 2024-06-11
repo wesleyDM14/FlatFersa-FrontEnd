@@ -205,7 +205,7 @@ export const ApartamentoSelect = ({ apartamentos, setSelectedApartamento }) => {
             let optionsTmp = [];
             for (let index = 0; index < apartamentos.length; index++) {
                 const element = apartamentos[index];
-                let temp = { label: element.numero, value: element.numeroContrato };
+                let temp = { label: element.numero, value: element.id };
                 optionsTmp.push(temp);
             }
             setOptions(optionsTmp);

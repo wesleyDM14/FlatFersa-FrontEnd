@@ -37,7 +37,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
-import { deleteApartamentoById } from "../../services/apartamentoService";
+import { deleteApartamentoById, updateApartamento } from "../../services/apartamentoService";
 
 const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate }) => {
     Modal.setAppElement(document.getElementById('root'));
@@ -71,7 +71,7 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
             </PredioListHeader>
             {
                 apartamentos.map((apartamento) => (
-                    <SinglePredio key={apartamento.apartamento.numeroContrato}>
+                    <SinglePredio key={apartamento.apartamento.id}>
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
                             <PredioValue>{apartamento.apartamento.numero}</PredioValue>
@@ -112,7 +112,7 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-                            await deleteApartamentoById(user, selectedApartamento.numeroContrato, setLoading, setLoading2);
+                            await deleteApartamentoById(user, selectedApartamento.id, setLoading, setLoading2);
                         }}>
                             Excluir
                         </SubmitButton>
@@ -133,47 +133,25 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                     </div>
                     <Formik
                         initialValues={{
-                            numeroContrato: selectedApartamento.numeroContrato,
+                            id: selectedApartamento.id,
                             numero: selectedApartamento.numero,
                             valorBase: selectedApartamento.valorBase,
                             climatizado: selectedApartamento.climatizado,
                         }}
                         validationSchema={
                             Yup.object({
-                                numeroContrato: Yup.string().required("Obrigatório"),
                                 numero: Yup.number().required("Obrigatório"),
                                 valorBase: Yup.number().required("Obrigatótio"),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            console.log(values);
+                            await updateApartamento(user, values, setLoading, setLoading2, setSubmitting, setFieldError);
                         }}
                     >
                         {
                             ({ isSubmitting }) => (
                                 <Form>
                                     <FormContent>
-                                        <FormColum>
-                                            <FormInputArea>
-                                                <FormInputLabelRequired>Nº Conta Contrato</FormInputLabelRequired>
-                                                <FormInput
-                                                    type="text"
-                                                    name="numeroContrato"
-                                                    placeholder="Conta contrato da COSERN"
-                                                />
-                                            </FormInputArea>
-                                            <SubItensContainer>
-                                                <RadioContainer>
-                                                    <RadioItemContainer>
-                                                        <RadioLabel>Climatizado?</RadioLabel>
-                                                        <Field
-                                                            name='climatizado'
-                                                            type='checkbox'
-                                                        />
-                                                    </RadioItemContainer>
-                                                </RadioContainer>
-                                            </SubItensContainer>
-                                        </FormColum>
                                         <FormColum>
                                             <SubItensContainer>
                                                 <FormInputArea>
@@ -200,6 +178,19 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                                                         />
                                                     </Limitador>
                                                 </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                        <FormColum>
+                                            <SubItensContainer>
+                                                <RadioContainer>
+                                                    <RadioItemContainer>
+                                                        <RadioLabel>Climatizado?</RadioLabel>
+                                                        <Field
+                                                            name='climatizado'
+                                                            type='checkbox'
+                                                        />
+                                                    </RadioItemContainer>
+                                                </RadioContainer>
                                             </SubItensContainer>
                                         </FormColum>
                                     </FormContent>
