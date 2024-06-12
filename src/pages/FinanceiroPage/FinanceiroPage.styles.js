@@ -28,6 +28,7 @@ export const MainFinanceiroContainer = styled.div`
 
 export const HeaderFinanceiroContainer = styled.div`
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     padding: 20px 35px;
 `;
@@ -137,6 +138,10 @@ export const StyledLabel = styled.h1`
     font-size: 18px;
     color: ${props => props.theme.colors.lightblue};
     margin-right: 10px;
+
+    @media (max-width: 978px) {
+        display: none;
+    }
 `;
 
 export const PredioValue = styled.a`
@@ -166,4 +171,221 @@ export const DeleteIcon = styled.div`
     font-size: 18px;
     margin-left: 10px;
     color: ${props => props.theme.colors.red};
+`;
+
+export const CardsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    margin-top: 15px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+`;
+
+export const CardsContainerAdmin = styled.div`
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin-top: 15px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+`;
+
+export const Card = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    padding: 25px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+    cursor: pointer;
+    transition: 0.5s ease;
+
+    &:hover{
+        -webkit-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        transform: scale(1.1);
+        transition: 0.5s ease;
+    }
+
+    @media only screen and (max-width: 978px){
+        width: 80%;
+    }
+`;
+
+export const CardTitle = styled.h1`
+    font-size: 25px;
+    font-weight: bold;
+    color: ${props => props.theme.colors.titleColor};
+`;
+
+export const CardIconContainer = styled.div`
+    font-size: 35px;
+    color: ${props => props.theme.colors.dark1};
+    text-align: center;
+    margin-top: 15px;
+`;
+
+export const CardContent = styled.p``;
+
+export const PrestacaoDetailMainContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 15px;
+    display: flex;
+    grid-area: main;
+
+    @media only screen and (max-width: 978px){
+        padding: 0 10px;
+    }
+`;
+
+export const PrestacaoDetailHeaderContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const PrestacaoDetailHeaderTitle = styled.h2`
+    font-size: 25px;
+    font-weight: bold;
+    color: ${props => props.theme.colors.titleColor};
+`;
+
+export const PrestcaoDetailContentContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 35px;
+    padding: 25px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+    transition: 0.5s ease;
+`;
+
+export const PrestacaoDetailLeftColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-right: 15px;
+`;
+
+export const PrestacaoDetailValueContainer = styled.div`
+    display: flex;
+`;
+
+export const PrestacaoDetailLabel = styled.span`
+    font-weight: bold;
+    margin-right: 5px;
+`;
+
+export const PrestacaoDetailValue = styled.p`
+    color: ${props => props.theme.colors.dark1};
+`;
+
+export const PrestacaoDetailRightColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+`;
+
+export const PrestacaoDetailPagamentoContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const QrCodePagamento = styled.img``;
+
+export const QrCodeCopiaEColaContainer = styled.div`
+    width: 80%; /* ou qualquer valor que você preferir */
+    max-width: 600px; /* limite máximo de largura */
+    height: 100px;
+    margin: auto; /* centraliza horizontalmente */
+    border: 1px solid #ccc; /* apenas para visualização */
+    overflow: hidden; /* esconde o conteúdo que excede a área */
+    position: relative; /* necessário para o posicionamento absoluto */
+`;
+
+export const QrCodeCopiaECola = styled.p`
+    position: absolute; /* permite o posicionamento dentro do contêiner */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+    word-wrap: break-word;
+`;
+
+export const PrestacaoDetailButtonContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 0px 35px;
+    margin-top: 15px;
+
+    @media only screen and (max-width: 978px){
+        justify-content: center;
+        padding: 30px 10px;
+    }
+`;
+
+export const BackButton = styled.button`
+    cursor: pointer;
+    margin-right: 15px;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: transparent;
+    color: ${props => props.theme.colors.secondary};
+
+    &:hover{
+        background-color: ${props => props.theme.colors.light2};
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
+`;
+
+export const SubmitButton = styled.button`
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: #000;;
+    color: ${props => props.theme.colors.primary};
+
+    &:hover{
+        background-color: #000A;
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
 `;

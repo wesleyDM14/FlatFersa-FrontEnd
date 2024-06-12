@@ -178,16 +178,3 @@ export const deleteContratoById = async (user, contratoId, setLoading) => {
         console.log(err.message);
     });
 }
-
-export const gerarCodigoPix = async (user, prestacaoId, setImgb64) => {
-    let data = { prestacaoId: prestacaoId };
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/aluguel/generateQrCode', data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response);
-        setImgb64(response.data.base64);
-    }).catch(err => console.error(err));
-}

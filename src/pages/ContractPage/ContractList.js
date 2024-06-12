@@ -64,7 +64,7 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { approveContract, desapproveContract, downloadContract, gerarCodigoPix } from "../../services/contratoService";
+import { approveContract, desapproveContract, downloadContract } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
@@ -78,7 +78,6 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
     const [selectedContrato, setSelectedContrato] = useState({});
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
-    const [imgb64, setImgb64] = useState({});
 
     const [periocidade, setPeriocidade] = useState([
         { label: 'Anualmente', value: 'ANUALMENTE' },
@@ -109,6 +108,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
         setModalContractIsOpen(false);
     }
 
+    console.log(contratos);
     return (
         <PredioListContainer>
             <PredioListHeader $isadmin={user.isAdmin.toString()}>
@@ -122,12 +122,13 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                 }
             </PredioListHeader>
             {
-                contratos.map((contrato) => (
+                contratos.map((contract) => (
                     <SinglePredio
-                        key={contrato.contrato.id}
+                        key={contract.contrato.id}
                         $isadmin={user.isAdmin.toString()}
                         onClick={() => {
-                            setSelectedContrato(contrato);
+                            console.log(contract);
+                            setSelectedContrato(contract);
                             openContractModal();
                         }}
                     >
@@ -135,17 +136,17 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                             user.isAdmin && (
                                 <PredioSingleContainer>
                                     <StyledLabel>Cliente: </StyledLabel>
-                                    <PredioValue>{contrato.cliente.name}</PredioValue>
+                                    <PredioValue>{contract.cliente.name}</PredioValue>
                                 </PredioSingleContainer>
                             )
                         }
                         <PredioSingleContainer >
                             <StyledLabel>Apartamento: </StyledLabel>
-                            <PredioValue>{contrato.apartamento.numero}</PredioValue>
+                            <PredioValue>{contract.apartamento.numero}</PredioValue>
                         </PredioSingleContainer>
                         <PredioSingleContainer>
                             <StyledLabel>Status: </StyledLabel>
-                            <PredioValue>{contrato.contrato.statusContrato}</PredioValue>
+                            <PredioValue>{contract.contrato.statusContrato}</PredioValue>
                         </PredioSingleContainer>
                         {
                             user.isAdmin && (
@@ -154,7 +155,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                         <FaEdit
                                             onClick={(event) => {
                                                 event.stopPropagation();
-                                                setSelectedContrato(contrato);
+                                                setSelectedContrato(contract);
                                                 openEditModal();
                                             }}
                                         />
@@ -163,7 +164,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                         <FaTrash
                                             onClick={(event) => {
                                                 event.stopPropagation();
-                                                setSelectedContrato(contrato);
+                                                setSelectedContrato(contract);
                                                 openDeleteModal();
                                             }}
                                         />
@@ -384,9 +385,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                         <FinanceiroList>
                                             {
                                                 selectedContrato.financeiro.map((parcela) => (
-                                                    <FinanceiroListElementContainer onClick={async () => {
-                                                        await gerarCodigoPix(user, parcela.id, setImgb64);
-                                                    }}>
+                                                    <FinanceiroListElementContainer onClick={() => navigate(`/prestacao/${parcela.id}`)}>
                                                         <FinanceiroListElement>
                                                             <FinanceiroListValue>
                                                                 {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo} - {parcela.statusPagamento}
@@ -398,7 +397,6 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                                                     </FinanceiroListElementContainer>
                                                 ))
                                             }
-                                            <img src={imgb64} />
                                         </FinanceiroList>
                                     </DetailContractDataColumnRight>
                                 </DetailContractDataContainer>

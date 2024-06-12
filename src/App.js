@@ -23,6 +23,7 @@ import NovoPredio from "./pages/PredioPage/NovoPredio";
 import NovoApartamento from "./pages/ApartamentoPage/NovoApartamento";
 import NovoClient from "./pages/ClientPage/NovoClient";
 import NovoContract from "./pages/ContractPage/NovoContract";
+import ParcelaInfo from "./pages/FinanceiroPage/ParcelaInfo";
 
 const App = ({ checked, user }) => {
   return (
@@ -44,6 +45,7 @@ const App = ({ checked, user }) => {
               <Route path="/contratos" element={<PrivateRoute><ContractPage /></PrivateRoute>} />
               <Route path="/contratos/novo" element={<PrivateRoute><NovoContract /></PrivateRoute>} />
               <Route path="/financeiro" element={<PrivateRoute><FianceiroPage /></PrivateRoute>} />
+              <Route path="/prestacao/:prestacaoId" element={<PrivateRoute><ParcelaInfo /></PrivateRoute>} />
               <Route path="/perfil" element={<PrivateRoute><PerfilPage /></PrivateRoute>} />
               <Route path="/politica-privacidade" element={<PrivateRoute><PoliticaPrivacidade /></PrivateRoute>} />
             </Routes>
