@@ -1,3 +1,7 @@
+import { useMemo } from "react";
+
+import Pagination from "../../components/Pagination";
+
 import {
     ListLabel,
     PredioListContainer,
@@ -8,7 +12,26 @@ import {
     StyledLabel
 } from "./FinanceiroPage.styles";
 
-const ParcelaList = ({ parcelas, user, setLoading, navigate }) => {
+const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
+
+    const filteredParcelas = useMemo(() => {
+        if (user.isAdmin) {
+            return parcelas.filter(parcela =>
+                parcela.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
+                parcela.prestacao.statusPagamento.toLowerCase().includes(search.toLowerCase())
+            )
+        } else {
+            return parcelas.filter(parcela =>
+                parcela.dataVencimento.toLowerCase().includes(search.toLowerCase()) ||
+                parcela.statusPagamento.toLowerCase().includes(search.toLowerCase())
+            )
+        }
+    }, [parcelas, search]);
+
+
+    const totalPages = Math.ceil(filteredParcelas.length / itemsPerPage);
+    const currentPageItems = filteredParcelas.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <PredioListContainer>
             {
@@ -30,7 +53,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate }) => {
                 user.isAdmin ? (
                     <>
                         {
-                            parcelas.map((parcela) => (
+                            currentPageItems.map((parcela) => (
                                 <SinglePredio key={parcela.prestacao.id} onClick={() => navigate(`/prestacao/${parcela.prestacao.id}`)}>
                                     <PredioSingleContainer>
                                         <StyledLabel>Cliente: </StyledLabel>
@@ -51,7 +74,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate }) => {
                 ) : (
                     <>
                         {
-                            parcelas.map((parcela) => (
+                            currentPageItems.map((parcela) => (
                                 <SinglePredio key={parcela.id} onClick={() => navigate(`/prestacao/${parcela.id}`)}>
                                     <PredioSingleContainer>
                                         <StyledLabel>Vencimento: </StyledLabel>
@@ -71,6 +94,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate }) => {
                     </>
                 )
             }
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >
     );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
 import {
     AdminPredioContainer,
@@ -35,8 +35,9 @@ import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
 import { deleteClientById } from "../../services/clientService";
+import Pagination from "../../components/Pagination";
 
-const ClientList = ({ clientes, user, setLoading, navigate }) => {
+const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -58,6 +59,15 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
         setModalDeleteIsOpen(false);
     }
 
+    const filteredClients = useMemo(() =>
+        clientes.filter(client =>
+            client.name.toLowerCase().includes(search.toLowerCase()) ||
+            client.phone.toLowerCase().includes(search.toLowerCase())
+        ), [clientes, search]);
+
+    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+    const currentPageItems = filteredClients.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <PredioListContainer>
             <PredioListHeader>
@@ -66,7 +76,7 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
                 <ListLabel>Opções</ListLabel>
             </PredioListHeader>
             {
-                clientes.map((cliente) => (
+                currentPageItems.map((cliente) => (
                     <SinglePredio key={cliente.id}>
                         <PredioSingleContainer>
                             <StyledLabel>Nome: </StyledLabel>
@@ -229,6 +239,7 @@ const ClientList = ({ clientes, user, setLoading, navigate }) => {
                     </Formik>
                 </StyledFormArea>
             </Modal>
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >
     );
 }

@@ -61,7 +61,7 @@ export const ItemTitle = styled.a`
 `;
 
 export const IconItemContainer = styled.div`
-display: flex;
+    display: flex;
     font-size: 18px;
     margin-right: 10px;
     align-items: center;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Modal from "react-modal";
 import { FaEdit, FaFileInvoice, FaTrash } from "react-icons/fa";
 import {
@@ -38,8 +38,9 @@ import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
 import { deleteApartamentoById, updateApartamento } from "../../services/apartamentoService";
+import Pagination from "../../components/Pagination";
 
-const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate }) => {
+const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
 
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
@@ -62,6 +63,15 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
         setModalDeleteIsOpen(false);
     }
 
+    const filteredApartamentos = useMemo(() =>
+        apartamentos.filter(apartamento =>
+            apartamento.apartamento.numero.toString().includes(search) ||
+            apartamento.predio.nome.toLowerCase().includes(search.toLowerCase())
+        ), [apartamentos, search]);
+
+    const totalPages = Math.ceil(filteredApartamentos.length / itemsPerPage);
+    const currentPageItems = filteredApartamentos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <PredioListContainer>
             <PredioListHeader>
@@ -70,7 +80,7 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                 <ListLabel>Opções</ListLabel>
             </PredioListHeader>
             {
-                apartamentos.map((apartamento) => (
+                currentPageItems.map((apartamento) => (
                     <SinglePredio key={apartamento.apartamento.id}>
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
@@ -215,6 +225,7 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                     </Formik>
                 </StyledFormArea>
             </Modal>
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >
     );
 }

@@ -34,9 +34,9 @@ const GlobalStyle = createGlobalStyle`
 
     .container {
         display: grid;
-        height: 100vh;
+        min-height: 100vh;
         grid-template-columns: 0.8fr repeat(3, 1fr);
-        grid-template-rows: 0.2fr 3fr;
+        grid-template-rows: auto 1fr;
         grid-template-areas: 
         'sidebar nav nav nav'
         'sidebar main main main';
@@ -61,11 +61,16 @@ const GlobalStyle = createGlobalStyle`
     }
 
     .sidebar-responsive {
-        display: inline !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: #020509;
+        padding: 20px;
         z-index: 9999 !important;
-        left: 0 !important;
-        position: absolute;
-        height: 100vh;
+        overflow-y: auto;
+        display: flex !important;
+        flex-direction: column;
     }
 
     .icon-responsive{

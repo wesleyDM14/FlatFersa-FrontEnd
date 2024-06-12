@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
+import SearchBar from "../../components/SearchBar";
 
 import { logoutUser } from '../../services/userService';
 
@@ -47,6 +48,10 @@ const ContractPage = ({ user }) => {
     const [contratosSolicitacao, setContratosSolicitacao] = useState([]);
 
     const [loading, setLoading] = useState(true);
+
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -135,8 +140,13 @@ const ContractPage = ({ user }) => {
                             </HeaderContratoContainer>
                             <ContentContratoContainer>
                                 <ContentContratoHeader>
-                                    <SearcherContainer>
-                                    </SearcherContainer>
+                                    {
+                                        (ativos || solicitacoes || historico) && (
+                                            <SearcherContainer>
+                                                <SearchBar search={search} setSearch={setSearch} />
+                                            </SearcherContainer>
+                                        )
+                                    }
                                 </ContentContratoHeader>
                                 {
                                     contratos.length === 0 ? (
@@ -151,13 +161,40 @@ const ContractPage = ({ user }) => {
                                         </NoContentContainer>
                                     ) : (
                                         historico ? (
-                                            <ContractList user={user} contratos={contratosInfo} navigate={navigate} setLoading={setLoading} />
+                                            <ContractList
+                                                user={user}
+                                                contratos={contratosInfo}
+                                                navigate={navigate}
+                                                setLoading={setLoading}
+                                                search={search}
+                                                page={page}
+                                                setPage={setPage}
+                                                itemsPerPage={itemsPerPage}
+                                            />
                                         ) :
                                             ativos ? (
-                                                <ContractList user={user} contratos={contratosAtivos} navigate={navigate} setLoading={setLoading} />
+                                                <ContractList
+                                                    user={user}
+                                                    contratos={contratosAtivos}
+                                                    navigate={navigate}
+                                                    setLoading={setLoading}
+                                                    search={search}
+                                                    page={page}
+                                                    setPage={setPage}
+                                                    itemsPerPage={itemsPerPage}
+                                                />
                                             ) :
                                                 solicitacoes ? (
-                                                    <ContractList user={user} contratos={contratosSolicitacao} navigate={navigate} setLoading={setLoading} />
+                                                    <ContractList
+                                                        user={user}
+                                                        contratos={contratosSolicitacao}
+                                                        navigate={navigate}
+                                                        setLoading={setLoading}
+                                                        search={search}
+                                                        page={page}
+                                                        setPage={setPage}
+                                                        itemsPerPage={itemsPerPage}
+                                                    />
                                                 ) : <></>
                                     )
                                 }
@@ -200,6 +237,9 @@ const ContractPage = ({ user }) => {
                                 <ContentContratoHeader>
                                     <ContratoCounter>Contratos ({contratos.length})</ContratoCounter>
                                     <SearcherContainer>
+                                        <SearcherContainer>
+                                            <SearchBar search={search} setSearch={setSearch} />
+                                        </SearcherContainer>
                                     </SearcherContainer>
                                 </ContentContratoHeader>
                                 {
@@ -218,7 +258,16 @@ const ContractPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ContractList user={user} contratos={contratos} navigate={navigate} setLoading={setLoading} />
+                                        <ContractList
+                                            user={user}
+                                            contratos={contratos}
+                                            navigate={navigate}
+                                            setLoading={setLoading}
+                                            search={search}
+                                            page={page}
+                                            setPage={setPage}
+                                            itemsPerPage={itemsPerPage}
+                                        />
                                     )
                                 }
                             </ContentContratoContainer>

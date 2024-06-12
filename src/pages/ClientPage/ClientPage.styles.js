@@ -46,6 +46,7 @@ export const ContentClientContainer = styled.div`
 
 export const ContentClientHeader = styled.div`
     display: flex;
+    flex-direction: column;
     padding: 20px 35px;
     background-color: ${props => props.theme.colors.primary};
     border-radius: 5px;

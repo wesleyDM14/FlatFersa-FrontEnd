@@ -53,12 +53,15 @@ export const ContentFinanceiroHeader = styled.div`
     border-radius: 5px;
     box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
     display: flex;
+    flex-direction: column;
 `;
 
 export const FinanceiroCounter = styled.h3`
     font-size: 16px;
     color: ${props => props.theme.colors.titleColor};
 `;
+
+export const SearcherContainer = styled.div``;
 
 export const NoContentContainer = styled.div`
     display: flex;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Formik, Form } from "formik";
 import Modal from "react-modal";
 import * as Yup from 'yup';
@@ -69,8 +69,9 @@ import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
 import { ThreeDots } from "react-loader-spinner";
+import Pagination from "../../components/Pagination";
 
-const ContractList = ({ contratos, user, setLoading, navigate }) => {
+const ContractList = ({ contratos, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -108,7 +109,24 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
         setModalContractIsOpen(false);
     }
 
-    console.log(contratos);
+    const filteredContratos = useMemo(() =>{
+        if (user.isAdmin) {
+            return contratos.filter(contrato =>
+                contrato.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
+                contrato.apartamento.numero.toString().includes(search) ||
+                contrato.contrato.statusContrato.toLowerCase().includes(search.toLowerCase())
+            );
+        } else {
+            return contratos.filter(contrato =>
+                contrato.apartamento.numero.toString().includes(search) ||
+                contrato.contrato.statusContrato.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+    }, [contratos, search, user]);
+
+    const totalPages = Math.ceil(filteredContratos.length / itemsPerPage);
+    const currentPageItems = filteredContratos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <PredioListContainer>
             <PredioListHeader $isadmin={user.isAdmin.toString()}>
@@ -122,7 +140,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                 }
             </PredioListHeader>
             {
-                contratos.map((contract) => (
+                currentPageItems.map((contract) => (
                     <SinglePredio
                         key={contract.contrato.id}
                         $isadmin={user.isAdmin.toString()}
@@ -449,6 +467,7 @@ const ContractList = ({ contratos, user, setLoading, navigate }) => {
                     </DeleteButtonContainer>
                 </DeleteContainer>
             </Modal>
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >
     );
 }

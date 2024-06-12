@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
 
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import SearchBar from "../../components/SearchBar";
 
 import { logoutUser } from "../../services/userService";
 
@@ -36,6 +37,9 @@ const ApartamentoPage = ({ user }) => {
     const [apartamentoInfos, setApartamentosInfo] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(true);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -46,21 +50,15 @@ const ApartamentoPage = ({ user }) => {
     }
 
     useEffect(() => {
-        async function loadData() {
-            if (loading) {
-                user.accessToken && await getApartamentos(user, setApartamentos, setLoading);
-            }
+        if (loading && user.accessToken) {
+            getApartamentos(user, setApartamentos, setLoading);
         }
-        loadData();
     }, [loading, user]);
 
     useEffect(() => {
-        async function loadData() {
-            if (loading2) {
-                user.accessToken && await getApartamentosWithInfos(user, setApartamentosInfo, setLoading2);
-            }
+        if (loading2 && user.accessToken) {
+            getApartamentosWithInfos(user, setApartamentosInfo, setLoading2);
         }
-        loadData();
     }, [loading2, user]);
 
     return (
@@ -91,6 +89,7 @@ const ApartamentoPage = ({ user }) => {
                                 <ContentApartamentoHeader>
                                     <ApartamentoCounter>Apartamentos ({apartamentos.length})</ApartamentoCounter>
                                     <SearcherContainer>
+                                        <SearchBar search={search} setSearch={setSearch} />
                                     </SearcherContainer>
                                 </ContentApartamentoHeader>
                                 {
@@ -105,7 +104,17 @@ const ApartamentoPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ApartamentoList apartamentos={apartamentoInfos} user={user} setLoading={setLoading} setLoading2={setLoading2} navigate={navigate} />
+                                        <ApartamentoList
+                                            apartamentos={apartamentoInfos}
+                                            user={user}
+                                            setLoading={setLoading}
+                                            setLoading2={setLoading2}
+                                            navigate={navigate}
+                                            search={search}
+                                            page={page}
+                                            setPage={setPage}
+                                            itemsPerPage={itemsPerPage}
+                                        />
                                     )
                                 }
                             </ContentApartamentoContainer>

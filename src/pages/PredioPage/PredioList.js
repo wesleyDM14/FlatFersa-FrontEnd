@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FaEdit, FaFileInvoice, FaTrash } from "react-icons/fa";
 import {
     AdminPredioContainer,
@@ -36,10 +36,9 @@ import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
 import { deletePredioById, updatePredio } from "../../services/predioService";
+import Pagination from "../../components/Pagination";
 
-
-
-const PredioList = ({ predios, user, setLoading, navigate }) => {
+const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -61,6 +60,15 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
         setModalDeleteIsOpen(false);
     }
 
+    const filteredPredios = useMemo(() =>
+        predios.filter(predio =>
+            predio.nome.toLowerCase().includes(search.toLowerCase()) ||
+            predio.cidade.toLowerCase().includes(search.toLowerCase())
+        ), [predios, search]);
+
+    const totalPages = Math.ceil(filteredPredios.length / itemsPerPage);
+    const currentPageItems = filteredPredios.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <PredioListContainer>
             <PredioListHeader>
@@ -69,7 +77,7 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                 <ListLabel>Opções</ListLabel>
             </PredioListHeader>
             {
-                predios.map((predio) => (
+                currentPageItems.map((predio) => (
                     <SinglePredio key={predio.id}>
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>
@@ -96,7 +104,6 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </SinglePredio>
                 ))
             }
-
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}
@@ -246,7 +253,6 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </Formik>
                 </StyledFormArea>
             </Modal>
-
             <Modal
                 isOpen={modalDeleteIsOpen}
                 onRequestClose={closeDeleteModal}
@@ -269,6 +275,7 @@ const PredioList = ({ predios, user, setLoading, navigate }) => {
                     </DeleteButtonContainer>
                 </DeleteContainer>
             </Modal>
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >
     );
 }

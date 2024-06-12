@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import SearchBar from "../../components/SearchBar";
 
 import { logoutUser } from "../../services/userService";
 import {
@@ -33,6 +34,9 @@ const ClientPage = ({ user }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -43,12 +47,9 @@ const ClientPage = ({ user }) => {
     }
 
     useEffect(() => {
-        async function teste() {
-            if (loading) {
-                user.accessToken && await getClientes(user, setClientes, setLoading);
-            }
+        if (loading && user.accessToken) {
+            getClientes(user, setClientes, setLoading);
         }
-        teste();
     }, [user, loading]);
 
     return (
@@ -79,6 +80,7 @@ const ClientPage = ({ user }) => {
                                 <ContentClientHeader>
                                     <ClientCounter>Clientes ({clientes.length})</ClientCounter>
                                     <SearcherContainer>
+                                        <SearchBar search={search} setSearch={setSearch} />
                                     </SearcherContainer>
                                 </ContentClientHeader>
                                 {
@@ -93,7 +95,16 @@ const ClientPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ClientList clientes={clientes} user={user} navigate={navigate} setLoading={setLoading} />
+                                        <ClientList
+                                            clientes={clientes}
+                                            user={user}
+                                            navigate={navigate}
+                                            setLoading={setLoading}
+                                            search={search}
+                                            page={page}
+                                            setPage={setPage}
+                                            itemsPerPage={itemsPerPage}
+                                        />
                                     )
                                 }
                             </ContentClientContainer>

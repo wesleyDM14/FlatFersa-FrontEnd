@@ -52,6 +52,7 @@ export const ContentPredioHeader = styled.div`
     border-radius: 5px;
     box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
     display: flex;
+    flex-direction: column;
 `;
 
 export const PredioCounter = styled.h3`

@@ -24,6 +24,8 @@ import {
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
+import SearchBar from '../../components/SearchBar';
+
 import { FaBuilding, FaPlus } from 'react-icons/fa';
 import { ThreeDots } from 'react-loader-spinner';
 import PredioList from './PredioList';
@@ -33,6 +35,9 @@ const PredioPage = ({ user }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [predios, setPredios] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -43,12 +48,9 @@ const PredioPage = ({ user }) => {
     }
 
     useEffect(() => {
-        async function teste() {
-            if (loading) {
-                user.accessToken && await getPredios(user, setPredios, setLoading);
-            }
+        if (loading && user.accessToken) {
+            getPredios(user, setPredios, setLoading);
         }
-        teste();
     }, [user, loading]);
 
     return (
@@ -80,6 +82,7 @@ const PredioPage = ({ user }) => {
                                 <ContentPredioHeader>
                                     <PredioCounter>Prédios ({predios.length})</PredioCounter>
                                     <SearcherContainer>
+                                        <SearchBar search={search} setSearch={setSearch} />
                                     </SearcherContainer>
                                 </ContentPredioHeader>
                                 {
@@ -94,7 +97,16 @@ const PredioPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <PredioList predios={predios} user={user} navigate={navigate} setLoading={setLoading} />
+                                        <PredioList 
+                                            predios={predios}
+                                            user={user}
+                                            navigate={navigate}
+                                            setLoading={setLoading}
+                                            search={search}
+                                            page={page}
+                                            setPage={setPage}
+                                            itemsPerPage={itemsPerPage}
+                                        />
                                     )
                                 }
                             </ContentPredioContainer>

@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
+import SearchBar from "../../components/SearchBar";
 
 import {
     MainFinanceiroContainer,
     HeaderFinanceiroContainer,
     HeaderTitle,
     ContentFinanceiroContainer,
-    ContentFinanceiroHeader,
     FinanceiroCounter,
     NoContentContainer,
     NoContentAvisoContainer,
@@ -21,6 +21,8 @@ import {
     CardTitle,
     CardIconContainer,
     CardsContainerAdmin,
+    ContentFinanceiroHeader,
+    SearcherContainer,
 } from './FinanceiroPage.styles';
 
 import { logoutUser } from '../../services/userService';
@@ -47,8 +49,11 @@ const FianceiroPage = ({ user }) => {
     const [parcelasAtrasados, setParcelasAtrasados] = useState([]);
     const [parcelasAguardando, setParcelasAguardando] = useState([]);
 
-
     const [loading, setLoading] = useState(true);
+
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -59,12 +64,9 @@ const FianceiroPage = ({ user }) => {
     }
 
     useEffect(() => {
-        async function teste() {
-            if (loading) {
-                user.accessToken && await getParcelas(user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasInfo, setParcelasAguardando);
-            }
+        if (loading && user.accessToken) {
+            getParcelas(user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasInfo, setParcelasAguardando);
         }
-        teste();
     }, [user, loading]);
 
     return (
@@ -175,6 +177,11 @@ const FianceiroPage = ({ user }) => {
                                         </CardsContainerAdmin>
                                     </HeaderFinanceiroContainer>
                                     <ContentFinanceiroContainer>
+                                        <ContentFinanceiroHeader>
+                                            <SearcherContainer>
+                                                <SearchBar search={search} setSearch={setSearch} />
+                                            </SearcherContainer>
+                                        </ContentFinanceiroHeader>
                                         {
                                             parcelas.length === 0 ? (
                                                 <NoContentContainer>
@@ -184,21 +191,65 @@ const FianceiroPage = ({ user }) => {
                                                     </NoContentAvisoContainer>
                                                 </NoContentContainer>
                                             ) : (
-
                                                 pagos ? (
-                                                    <ParcelaList parcelas={parcelasPagos} user={user} navigate={navigate} setLoading={setLoading} />
+                                                    <ParcelaList
+                                                        parcelas={parcelasPagos}
+                                                        user={user}
+                                                        navigate={navigate}
+                                                        setLoading={setLoading}
+                                                        search={search}
+                                                        page={page}
+                                                        setPage={setPage}
+                                                        itemsPerPage={itemsPerPage}
+                                                    />
                                                 ) :
                                                     atrasados ? (
-                                                        <ParcelaList parcelas={parcelasAtrasados} user={user} navigate={navigate} setLoading={setLoading} />
+                                                        <ParcelaList
+                                                            parcelas={parcelasAtrasados}
+                                                            user={user}
+                                                            navigate={navigate}
+                                                            setLoading={setLoading}
+                                                            search={search}
+                                                            page={page}
+                                                            setPage={setPage}
+                                                            itemsPerPage={itemsPerPage}
+                                                        />
                                                     ) :
                                                         pendentes ? (
-                                                            <ParcelaList parcelas={parcelasPendentes} user={user} navigate={navigate} setLoading={setLoading} />
+                                                            <ParcelaList
+                                                                parcelas={parcelasPendentes}
+                                                                user={user}
+                                                                navigate={navigate}
+                                                                setLoading={setLoading}
+                                                                search={search}
+                                                                page={page}
+                                                                setPage={setPage}
+                                                                itemsPerPage={itemsPerPage}
+                                                            />
                                                         ) :
                                                             total ? (
-                                                                <ParcelaList parcelas={parcelasInfo} user={user} navigate={navigate} setLoading={setLoading} />
+                                                                <ParcelaList
+                                                                    parcelas={parcelasInfo}
+                                                                    user={user}
+                                                                    navigate={navigate}
+                                                                    setLoading={setLoading}
+                                                                    search={search}
+                                                                    page={page}
+                                                                    setPage={setPage}
+                                                                    itemsPerPage={itemsPerPage}
+                                                                />
                                                             ) :
                                                                 aguardando ? (
-                                                                    <ParcelaList parcelas={parcelasAguardando} user={user} navigate={navigate} setLoading={setLoading} />
+                                                                    <ParcelaList
+                                                                        parcelas={parcelasAguardando}
+                                                                        user={user}
+                                                                        navigate={navigate}
+                                                                        setLoading={setLoading}
+                                                                        search={search}
+                                                                        page={page}
+                                                                        setPage={setPage}
+                                                                        itemsPerPage={itemsPerPage}
+                                                                    />
                                                                 ) : (
                                                                     <></>
                                                                 )
@@ -280,16 +331,52 @@ const FianceiroPage = ({ user }) => {
                                     <ContentFinanceiroContainer>
                                         {
                                             pagos ? (
-                                                <ParcelaList parcelas={parcelasPagos} user={user} navigate={navigate} setLoading={setLoading} />
+                                                <ParcelaList
+                                                    parcelas={parcelasPagos}
+                                                    user={user}
+                                                    navigate={navigate}
+                                                    setLoading={setLoading}
+                                                    search={search}
+                                                    page={page}
+                                                    setPage={setPage}
+                                                    itemsPerPage={itemsPerPage}
+                                                />
                                             ) :
                                                 atrasados ? (
-                                                    <ParcelaList parcelas={parcelasAtrasados} user={user} navigate={navigate} setLoading={setLoading} />
+                                                    <ParcelaList
+                                                        parcelas={parcelasAtrasados}
+                                                        user={user}
+                                                        navigate={navigate}
+                                                        setLoading={setLoading}
+                                                        search={search}
+                                                        page={page}
+                                                        setPage={setPage}
+                                                        itemsPerPage={itemsPerPage}
+                                                    />
                                                 ) :
                                                     pendentes ? (
-                                                        <ParcelaList parcelas={parcelasPendentes} user={user} navigate={navigate} setLoading={setLoading} />
+                                                        <ParcelaList
+                                                            parcelas={parcelasPendentes}
+                                                            user={user}
+                                                            navigate={navigate}
+                                                            setLoading={setLoading}
+                                                            search={search}
+                                                            page={page}
+                                                            setPage={setPage}
+                                                            itemsPerPage={itemsPerPage}
+                                                        />
                                                     ) :
                                                         total ? (
-                                                            <ParcelaList parcelas={parcelas} user={user} navigate={navigate} setLoading={setLoading} />
+                                                            <ParcelaList
+                                                                parcelas={parcelas}
+                                                                user={user}
+                                                                navigate={navigate}
+                                                                setLoading={setLoading}
+                                                                search={search}
+                                                                page={page}
+                                                                setPage={setPage}
+                                                                itemsPerPage={itemsPerPage}
+                                                            />
                                                         ) :
                                                             <></>
                                         }
