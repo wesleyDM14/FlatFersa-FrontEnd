@@ -30,7 +30,6 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                         solicitacoes.push(contrato)
                     }
                 }
-
                 setContratosAtivos(ativos);
                 setContratosSolicitacao(solicitacoes);
                 setLoading(false);

@@ -81,7 +81,10 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
             </PredioListHeader>
             {
                 currentPageItems.map((apartamento) => (
-                    <SinglePredio key={apartamento.apartamento.id}>
+                    <SinglePredio
+                        key={apartamento.apartamento.id}
+                        onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
+                    >
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
                             <PredioValue>{apartamento.apartamento.numero}</PredioValue>
@@ -91,13 +94,15 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                             <PredioValue>{apartamento.predio.nome}</PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
-                            <EditIcon onClick={() => {
+                            <EditIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedApartamento(apartamento.apartamento);
                                 openEditModal();
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <DeleteIcon onClick={() => {
+                            <DeleteIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedApartamento(apartamento.apartamento);
                                 openDeleteModal();
                             }}>

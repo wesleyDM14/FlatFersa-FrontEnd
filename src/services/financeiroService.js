@@ -55,8 +55,11 @@ export const getParcelas = async (user, setParcelas, setLoading, setParcelasAtra
                 "Authorization": `Bearer ${user.accessToken}`,
             }
         }).then((response) => {
-            setParcelas(response.data[0]);
-            let parcelas = response.data[0];
+            let parcelas = [];
+
+            if (response.data[0]) {
+                parcelas = response.data[0];
+            }
 
             let pagos = [];
             let pendentes = [];
@@ -72,6 +75,7 @@ export const getParcelas = async (user, setParcelas, setLoading, setParcelasAtra
                     atrasados.push(parcela);
                 }
             }
+            setParcelas(parcelas);
             setParcelasPagos(pagos);
             setParcelasPendentes(pendentes);
             setParcelasAtrasados(atrasados);

@@ -58,21 +58,15 @@ const ParcelaInfo = ({ user }) => {
     }
 
     useEffect(() => {
-        async function loadPrestacaoData() {
-            if (loading) {
-                user.accessToken && await getParcelaById(user, prestacaoId, setParcela, setParcelasInfo, setLoading);
-            }
+        if (loading && user.accessToken) {
+            getParcelaById(user, prestacaoId, setParcela, setParcelasInfo, setLoading);
         }
-        loadPrestacaoData();
     }, [user, loading, prestacaoId]);
 
     useEffect(() => {
-        async function generateDataPayment() {
-            if (loading2) {
-                user.accessToken && await gerarCodigoPix(user, prestacaoId, setImgb64, setLoading2, setCopiCola);
-            }
+        if (loading2 && user.accessToken) {
+            gerarCodigoPix(user, prestacaoId, setImgb64, setLoading2, setCopiCola);
         }
-        generateDataPayment();
     }, [user, loading2, prestacaoId]);
 
 

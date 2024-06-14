@@ -765,9 +765,11 @@ export const DetailContractDownloadButton = styled.button`
     }
 `;
 
-export const FinanceiroList = styled.dt``;
+export const FinanceiroList = styled.ul`
+    list-style-type: none;
+`;
 
-export const FinanceiroListElement = styled.dd`
+export const FinanceiroListElement = styled.li`
     display: flex;
 `;
 

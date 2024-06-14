@@ -78,7 +78,10 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
             </PredioListHeader>
             {
                 currentPageItems.map((predio) => (
-                    <SinglePredio key={predio.id}>
+                    <SinglePredio
+                        key={predio.id}
+                        onClick={() => navigate(`/predios/${predio.id}`)}
+                    >
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>
                             <PredioValue>{predio.nome}</PredioValue>
@@ -88,13 +91,15 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             <PredioValue>{predio.cidade}</PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
-                            <EditIcon onClick={() => {
+                            <EditIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedPredio(predio);
                                 openEditModal();
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <DeleteIcon onClick={() => {
+                            <DeleteIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedPredio(predio);
                                 openDeleteModal();
                             }}>

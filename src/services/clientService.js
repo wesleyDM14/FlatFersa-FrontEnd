@@ -31,7 +31,7 @@ export const createCliente = async (cliente, user, navigate, setSubmitting, setF
     });
 }
 
-export const getClienteById = async (user, clientId, setClient) => {
+export const getClienteById = async (user, clientId, setClient, setLoading) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/clients/${clientId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -40,8 +40,10 @@ export const getClienteById = async (user, clientId, setClient) => {
     }).then((response) => {
         let client = response.data;
         setClient(client);
+        setLoading(false);
     }).catch((err) => {
         console.log(err.message);
+        setLoading(false);
     });
 }
 

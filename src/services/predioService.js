@@ -31,7 +31,7 @@ export const createPredio = async (predio, user, navigate, setSubmitting, setFie
     });
 }
 
-export const getPredioById = async (user, predioId, setPredio) => {
+export const getPredioById = async (user, predioId, setPredio, setLoading) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predioId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -40,8 +40,10 @@ export const getPredioById = async (user, predioId, setPredio) => {
     }).then((response) => {
         let predio = response.data;
         setPredio(predio);
+        setLoading(false);
     }).catch((err) => {
         console.log(err.message);
+        setLoading(false);
     });
 }
 

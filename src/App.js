@@ -24,6 +24,9 @@ import NovoApartamento from "./pages/ApartamentoPage/NovoApartamento";
 import NovoClient from "./pages/ClientPage/NovoClient";
 import NovoContract from "./pages/ContractPage/NovoContract";
 import ParcelaInfo from "./pages/FinanceiroPage/ParcelaInfo";
+import PredioInfos from "./pages/PredioPage/PredioInfos";
+import ApartamentoInfos from "./pages/ApartamentoPage/ApartamentoInfos";
+import ClientInfos from "./pages/ClientPage/ClientInfos";
 
 const App = ({ checked, user }) => {
   return (
@@ -37,10 +40,13 @@ const App = ({ checked, user }) => {
               <Route path="/login" element={<BasicRoute><LoginPage /></BasicRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/predios" element={<PrivateRoute><PredioPage /></PrivateRoute>} />
+              <Route path="/predios/:predioId" element={<PrivateRoute><PredioInfos /></PrivateRoute>} />
               <Route path="/predios/novo" element={<PrivateRoute><NovoPredio /></PrivateRoute>} />
               <Route path="/clientes" element={<PrivateRoute><ClientPage /></PrivateRoute>} />
+              <Route path="/clientes/:clientId" element={<PrivateRoute><ClientInfos /></PrivateRoute>} />
               <Route path="/clientes/novo" element={<PrivateRoute><NovoClient /></PrivateRoute>} />
               <Route path="/apartamentos" element={<PrivateRoute><ApartamentoPage /></PrivateRoute>} />
+              <Route path="/apartamentos/:apartamentoId" element={<PrivateRoute><ApartamentoInfos /></PrivateRoute>} />
               <Route path="/apartamentos/novo" element={<PrivateRoute><NovoApartamento /></PrivateRoute>} />
               <Route path="/contratos" element={<PrivateRoute><ContractPage /></PrivateRoute>} />
               <Route path="/contratos/novo" element={<PrivateRoute><NovoContract /></PrivateRoute>} />

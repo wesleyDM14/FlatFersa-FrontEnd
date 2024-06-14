@@ -77,23 +77,34 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
             </PredioListHeader>
             {
                 currentPageItems.map((cliente) => (
-                    <SinglePredio key={cliente.id}>
+                    <SinglePredio
+                        key={cliente.id}
+                        onClick={() => navigate(`/clientes/${cliente.id}`)}
+                    >
                         <PredioSingleContainer>
                             <StyledLabel>Nome: </StyledLabel>
                             <PredioValue>{cliente.name}</PredioValue>
                         </PredioSingleContainer>
                         <PredioSingleContainer>
                             <StyledLabel><FaWhatsapp /> </StyledLabel>
-                            <PredioValue href={`https://whatsa.me/55${cliente.phone}`} target='_blank'>{cliente.phone}</PredioValue>
+                            <PredioValue
+                                href={`https://whatsa.me/55${cliente.phone}`}
+                                target='_blank'
+                                onClick={(event) => event.stopPropagation()}
+                            >
+                                {cliente.phone}
+                            </PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
-                            <EditIcon onClick={() => {
+                            <EditIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedClient(cliente);
                                 openEditModal();
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <DeleteIcon onClick={() => {
+                            <DeleteIcon onClick={(event) => {
+                                event.stopPropagation();
                                 setSelectedClient(cliente);
                                 openDeleteModal();
                             }}>
@@ -103,7 +114,6 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                     </SinglePredio >
                 ))
             }
-
             <Modal
                 isOpen={modalDeleteIsOpen}
                 onRequestClose={closeDeleteModal}
@@ -126,7 +136,6 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                     </DeleteButtonContainer>
                 </DeleteContainer>
             </Modal>
-
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}

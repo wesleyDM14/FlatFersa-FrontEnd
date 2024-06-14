@@ -37,24 +37,28 @@ import {
     SubmitButton,
 } from "./ContractPage.styles";
 import { FaFileInvoice } from "react-icons/fa";
-import { ClientSelect, FormInput, StyledDatePicker, StyledSelect } from "../../components/FormLib";
+import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker, StyledSelect } from "../../components/FormLib";
 import { ThreeDots } from "react-loader-spinner";
-import { getApartamentos } from "../../services/apartamentoService";
+import { getApartamentos, getApartamentosByPredioId } from "../../services/apartamentoService";
 import { getClientes } from "../../services/clientService";
 import { createContrato } from "../../services/contratoService";
 import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
 import { modalStyles } from "../../styles/ModalStyles";
+import { getPredios } from "../../services/predioService";
 
 const NovoContract = ({ user }) => {
     Modal.setAppElement(document.getElementById('root'));
     const navigate = useNavigate();
     const [clientes, setClientes] = useState([]);
     const [selectedClient, setSelectedClient] = useState({});
+    const [predios, setPredios] = useState([]);
+    const [selectedPredio, setSelectedPredio] = useState(null);
     const [apartamentos, setApatamentos] = useState([]);
     const [selectedApartamento, setSelectedApartamento] = useState({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(true);
+    const [loadingApartamentos, setLoadingApartamentos] = useState(true);
     const [modalAlertIsOpen, setModalAlertIsOpen] = useState(false);
 
     const [periocidade, setPeriocidade] = useState([
@@ -83,29 +87,30 @@ const NovoContract = ({ user }) => {
     }
 
     useEffect(() => {
-        async function loadData() {
-            if (loading) {
-                user.accessToken && await getApartamentos(user, setApatamentos, setLoading);
-            }
-            if (user.isAdmin && loading2) {
-                user.accessToken && await getClientes(user, setClientes, setLoading2);
-            }
+
+        if (loading && user.accessToken) {
+            getPredios(user, setPredios, setLoading);
         }
-        loadData();
+        if (user.isAdmin && loading2) {
+            getClientes(user, setClientes, setLoading2);
+        }
     }, [loading, user, loading2]);
 
     useEffect(() => {
-        function verifyApartment() {
-            if (selectedApartamento.status) {
-                if (selectedApartamento.status === 'OCUPADO') {
-                    setModalAlertIsOpen(true);
-                } else {
-                    window.alert(`Apartamento ${selectedApartamento.numero} selecionado.`);
-                }
+        if (selectedApartamento.status) {
+            if (selectedApartamento.status === 'OCUPADO') {
+                setModalAlertIsOpen(true);
+            } else {
+                window.alert(`Apartamento ${selectedApartamento.numero} selecionado.`);
             }
         }
-        verifyApartment();
     }, [selectedApartamento]);
+
+    useEffect(() => {
+        if (selectedPredio && user.accessToken && loadingApartamentos) {
+            getApartamentosByPredioId(user, selectedPredio.value, setApatamentos, setLoadingApartamentos);
+        }
+    }, [selectedPredio, user, loadingApartamentos]);
 
     return (
         user.isAdmin ? (
@@ -156,8 +161,7 @@ const NovoContract = ({ user }) => {
                                             values.dataInicio = selectedDate;
                                             values.periocidade = selectedPeriocidade.value;
                                             values.clienteId = selectedClient.value;
-                                            values.aptId = selectedApartamento.id;
-                                            console.log(values);
+                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'faltfersa' ? selectedApartamento.id : selectedApartamento.value;
                                             await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >
@@ -166,6 +170,9 @@ const NovoContract = ({ user }) => {
                                                 <Form>
                                                     <FormContent>
                                                         <FormColum>
+                                                            <FormInputArea>
+                                                                <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} setLoading={setLoadingApartamentos} />
+                                                            </FormInputArea>
                                                             <FormInputArea>
                                                                 <ClientSelect clientes={clientes} setSelectedClient={setSelectedClient} />
                                                             </FormInputArea>
@@ -238,12 +245,37 @@ const NovoContract = ({ user }) => {
                                                                     <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
                                                                 </FormInputArea>
                                                             </SubItensContainer>
+                                                            {
+                                                                selectedPredio && selectedPredio.label.toLowerCase() !== 'flatfersa' && (
+                                                                    loadingApartamentos ? (
+                                                                        <LoadingContainer>
+                                                                            <ThreeDots />
+                                                                        </LoadingContainer>
+                                                                    ) : (
+                                                                        <FormInputArea>
+                                                                            <ApartamentoSelect apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                                        </FormInputArea>
+                                                                    )
+                                                                )
+                                                            }
                                                         </FormColum>
                                                     </FormContent>
-                                                    <SelectedAptTitleContainer>
-                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
-                                                    </SelectedAptTitleContainer>
-                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                    {
+                                                        selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' && (
+                                                            loadingApartamentos ? (
+                                                                <LoadingContainer>
+                                                                    <ThreeDots />
+                                                                </LoadingContainer>
+                                                            ) : (
+                                                                <>
+                                                                    <SelectedAptTitleContainer>
+                                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
+                                                                    </SelectedAptTitleContainer>
+                                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                                </>
+                                                            )
+                                                        )
+                                                    }
                                                     <ButtonGroup>
                                                         <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
                                                         {!isSubmitting && (
@@ -323,8 +355,7 @@ const NovoContract = ({ user }) => {
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                             values.dataInicio = selectedDate;
-                                            values.aptId = selectedApartamento.id;
-                                            console.log(values);
+                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'faltfersa' ? selectedApartamento.id : selectedApartamento.value;
                                             await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >
@@ -333,6 +364,9 @@ const NovoContract = ({ user }) => {
                                                 <Form>
                                                     <FormContent>
                                                         <FormColum>
+                                                            <FormInputArea>
+                                                                <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} setLoading={setLoadingApartamentos} />
+                                                            </FormInputArea>
                                                             <SubItensContainer>
                                                                 <FormInputArea>
                                                                     <FormInputLabelRequired>Data Início</FormInputLabelRequired>
@@ -358,6 +392,19 @@ const NovoContract = ({ user }) => {
                                                             </SubItensContainer>
                                                         </FormColum>
                                                         <FormColum>
+                                                            {
+                                                                selectedPredio && selectedPredio.label.toLowerCase() !== 'flatfersa' && (
+                                                                    loadingApartamentos ? (
+                                                                        <LoadingContainer>
+                                                                            <ThreeDots />
+                                                                        </LoadingContainer>
+                                                                    ) : (
+                                                                        <FormInputArea>
+                                                                            <ApartamentoSelect apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                                        </FormInputArea>
+                                                                    )
+                                                                )
+                                                            }
                                                             <SubItensContainer>
                                                                 <FormInputArea>
                                                                     <FormInputLabelRequired>Dia de Vencimento</FormInputLabelRequired>
@@ -375,10 +422,22 @@ const NovoContract = ({ user }) => {
                                                             </SubItensContainer>
                                                         </FormColum>
                                                     </FormContent>
-                                                    <SelectedAptTitleContainer>
-                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
-                                                    </SelectedAptTitleContainer>
-                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                    {
+                                                        selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' && (
+                                                            loadingApartamentos ? (
+                                                                <LoadingContainer>
+                                                                    <ThreeDots />
+                                                                </LoadingContainer>
+                                                            ) : (
+                                                                <>
+                                                                    <SelectedAptTitleContainer>
+                                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
+                                                                    </SelectedAptTitleContainer>
+                                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
+                                                                </>
+                                                            )
+                                                        )
+                                                    }
                                                     <ButtonGroup>
                                                         <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
                                                         {!isSubmitting && (

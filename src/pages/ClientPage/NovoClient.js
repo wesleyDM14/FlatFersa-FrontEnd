@@ -93,7 +93,6 @@ const NovoClient = ({ user }) => {
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                     values.dateBirth = startDate;
-                                    console.log(values);
                                     await createCliente(values, user, navigate, setSubmitting, setFieldError);
                                 }}
                             >

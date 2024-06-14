@@ -82,7 +82,7 @@ export const FormInput = ({ ...props }) => {
     )
 }
 
-export const PredioSelect = ({ predios, setSelectedPredio }) => {
+export const PredioSelect = ({ predios, setSelectedPredio, setLoading }) => {
     const [options, setOptions] = useState([]);
 
     useEffect(() => {
@@ -106,6 +106,7 @@ export const PredioSelect = ({ predios, setSelectedPredio }) => {
                 placeholder={'Selecione o Prédio do Apartamento'}
                 onChange={(value) => {
                     setSelectedPredio(value);
+                    setLoading(true);
                 }}
                 menuPlacement="auto"
                 menuPosition="fixed"
@@ -205,8 +206,10 @@ export const ApartamentoSelect = ({ apartamentos, setSelectedApartamento }) => {
             let optionsTmp = [];
             for (let index = 0; index < apartamentos.length; index++) {
                 const element = apartamentos[index];
-                let temp = { label: element.numero, value: element.id };
-                optionsTmp.push(temp);
+                if (element.status === 'VAGO') {
+                    let temp = { label: element.numero, value: element.id };
+                    optionsTmp.push(temp);
+                }
             }
             setOptions(optionsTmp);
         }

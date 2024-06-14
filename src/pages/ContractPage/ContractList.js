@@ -64,7 +64,7 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { approveContract, desapproveContract, downloadContract } from "../../services/contratoService";
+import { approveContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
@@ -79,6 +79,8 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
     const [selectedContrato, setSelectedContrato] = useState({});
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
+
+    const [financeiroPage, setFinanceiroPage] = useState(1);
 
     const [periocidade, setPeriocidade] = useState([
         { label: 'Anualmente', value: 'ANUALMENTE' },
@@ -109,7 +111,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
         setModalContractIsOpen(false);
     }
 
-    const filteredContratos = useMemo(() =>{
+    const filteredContratos = useMemo(() => {
         if (user.isAdmin) {
             return contratos.filter(contrato =>
                 contrato.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -126,6 +128,9 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
 
     const totalPages = Math.ceil(filteredContratos.length / itemsPerPage);
     const currentPageItems = filteredContratos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    const totalPagesFinanceiro = selectedContrato.financeiro && Math.ceil(selectedContrato.financeiro.length / itemsPerPage);
+    const currentPageItemsFinanceiro = selectedContrato.financeiro && selectedContrato.financeiro.slice((financeiroPage - 1) * itemsPerPage, financeiroPage * itemsPerPage);
 
     return (
         <PredioListContainer>
@@ -145,7 +150,6 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                         key={contract.contrato.id}
                         $isadmin={user.isAdmin.toString()}
                         onClick={() => {
-                            console.log(contract);
                             setSelectedContrato(contract);
                             openContractModal();
                         }}
@@ -234,6 +238,10 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                 </DataIconContainer>
                                                 <SubTitle>Dados do Apartamento</SubTitle>
                                             </DataSection>
+                                            <DataContainer>
+                                                <SolicitacaoModalContentLabel>Prédio: </SolicitacaoModalContentLabel>
+                                                <SolicitacaoModalContentValue>{selectedContrato.predio.nome}</SolicitacaoModalContentValue>
+                                            </DataContainer>
                                             <DataContainer>
                                                 <SolicitacaoModalContentLabel>Número: </SolicitacaoModalContentLabel>
                                                 <SolicitacaoModalContentValue>{selectedContrato.apartamento.numero}</SolicitacaoModalContentValue>
@@ -389,6 +397,10 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                         <DetailContractDataSectionTitle>Dados do Apartamento</DetailContractDataSectionTitle>
                                         <DetailContractDataSectionContainer>
                                             <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Predio: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.predio.nome}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
                                                 <DetailContractDataLabel>Numero: </DetailContractDataLabel>
                                                 <DetailContractDataValue>{selectedContrato.apartamento.numero}</DetailContractDataValue>
                                             </DetailContractValueContainer>
@@ -397,24 +409,58 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                 <DetailContractDataValue>{selectedContrato.apartamento.climatizado ? <FaCheck color="#0F0" /> : <FaTimes color="#F00" />}</DetailContractDataValue>
                                             </DetailContractValueContainer>
                                         </DetailContractDataSectionContainer>
+                                        <DetailContractDataSectionTitle>Dados do Contrato</DetailContractDataSectionTitle>
+                                        <DetailContractDataSectionContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Valor: </DetailContractDataLabel>
+                                                <DetailContractDataValue>R$ {parseFloat(selectedContrato.contrato.valorAluguel).toFixed(2)}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Inicio: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{new Date(selectedContrato.contrato.dataInicio).toLocaleDateString()}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Duração: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.contrato.duracaoContrato} meses</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                            <DetailContractValueContainer>
+                                                <DetailContractDataLabel>Reajuste: </DetailContractDataLabel>
+                                                <DetailContractDataValue>{selectedContrato.contrato.periodicidadeReajuste}</DetailContractDataValue>
+                                            </DetailContractValueContainer>
+                                        </DetailContractDataSectionContainer>
                                     </DetailContractDataColumnLeft>
                                     <DetailContractDataColumnRight>
                                         <DetailContractDataSectionTitle>Financeiro</DetailContractDataSectionTitle>
                                         <FinanceiroList>
                                             {
-                                                selectedContrato.financeiro.map((parcela) => (
-                                                    <FinanceiroListElementContainer onClick={() => navigate(`/prestacao/${parcela.id}`)}>
+                                                currentPageItemsFinanceiro.map((parcela, index) => (
+                                                    <FinanceiroListElementContainer key={index} onClick={() => navigate(`/prestacao/${parcela.id}`)}>
                                                         <FinanceiroListElement>
                                                             <FinanceiroListValue>
                                                                 {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo} - {parcela.statusPagamento}
                                                                 <FinanceiroListIconContainer>
-                                                                    <FaClock />
+                                                                    {
+                                                                        parcela.statusPagamento === 'PENDENTE' && (
+                                                                            <FaClock />
+                                                                        )
+                                                                    }
+                                                                    {
+                                                                        parcela.statusPagamento === 'PAGO' && (
+                                                                            <FaCheck color="#0F0"/>
+                                                                        )
+                                                                    }
+                                                                    {
+                                                                        parcela.statusPagamento === 'ATRASADO' && (
+                                                                            <FaTimes color="#F00"/>
+                                                                        )
+                                                                    }
                                                                 </FinanceiroListIconContainer>
                                                             </FinanceiroListValue>
                                                         </FinanceiroListElement>
                                                     </FinanceiroListElementContainer>
                                                 ))
                                             }
+                                            <Pagination totalPages={totalPagesFinanceiro} currentPage={financeiroPage} setPage={setFinanceiroPage} />
                                         </FinanceiroList>
                                     </DetailContractDataColumnRight>
                                 </DetailContractDataContainer>
@@ -460,7 +506,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-
+                            await deleteContratoById(user, selectedContrato.contrato.id, setLoading);
                         }}>
                             Excluir
                         </SubmitButton>

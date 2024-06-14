@@ -84,7 +84,6 @@ const NovoPredio = ({ user }) => {
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                    console.log(values);
                                     await createPredio(values, user, navigate, setSubmitting, setFieldError);
                                 }}
                             >

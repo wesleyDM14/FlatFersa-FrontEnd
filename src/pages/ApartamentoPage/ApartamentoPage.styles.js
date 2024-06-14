@@ -547,3 +547,101 @@ export const DeleteButtonContainer = styled.div`
     justify-content: space-between;
     margin-top: 25px;
 `;
+
+//************************************* */
+
+export const DetailApartamentoContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+`;
+
+export const DetailApartamentoHeaderContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const DetailApartamentoHeaderTitle = styled.h2``;
+
+export const DetailApartamentoDataContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+`;
+
+export const DetailApartamentoDataLabel = styled.span`
+    font-size: 15px;
+    color: ${props => props.theme.colors.dark1};
+    font-weight: 700;
+
+    @media only screen and (max-width: 978px){
+        font-size: 13px;
+    }
+`;
+
+export const DetailApartamentoValueContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+`;
+
+export const DetailApartamentoDataValue = styled.span`
+    font-size: 15px;
+    color: ${props => props.theme.colors.dark1};
+    font-weight: 500;
+
+    @media only screen and (max-width: 978px){
+        font-size: 13px;
+    }
+`;
+
+export const DetailApartamentoButtonGroup = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+`;
+
+export const DetailApartamentoBackButton = styled.button`
+    cursor: pointer;
+    margin-right: 15px;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: transparent;
+    color: ${props => props.theme.colors.secondary};
+
+    &:hover{
+        background-color: ${props => props.theme.colors.light2};
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
+`;
+
+export const DetailApartamentoSelectButton = styled.button`
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid ${props => props.theme.colors.secondary};
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+    min-width: 80px;
+    transition: all .2s ease-out;
+    background-color: #000;;
+    color: ${props => props.theme.colors.primary};
+
+    &:hover{
+        background-color: #000A;
+    }
+
+    @media only screen and (max-width: 978px){
+        //min-width: 45%;
+    }
+`;
