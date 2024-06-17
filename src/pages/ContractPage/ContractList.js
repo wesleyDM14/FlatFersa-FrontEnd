@@ -64,7 +64,7 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { approveContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
+import { approveContract, cancelContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
@@ -412,7 +412,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                         <DetailContractDataSectionTitle>Dados do Contrato</DetailContractDataSectionTitle>
                                         <DetailContractDataSectionContainer>
                                             <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Valor: </DetailContractDataLabel>
+                                                <DetailContractDataLabel>Valor Aluguel: </DetailContractDataLabel>
                                                 <DetailContractDataValue>R$ {parseFloat(selectedContrato.contrato.valorAluguel).toFixed(2)}</DetailContractDataValue>
                                             </DetailContractValueContainer>
                                             <DetailContractValueContainer>
@@ -446,12 +446,12 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                                     }
                                                                     {
                                                                         parcela.statusPagamento === 'PAGO' && (
-                                                                            <FaCheck color="#0F0"/>
+                                                                            <FaCheck color="#0F0" />
                                                                         )
                                                                     }
                                                                     {
                                                                         parcela.statusPagamento === 'ATRASADO' && (
-                                                                            <FaTimes color="#F00"/>
+                                                                            <FaTimes color="#F00" />
                                                                         )
                                                                     }
                                                                 </FinanceiroListIconContainer>
@@ -466,6 +466,22 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                 </DetailContractDataContainer>
                                 <DetailContractButtonGroup>
                                     <DetailContractBackButton onClick={() => closeContractModal()}>Voltar</DetailContractBackButton>
+                                    {(selectedContrato.contrato.statusContrato === 'ATIVO') && (
+                                        <RejectButton onClick={async () => {
+                                            if (window.confirm("Tem certeza?")) {
+                                                let message = window.prompt("Por favor informe o motivo: ");
+                                                if (message === null || message === "") {
+                                                    window.alert("Por favor informe um motivo.");
+                                                } else {
+                                                    await cancelContract(user, selectedContrato.contrato.id, message, setLoading);
+                                                }
+                                            } else {
+                                                return;
+                                            }
+                                        }}>
+                                            Cancelar Contrato
+                                        </RejectButton>
+                                    )}
                                     {!(selectedContrato.contrato.statusContrato === 'CANCELADO') && (
                                         isDownloading ?
                                             <ThreeDots />

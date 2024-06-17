@@ -164,6 +164,21 @@ export const desapproveContract = async (user, contratoId, setLoading) => {
     });
 }
 
+export const cancelContract = async (user, contratoId, message, setLoading) => {
+    let data = { contratoId: contratoId, message: message };
+    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/cancelar', data, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err.message);
+    });
+}
+
 export const deleteContratoById = async (user, contratoId, setLoading) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/contratos/${contratoId}`, {
         headers: {
