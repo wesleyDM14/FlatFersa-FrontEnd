@@ -127,7 +127,17 @@ const ParcelaInfo = ({ user }) => {
                                     </PrestacaoDetailValueContainer>
                                     <PrestacaoDetailButtonContainer>
                                         <BackButton onClick={() => navigate('/financeiro')}>Voltar</BackButton>
-                                        <SubmitButton onClick={() => window.alert('Funcionalidade em teste')}>Registar Leitura</SubmitButton>
+                                        {
+                                            (parcela.mesReferencia !== 0) && (
+                                                <SubmitButton
+                                                    onClick={() => {
+                                                        window.alert('Funcionalidade em teste');
+                                                    }}
+                                                >
+                                                    Registar Leitura
+                                                </SubmitButton>
+                                            )
+                                        }
                                     </PrestacaoDetailButtonContainer>
                                 </PrestacaoDetailLeftColumn>
                             </PrestcaoDetailContentContainer>

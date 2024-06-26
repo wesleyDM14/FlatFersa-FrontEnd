@@ -17,7 +17,8 @@ import {
     StyledTitle,
     ButtonGroup,
     StyledFormButton,
-    StyledContainer
+    StyledContainer,
+    StyledLink
 } from './LoginPage.styles';
 
 import { loginUser } from "../../services/userService";
@@ -83,6 +84,7 @@ const LoginPage = ({ loginUser }) => {
                     )}
                 </Formik>
             </StyledFormArea>
+            <StyledLink href="/signin"> Não possui conta? Solicitar Acesso</StyledLink>
         </StyledContainer>
     )
 }

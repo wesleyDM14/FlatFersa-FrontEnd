@@ -85,6 +85,15 @@ const ContractPage = ({ user }) => {
                         </LoadingContainer>
                     ) : (
                         <MainContratoContainer>
+                            <HeaderContratoContainer>
+                                <HeaderTitle>Contratos</HeaderTitle>
+                                <AddContratoHeaderButton onClick={() => navigate('/contratos/novo')}>
+                                    <FaPlus color='green' />
+                                    <AddButtonText>
+                                        Adicionar Novo
+                                    </AddButtonText>
+                                </AddContratoHeaderButton>
+                            </HeaderContratoContainer>
                             <ContratoCardsContainer>
                                 <Card
                                     onClick={() => {
@@ -129,15 +138,6 @@ const ContractPage = ({ user }) => {
                                     </CardIconContainer>
                                 </Card>
                             </ContratoCardsContainer>
-                            <HeaderContratoContainer>
-                                <HeaderTitle>Contratos</HeaderTitle>
-                                <AddContratoHeaderButton onClick={() => navigate('/contratos/novo')}>
-                                    <FaPlus color='green' />
-                                    <AddButtonText>
-                                        Adicionar Novo
-                                    </AddButtonText>
-                                </AddContratoHeaderButton>
-                            </HeaderContratoContainer>
                             <ContentContratoContainer>
                                 <ContentContratoHeader>
                                     {

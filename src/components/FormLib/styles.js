@@ -1,4 +1,35 @@
+import ReactInputMask from "react-input-mask-next";
 import styled from "styled-components";
+
+export const StyledInputMask = styled(ReactInputMask)`
+    max-width: 100%;
+    width: 90%;
+    background-color: #fff;
+    border-color: #dbdbdb;
+    border-radius: 4px;
+    color: #363636;
+    align-items: center;
+    border: 1px solid #0a0a0a0d;
+    display: inline-flex;
+    font-size: 1rem;
+    height: 2.5em;
+    justify-content: flex-start;
+    padding-bottom: calc(.5em - 1px);
+    padding-left: calc(.75em - 1px);
+    padding-right: calc(.75em - 1px);
+    padding-top: calc(.5em - 1px);
+    line-height: 1.5;
+
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+`;
 
 export const StyledTextInput = styled.input`
     width: ${(props) => props.width}px;

@@ -30,13 +30,20 @@ import {
     LimitadorAlt,
 } from './PredioPage.styles';
 import { FaFileInvoice } from "react-icons/fa";
-import { FormInput } from "../../components/FormLib";
+import { FormInput, StyledSelect } from "../../components/FormLib";
 import { createPredio } from "../../services/predioService";
 import { ThreeDots } from "react-loader-spinner";
 
 const NovoPredio = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [selectedFinalidade, setSelectedFinalidade] = useState({});
+
+    const finalidade = [
+        { label: 'Comercial', value: 'COMERCIAL' },
+        { label: 'Residencial', value: 'RESIDENCIAL' },
+        { label: 'Rural', value: 'RURAL' },
+    ];
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -71,6 +78,7 @@ const NovoPredio = ({ user }) => {
                                     bairro: '',
                                     numApt: 0,
                                     kwhPrice: 0,
+                                    finalidade: '',
                                 }}
                                 validationSchema={
                                     Yup.object({
@@ -84,6 +92,7 @@ const NovoPredio = ({ user }) => {
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                    values.finalidade = selectedFinalidade;
                                     await createPredio(values, user, navigate, setSubmitting, setFieldError);
                                 }}
                             >
@@ -107,6 +116,9 @@ const NovoPredio = ({ user }) => {
                                                             name='endereco'
                                                             placeholder="Endereço e Número"
                                                         />
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <StyledSelect options={finalidade} setSelectedOption={setSelectedFinalidade} label='Finalidade do Imóvel' />
                                                     </FormInputArea>
                                                 </FormColum>
                                                 <FormColum>

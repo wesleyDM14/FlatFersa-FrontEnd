@@ -82,10 +82,10 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
 
     const [financeiroPage, setFinanceiroPage] = useState(1);
 
-    const [periocidade, setPeriocidade] = useState([
+    const periocidade = [
         { label: 'Anualmente', value: 'ANUALMENTE' },
         { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
-    ]);
+    ];
 
     const openEditModal = () => {
         setModalEditIsOpen(true);

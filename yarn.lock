@@ -1830,18 +1830,6 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
-"@react-input/core@^1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@react-input/core/-/core-1.0.11.tgz#3de476c11d27ee72443084a5628522c1ca564637"
-  integrity sha512-fk2hJxmKZc1LJ5GbNIT2E7faMWifipIiYFLMpVXL3c9izke9+oTjYkseUI9TDVbJA2ptMi5Iwy/VEDNPotwWLA==
-
-"@react-input/mask@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@react-input/mask/-/mask-1.2.0.tgz#4419079a1403f7d2929401070ba08e9352d6a0ac"
-  integrity sha512-MUTwFtZSccUUNIF5LW4oulengsHMn2iv1i05rygcixbqbEyifIBhODtFQdayUp75+SRfWjkme0QHVF/c4dPxug==
-  dependencies:
-    "@react-input/core" "^1.0.11"
-
 "@reduxjs/toolkit@^2.2.3":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-2.2.3.tgz#5ce71cbf162f98c5dafb49bd3f1e11c5486ab9c4"
@@ -5645,6 +5633,13 @@ internal-slot@^1.0.4, internal-slot@^1.0.7:
     hasown "^2.0.0"
     side-channel "^1.0.4"
 
+invariant@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
+  integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
+  dependencies:
+    loose-envify "^1.0.0"
+
 ipaddr.js@1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
@@ -8309,6 +8304,15 @@ react-icons@^5.1.0:
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.1.0.tgz#9e7533cc256571a610c2a1ec8a7a143fb1222943"
   integrity sha512-D3zug1270S4hbSlIRJ0CUS97QE1yNNKDjzQe3HqY0aefp2CBn9VgzgES27sRR2gOvFK+0CNx/BW0ggOESp6fqQ==
 
+react-input-mask-next@^3.0.0-alpha.12:
+  version "3.0.0-alpha.12"
+  resolved "https://registry.yarnpkg.com/react-input-mask-next/-/react-input-mask-next-3.0.0-alpha.12.tgz#126483b86bbe4e876f760e0549fabfad3afdb213"
+  integrity sha512-ATUbd4vigFCmGxTDCjjZ3tAaqzLrebfTR8/XbcYXp0yQSUB14vav1ggUTEGMSu5FnrKyMGxnn/iGx6CLziKwxQ==
+  dependencies:
+    invariant "^2.2.4"
+    prop-types "^15.7.2"
+    warning "^4.0.3"
+
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
@@ -8461,9 +8465,9 @@ react-transition-group@^4.3.0:
     prop-types "^15.6.2"
 
 react@^18.2.0:
-  version "18.2.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
-  integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
+  version "18.3.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"
+  integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
   dependencies:
     loose-envify "^1.1.0"
 
@@ -9947,11 +9951,6 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   integrity sha512-O84QOnr0icsbFGLS0O3bI5FswxzRr8/gHwWkDlQFskhSPryQXvrTMxjxGP4+iWYoauLoBvfDpkrOauZ+0iZpDA==
   dependencies:
     minimalistic-assert "^1.0.0"
-
-web-vitals@^2.1.0:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/web-vitals/-/web-vitals-2.1.4.tgz#76563175a475a5e835264d373704f9dde718290c"
-  integrity sha512-sVWcwhU5mX6crfI5Vd2dC4qchyTqxV8URinzt25XqVh+bHEPGH4C3NPrNionCP7Obx59wrYEbNlw4Z8sjALzZg==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"

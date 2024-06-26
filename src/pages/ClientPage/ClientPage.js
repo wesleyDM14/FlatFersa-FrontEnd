@@ -11,7 +11,11 @@ import {
     AddButtonText,
     AddClientHeaderButton,
     AdicionarClientButton,
+    Card,
+    CardIconContainer,
+    CardTitle,
     ClientCounter,
+    ClienteCardsContainer,
     ContentClientContainer,
     ContentClientHeader,
     HeaderClientContainer,
@@ -23,7 +27,7 @@ import {
     SearcherContainer,
     TextContent,
 } from "./ClientPage.styles";
-import { FaPlus, FaUsers } from "react-icons/fa";
+import { FaDatabase, FaPlus, FaUserCheck, FaUserEdit, FaUsers } from "react-icons/fa";
 import { getClientes } from "../../services/clientService";
 import { ThreeDots } from "react-loader-spinner";
 import ClientList from "./ClientList";
@@ -33,6 +37,12 @@ const ClientPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [clientes, setClientes] = useState([]);
+    const [ativos, setAtivos] = useState(false);
+    const [solicitacoes, setSolicitacoes] = useState(false);
+    const [total, setTotal] = useState(false);
+    const [clientesAtivos, setClientesAtivos] = useState([]);
+    const [clientesSolicitacao, setClientesSolicitacao] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -48,7 +58,7 @@ const ClientPage = ({ user }) => {
 
     useEffect(() => {
         if (loading && user.accessToken) {
-            getClientes(user, setClientes, setLoading);
+            getClientes(user, setClientes, setLoading, setClientesSolicitacao, setClientesAtivos);
         }
     }, [user, loading]);
 
@@ -76,12 +86,59 @@ const ClientPage = ({ user }) => {
                                     </AddButtonText>
                                 </AddClientHeaderButton>
                             </HeaderClientContainer>
+                            <ClienteCardsContainer>
+                                <Card
+                                    onClick={() => {
+                                        setTotal(false);
+                                        setAtivos(!ativos);
+                                        setSolicitacoes(false);
+                                    }}
+                                    className={ativos && 'active'}
+                                >
+                                    <CardTitle>Clientes Ativos</CardTitle>
+                                    <CardIconContainer>
+                                        <FaUserCheck />
+                                        <ClientCounter>Clientes Ativos ({clientesAtivos.length})</ClientCounter>
+                                    </CardIconContainer>
+                                </Card>
+                                <Card
+                                    onClick={() => {
+                                        setTotal(false);
+                                        setAtivos(false);
+                                        setSolicitacoes(!solicitacoes);
+                                    }}
+                                    className={solicitacoes && 'active'}
+                                >
+                                    <CardTitle>Solicitações</CardTitle>
+                                    <CardIconContainer>
+                                        <FaUserEdit />
+                                        <ClientCounter>Solicitações ({clientesSolicitacao.length})</ClientCounter>
+                                    </CardIconContainer>
+                                </Card>
+                                <Card
+                                    onClick={() => {
+                                        setTotal(!total);
+                                        setAtivos(false);
+                                        setSolicitacoes(false);
+                                    }}
+                                    className={total && 'active'}
+                                >
+                                    <CardTitle>Total</CardTitle>
+                                    <CardIconContainer>
+                                        <FaDatabase />
+                                        <ClientCounter>Clientes Totais ({clientes.length})</ClientCounter>
+                                    </CardIconContainer>
+                                </Card>
+                            </ClienteCardsContainer>
                             <ContentClientContainer>
                                 <ContentClientHeader>
-                                    <ClientCounter>Clientes ({clientes.length})</ClientCounter>
-                                    <SearcherContainer>
-                                        <SearchBar search={search} setSearch={setSearch} />
-                                    </SearcherContainer>
+                                    {
+                                        (total || ativos || solicitacoes) && (
+                                            <SearcherContainer>
+                                                <SearchBar search={search} setSearch={setSearch} />
+                                            </SearcherContainer>
+                                        )
+                                    }
                                 </ContentClientHeader>
                                 {
                                     clientes.length === 0 ? (
@@ -95,16 +152,42 @@ const ClientPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <ClientList
-                                            clientes={clientes}
-                                            user={user}
-                                            navigate={navigate}
-                                            setLoading={setLoading}
-                                            search={search}
-                                            page={page}
-                                            setPage={setPage}
-                                            itemsPerPage={itemsPerPage}
-                                        />
+                                        total ? (
+                                            <ClientList
+                                                clientes={clientes}
+                                                user={user}
+                                                navigate={navigate}
+                                                setLoading={setLoading}
+                                                search={search}
+                                                page={page}
+                                                setPage={setPage}
+                                                itemsPerPage={itemsPerPage}
+                                            />
+                                        ) :
+                                            ativos ? (
+                                                <ClientList
+                                                    clientes={clientesAtivos}
+                                                    user={user}
+                                                    navigate={navigate}
+                                                    setLoading={setLoading}
+                                                    search={search}
+                                                    page={page}
+                                                    setPage={setPage}
+                                                    itemsPerPage={itemsPerPage}
+                                                />
+                                            ) :
+                                                solicitacoes ? (
+                                                    <ClientList
+                                                        clientes={clientesSolicitacao}
+                                                        user={user}
+                                                        navigate={navigate}
+                                                        setLoading={setLoading}
+                                                        search={search}
+                                                        page={page}
+                                                        setPage={setPage}
+                                                        itemsPerPage={itemsPerPage}
+                                                    />
+                                                ) : <></>
                                     )
                                 }
                             </ContentClientContainer>

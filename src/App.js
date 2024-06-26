@@ -27,6 +27,7 @@ import ParcelaInfo from "./pages/FinanceiroPage/ParcelaInfo";
 import PredioInfos from "./pages/PredioPage/PredioInfos";
 import ApartamentoInfos from "./pages/ApartamentoPage/ApartamentoInfos";
 import ClientInfos from "./pages/ClientPage/ClientInfos";
+import SingInPage from "./pages/SignInPage";
 
 const App = ({ checked, user }) => {
   return (
@@ -38,6 +39,7 @@ const App = ({ checked, user }) => {
             <Routes>
               <Route path="/" element={<BasicRoute><HomePage /></BasicRoute>} />
               <Route path="/login" element={<BasicRoute><LoginPage /></BasicRoute>} />
+              <Route path="/signin" element={<BasicRoute><SingInPage /></BasicRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/predios" element={<PrivateRoute><PredioPage /></PrivateRoute>} />
               <Route path="/predios/:predioId" element={<PrivateRoute><PredioInfos /></PrivateRoute>} />

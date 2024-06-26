@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useField } from "formik";
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
-
 import "react-datepicker/dist/react-datepicker.css";
 
 import {
@@ -13,8 +12,35 @@ import {
     StyledSelectArea,
     StyledSelectLabel,
     FormTextInput,
+    StyledInputMask,
 } from './styles';
 import { FiEye, FiEyeOff } from "react-icons/fi";
+
+export const MaskedInput = forwardRef(({ mask, ...props }, ref) => {
+    const [field, meta, helpers] = useField(props);
+    return (
+        <>
+            <StyledInputMask
+                {...field}
+                {...props}
+                mask={mask}
+                ref={ref}
+                onChange={(event) => {
+                    const rawValue = event.target.value.replace(/\D/g, '');
+                    helpers.setValue(rawValue);
+                }}
+                value={props.value}
+            />
+            {
+                meta.touched && meta.error ? (
+                    <ErrorMsg>{meta.error}</ErrorMsg>
+                ) : (
+                    <ErrorMsg style={{ visibility: 'hidden' }}>.</ErrorMsg>
+                )
+            }
+        </>
+    )
+});
 
 export const TextInput = ({ icon, ...props }) => {
     const [field, meta] = useField(props);

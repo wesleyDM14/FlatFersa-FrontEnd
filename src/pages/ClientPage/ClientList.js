@@ -10,11 +10,13 @@ import {
     DeleteContainer,
     DeleteIcon,
     DeleteTitle,
+    DocumentImage,
     EditIcon,
     FormColum,
     FormContent,
     FormInputArea,
     FormInputLabelRequired,
+    ImgContainer,
     Limitador,
     ListLabel,
     PredioListContainer,
@@ -36,11 +38,23 @@ import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
 import { deleteClientById } from "../../services/clientService";
 import Pagination from "../../components/Pagination";
+import {
+    DataColumn,
+    DataContainer,
+    RejectButton,
+    SolicitacaoModalContainer,
+    SolicitacaoModalContent,
+    SolicitacaoModalContentLabel,
+    SolicitacaoModalContentValue,
+    SolicitacaoModalTitle,
+    SolicitacaoTitleContainer
+} from "../ContractPage/ContractPage.styles";
 
 const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
+    const [modalSolicitacaoIsOpen, setModalSolicitacaoIsOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState({});
 
     const openEditModal = () => {
@@ -57,6 +71,14 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
 
     const closeDeleteModal = () => {
         setModalDeleteIsOpen(false);
+    }
+
+    const openSolicitacaoModal = () => {
+        setModalSolicitacaoIsOpen(true);
+    }
+
+    const closeSolicitacaoModal = () => {
+        setModalSolicitacaoIsOpen(false);
     }
 
     const filteredClients = useMemo(() =>
@@ -79,7 +101,14 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                 currentPageItems.map((cliente) => (
                     <SinglePredio
                         key={cliente.id}
-                        onClick={() => navigate(`/clientes/${cliente.id}`)}
+                        onClick={() => {
+                            if (cliente.statusClient === 'AGUARDANDO') {
+                                setSelectedClient(cliente);
+                                openSolicitacaoModal();
+                            } else {
+                                navigate(`/clientes/${cliente.id}`);
+                            }
+                        }}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Nome: </StyledLabel>
@@ -247,6 +276,84 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                         }
                     </Formik>
                 </StyledFormArea>
+            </Modal>
+            <Modal
+                isOpen={modalSolicitacaoIsOpen}
+                onRequestClose={closeSolicitacaoModal}
+                style={modalStyles}
+            >
+                <>
+                    <SolicitacaoModalContainer>
+                        <SolicitacaoTitleContainer>
+                            <SolicitacaoModalTitle>Solicitação de Acesso</SolicitacaoModalTitle>
+                        </SolicitacaoTitleContainer>
+                        <SolicitacaoModalContent>
+                            <DataColumn>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Nome:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.name}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>CPF:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.cpf}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>RG:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.rg}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Telefone:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.phone}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Data Nascimento:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{new Date(selectedClient.dateBirth).toLocaleDateString()}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Endereço:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.address}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                            </DataColumn>
+                            <DataColumn>
+                                <ImgContainer>
+                                    <SolicitacaoModalContentLabel>Documento de Identificação (Frente): </SolicitacaoModalContentLabel>
+                                    <DocumentImage src={selectedClient.documentoFrente} />
+                                </ImgContainer>
+                                <ImgContainer>
+                                    <SolicitacaoModalContentLabel>Documento de Identificação (Verso): </SolicitacaoModalContentLabel>
+                                    <DocumentImage src={selectedClient.documentoVerso} />
+                                </ImgContainer>
+                            </DataColumn>
+                        </SolicitacaoModalContent>
+                        <ButtonGroup>
+                            <BackButton
+                                type='button'
+                                onClick={() => {
+                                    setSelectedClient({});
+                                    closeSolicitacaoModal();
+                                }}
+                            >
+                                Fechar
+                            </BackButton>
+                            <RejectButton
+                                type='button'
+                                onClick={async () => {
+                                    //reprova cliente
+                                }}
+                            >
+                                Rejeitar
+                            </RejectButton>
+                            <SubmitButton
+                                type="button"
+                                onClick={async () => {
+                                    //aprove cliente
+                                }}
+                            >
+                                Aprovar
+                            </SubmitButton>
+                        </ButtonGroup>
+                    </SolicitacaoModalContainer>
+                </>
             </Modal>
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
         </PredioListContainer >

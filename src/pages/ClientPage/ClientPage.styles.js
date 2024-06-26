@@ -448,3 +448,69 @@ export const Image = styled.img`
     max-width: 100%;
     width: 50%;
 `;
+
+export const ClienteCardsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+`;
+
+export const Card = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    padding: 25px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+    cursor: pointer;
+    transition: 0.5s ease;
+
+    &:hover{
+        -webkit-transform: scale(1.1);
+        -ms-transform: scale(1.1);
+        transform: scale(1.1);
+        transition: 0.5s ease;
+    }
+
+    @media only screen and (max-width: 978px){
+        width: 80%;
+    }
+`;
+
+export const CardTitle = styled.h1`
+    font-size: 25px;
+    font-weight: bold;
+    color: ${props => props.theme.colors.titleColor};
+`;
+
+export const CardIconContainer = styled.div`
+    font-size: 35px;
+    color: ${props => props.theme.colors.dark1};
+    text-align: center;
+    margin-top: 15px;
+`;
+
+export const CardContent = styled.p``;
+
+export const DocumentImage = styled.img`
+    margin-top: 15px;
+    margin-bottom: 20px;
+    height: 100px;
+    width: 50%;
+`;
+
+export const ImgContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;

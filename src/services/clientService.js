@@ -1,13 +1,28 @@
 import axios from "axios";
 
-export const getClientes = async (user, setClients, setLoading) => {
+export const getClientes = async (user, setClients, setLoading, setClientesSolicitacao, setClientesAtivos) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/clients', {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
-        setClients(response.data);
+        let clientes = response.data;
+        let ativos = [];
+        let solicitacoes = [];
+
+        for (let index = 0; index < clientes.length; index++) {
+            const client = clientes[index];
+            if (client.statusClient === 'ATIVO') {
+                ativos.push(client);
+            } else if (client.statusClient === 'AGUARDANDO') {
+                solicitacoes.push(client);
+            }
+        }
+
+        setClientesAtivos(ativos);
+        setClientesSolicitacao(solicitacoes);
+        setClients(clientes);
         setLoading(false);
     }).catch((err) => {
         setLoading(false);

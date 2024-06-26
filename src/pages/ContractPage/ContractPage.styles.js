@@ -579,8 +579,8 @@ export const DataColumn = styled.div`
 `;
 
 export const DataContainer = styled.div`
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 `;
 
 export const DataIconContainer = styled.div`
