@@ -15,7 +15,8 @@ export const modalStyles = {
         transform: 'translate(-50%,-50%)',
         overflowY: 'auto',
         maxHeight: '600px',
-        padding: '0'
+        padding: '0',
+        maxWidth: '90%'
     }
 
 }

@@ -204,6 +204,7 @@ export const ButtonGroup = styled.div`
     padding: 0px 35px;
 
     @media only screen and (max-width: 978px){
+        flex-direction: column;
         justify-content: center;
         padding: 30px 10px;
     }
@@ -248,7 +249,9 @@ export const SubmitButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
+        margin-top: 15px;
         min-width: 45%;
+        max-width: 95%;
     }
 `;
 
@@ -325,7 +328,7 @@ export const PredioListContainer = styled.div`
 
 export const PredioListHeader = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 1fr;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
     height: 40px;
     width: 100%;
     align-items: center;
@@ -348,7 +351,7 @@ export const ListLabel = styled.h5`
 
 export const SinglePredio = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 1fr;
+    grid-template-columns: 5fr 2fr 2fr 1fr;
     height: 50px;
     width: 100%;
     align-items: center;

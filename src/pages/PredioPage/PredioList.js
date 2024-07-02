@@ -34,7 +34,7 @@ import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
-import { FormInput } from "../../components/FormLib";
+import { FinalidadeSelected, FormInput } from "../../components/FormLib";
 import { deletePredioById, updatePredio } from "../../services/predioService";
 import Pagination from "../../components/Pagination";
 
@@ -43,6 +43,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
     const [selectedPredio, setSelectedPredio] = useState({});
+    const [selectedFinalidade, setSelectedFinalidade] = useState('');
 
     const openEditModal = () => {
         setModalEditIsOpen(true);
@@ -94,6 +95,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             <EditIcon onClick={(event) => {
                                 event.stopPropagation();
                                 setSelectedPredio(predio);
+                                setSelectedFinalidade(predio.finalidade);
                                 openEditModal();
                             }}>
                                 <FaEdit />
@@ -101,6 +103,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             <DeleteIcon onClick={(event) => {
                                 event.stopPropagation();
                                 setSelectedPredio(predio);
+                                setSelectedFinalidade(predio.finalidade);
                                 openDeleteModal();
                             }}>
                                 <FaTrash />
@@ -131,6 +134,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             bairro: selectedPredio.bairro,
                             numApt: selectedPredio.numApt,
                             kwhPrice: selectedPredio.kwhPrice,
+                            finalidade: selectedPredio.finalidade,
                         }}
                         validationSchema={
                             Yup.object({
@@ -144,6 +148,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                            values.finalidade = selectedFinalidade;
                             await updatePredio(user, values, setSubmitting, setFieldError, setLoading);
                         }}
                     >
@@ -166,6 +171,12 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                                                     type="text"
                                                     name='endereco'
                                                     placeholder="Endereço e Número"
+                                                />
+                                            </FormInputArea>
+                                            <FormInputArea>
+                                                <FinalidadeSelected
+                                                    handleChange={setSelectedFinalidade}
+                                                    initialValue={selectedFinalidade}
                                                 />
                                             </FormInputArea>
                                         </FormColum>

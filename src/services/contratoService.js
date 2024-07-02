@@ -67,7 +67,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
 }
 
 export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {
-
+    console.log(contrato);
     if (user.isAdmin) {
         await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos', contrato, {
             headers: {

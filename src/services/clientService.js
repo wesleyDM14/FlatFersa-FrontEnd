@@ -20,8 +20,14 @@ export const getClientes = async (user, setClients, setLoading, setClientesSolic
             }
         }
 
-        setClientesAtivos(ativos);
-        setClientesSolicitacao(solicitacoes);
+        if (setClientesSolicitacao) {
+            setClientesSolicitacao(solicitacoes);
+        }
+
+        if (setClientesAtivos) {
+            setClientesAtivos(ativos);
+        }
+
         setClients(clientes);
         setLoading(false);
     }).catch((err) => {
@@ -73,5 +79,35 @@ export const deleteClientById = async (user, clientId, setLoading) => {
         setLoading(true);
     }).catch((err) => {
         console.log(err.message);
+    });
+}
+
+export const aproveClient = async (user, clientId, setLoading) => {
+    let client = { clientId: clientId };
+    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/aprove', client, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err);
+    });
+}
+
+export const reproveClient = async (user, clientId, message, setLoading) => {
+    let client = { clientId: clientId, message: message };
+    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/reprove', client, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        console.log(response.data);
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err);
     });
 }

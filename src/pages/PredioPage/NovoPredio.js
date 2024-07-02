@@ -30,7 +30,7 @@ import {
     LimitadorAlt,
 } from './PredioPage.styles';
 import { FaFileInvoice } from "react-icons/fa";
-import { FormInput, StyledSelect } from "../../components/FormLib";
+import { FinalidadeSelected, FormInput } from "../../components/FormLib";
 import { createPredio } from "../../services/predioService";
 import { ThreeDots } from "react-loader-spinner";
 
@@ -38,12 +38,6 @@ const NovoPredio = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [selectedFinalidade, setSelectedFinalidade] = useState({});
-
-    const finalidade = [
-        { label: 'Comercial', value: 'COMERCIAL' },
-        { label: 'Residencial', value: 'RESIDENCIAL' },
-        { label: 'Rural', value: 'RURAL' },
-    ];
 
     const openSidebar = () => {
         setSidebarOpen(true);
@@ -118,7 +112,10 @@ const NovoPredio = ({ user }) => {
                                                         />
                                                     </FormInputArea>
                                                     <FormInputArea>
-                                                        <StyledSelect options={finalidade} setSelectedOption={setSelectedFinalidade} label='Finalidade do Imóvel' />
+                                                        <FinalidadeSelected
+                                                            handleChange={setSelectedFinalidade}
+                                                            initialValue={selectedFinalidade}
+                                                        />
                                                     </FormInputArea>
                                                 </FormColum>
                                                 <FormColum>

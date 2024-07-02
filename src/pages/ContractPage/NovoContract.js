@@ -148,6 +148,8 @@ const NovoContract = ({ user }) => {
                                             aptId: '',
                                             clienteId: '',
                                             periocidade: '',
+                                            leituraAtual: '',
+                                            leituraInicial: '',
                                         }}
                                         validationSchema={
                                             Yup.object({
@@ -155,13 +157,15 @@ const NovoContract = ({ user }) => {
                                                 diaVencimentoAluguel: Yup.number().required('Obrigatório'),
                                                 valorAluguel: Yup.number().required('Obrigatório'),
                                                 limiteKwh: Yup.number().required('Obrigatório'),
+                                                leituraInicial: Yup.number().required('Obrigatório')
                                             })
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                             values.dataInicio = selectedDate;
+                                            values.leituraAtual = values.leituraInicial;
                                             values.periocidade = selectedPeriocidade.value;
                                             values.clienteId = selectedClient.value;
-                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'faltfersa' ? selectedApartamento.id : selectedApartamento.value;
+                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' ? selectedApartamento.id : selectedApartamento.value;
                                             await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >
@@ -243,6 +247,20 @@ const NovoContract = ({ user }) => {
                                                                 </FormInputArea>
                                                                 <FormInputArea>
                                                                     <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
+                                                                </FormInputArea>
+                                                            </SubItensContainer>
+                                                            <SubItensContainer>
+                                                                <FormInputArea>
+                                                                    <FormInputLabelRequired>Leitura Inicial Medidor</FormInputLabelRequired>
+                                                                    <Limitador>
+                                                                        <FormInput
+                                                                            type="number"
+                                                                            min="0"
+                                                                            step="1"
+                                                                            name="leituraInicial"
+                                                                            placeholder="Leitura Inicial"
+                                                                        />
+                                                                    </Limitador>
                                                                 </FormInputArea>
                                                             </SubItensContainer>
                                                             {

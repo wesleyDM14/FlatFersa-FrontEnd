@@ -36,7 +36,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput } from "../../components/FormLib";
-import { deleteClientById } from "../../services/clientService";
+import { aproveClient, deleteClientById, reproveClient } from "../../services/clientService";
 import Pagination from "../../components/Pagination";
 import {
     DataColumn,
@@ -94,7 +94,8 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
         <PredioListContainer>
             <PredioListHeader>
                 <ListLabel>Nome</ListLabel>
-                <ListLabel>Telefone</ListLabel>
+                <ListLabel className="hidden-responsive">Telefone</ListLabel>
+                <ListLabel>Status</ListLabel>
                 <ListLabel>Opções</ListLabel>
             </PredioListHeader>
             {
@@ -114,7 +115,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             <StyledLabel>Nome: </StyledLabel>
                             <PredioValue>{cliente.name}</PredioValue>
                         </PredioSingleContainer>
-                        <PredioSingleContainer>
+                        <PredioSingleContainer className="hidden-responsive">
                             <StyledLabel><FaWhatsapp /> </StyledLabel>
                             <PredioValue
                                 href={`https://whatsa.me/55${cliente.phone}`}
@@ -123,6 +124,10 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             >
                                 {cliente.phone}
                             </PredioValue>
+                        </PredioSingleContainer>
+                        <PredioSingleContainer>
+                            <StyledLabel> Status: </StyledLabel>
+                            <PredioValue>{cliente.statusClient}</PredioValue>
                         </PredioSingleContainer>
                         <AdminPredioContainer>
                             <EditIcon onClick={(event) => {
@@ -192,7 +197,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-
+                            //update client
                         }}
                     >
                         {
@@ -338,7 +343,14 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             <RejectButton
                                 type='button'
                                 onClick={async () => {
-                                    //reprova cliente
+                                    if (window.confirm("Tem certeza?")) {
+                                        let message = window.prompt("Por favor informe o motivo: ");
+                                        if (message === null || message === "") {
+                                            window.alert("Por favor informe um motivo.");
+                                        } else {
+                                            await reproveClient(user, selectedClient.id, message, setLoading);
+                                        }
+                                    }
                                 }}
                             >
                                 Rejeitar
@@ -346,7 +358,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             <SubmitButton
                                 type="button"
                                 onClick={async () => {
-                                    //aprove cliente
+                                    await aproveClient(user, selectedClient.id, setLoading);
                                 }}
                             >
                                 Aprovar

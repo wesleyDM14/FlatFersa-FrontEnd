@@ -270,7 +270,8 @@ export const RejectButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
-        //min-width: 45%;
+        margin-top: 15px;
+        min-width: 95%;
     }
 `;
 
@@ -720,6 +721,10 @@ export const DetailContractButtonGroup = styled.div`
     align-items: center;
     justify-content: center;
     margin-top: 15px;
+
+    @media only screen and (max-width: 978px){
+        flex-direction: column;
+    }
 `;
 
 export const DetailContractBackButton = styled.button`
@@ -740,7 +745,7 @@ export const DetailContractBackButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
-        //min-width: 45%;
+        min-width: 95%;
     }
 `;
 
@@ -761,7 +766,9 @@ export const DetailContractDownloadButton = styled.button`
     }
 
     @media only screen and (max-width: 978px){
-        //min-width: 45%;
+        min-width: 95%;
+        margin-top: 15px;
+        margin-right: 15px;
     }
 `;
 

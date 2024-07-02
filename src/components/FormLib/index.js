@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import { useField } from "formik";
 import Select from 'react-select';
 import DatePicker from "react-datepicker";
@@ -283,7 +283,7 @@ export const ApartamentoSelect = ({ apartamentos, setSelectedApartamento }) => {
     );
 }
 
-export const StyledSelect = ({ options, setSelectedOption, label }) => {
+export const StyledSelect = ({ options, setSelectedOption, label, selectedOption }) => {
 
     return (
         <StyledSelectArea>
@@ -294,6 +294,7 @@ export const StyledSelect = ({ options, setSelectedOption, label }) => {
                 onChange={(value) => {
                     setSelectedOption(value);
                 }}
+                value={selectedOption}
                 menuPlacement="auto"
                 styles={{
                     control: (baseStyles, state) => ({
@@ -319,6 +320,65 @@ export const StyledSelect = ({ options, setSelectedOption, label }) => {
                         }
                     })
                 }}
+            />
+        </StyledSelectArea>
+    );
+}
+
+export const FinalidadeSelected = ({ handleChange, initialValue, ...props }) => {
+    const [selectedFinalidade, setSelectedFinalidade] = useState(null);
+
+    const options = useMemo(() => [
+        { label: 'Comercial', value: 'COMERCIAL' },
+        { label: 'Residencial', value: 'RESIDENCIAL' },
+        { label: 'Rural', value: 'RURAL' },
+    ], []);
+
+    useEffect(() => {
+        if (initialValue) {
+            setSelectedFinalidade(options.find(option => option.value === initialValue));
+        }
+    }, [initialValue, options]);
+
+    const handleChangeSelected = (selectedOption) => {
+        setSelectedFinalidade(selectedOption);
+        handleChange(selectedOption ? selectedOption.value : null);
+    }
+
+    return (
+        <StyledSelectArea>
+            <StyledSelectLabel>Finalidade do Imóvel</StyledSelectLabel>
+            <Select
+                options={options}
+                placeholder={'Selecionar opção desejada'}
+                onChange={handleChangeSelected}
+                value={selectedFinalidade}
+                menuPlacement="auto"
+                styles={{
+                    control: (baseStyles, state) => ({
+                        maxWidth: '100%',
+                        width: '90%',
+                        backgroundColor: '#fff',
+                        borderColor: '#dbdbdb',
+                        borderRadius: '4px',
+                        color: '#363636',
+                        alignItems: 'center',
+                        border: '2px solid #0a0a0a0d',
+                        display: 'inline-flex',
+                        fontSize: '1rem',
+                        height: '2.5em',
+                        justifyContent: 'flex-start',
+                        paddingBottom: 'calc(.5em - 1px)',
+                        paddingLeft: 'calc(.75em - 1px)',
+                        paddingRight: 'calc(.75em - 1px)',
+                        paddingTop: 'calc(.5em - 1px)',
+                        lineHeight: '1.5',
+                        "&:hover": {
+                            border: '2px solid #000',
+                        }
+                    })
+                }}
+                isClearable
             />
         </StyledSelectArea>
     );

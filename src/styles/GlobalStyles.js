@@ -162,6 +162,9 @@ const GlobalStyle = createGlobalStyle`
         .modal-responsive {
             right: 10%;
         }
+        .hidden-responsive {
+            display: none;
+        }
     }
 `;
 
