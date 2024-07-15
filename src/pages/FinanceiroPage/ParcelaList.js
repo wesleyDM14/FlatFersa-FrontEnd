@@ -26,7 +26,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
                 parcela.statusPagamento.toLowerCase().includes(search.toLowerCase())
             )
         }
-    }, [parcelas, search]);
+    }, [parcelas, search, user]);
 
 
     const totalPages = Math.ceil(filteredParcelas.length / itemsPerPage);
@@ -39,6 +39,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
                     <PredioListHeader >
                         <ListLabel>Cliente</ListLabel>
                         <ListLabel>Valor</ListLabel>
+                        <ListLabel className="hidden-responsive">Vencimento</ListLabel>
                         <ListLabel>Status</ListLabel>
                     </PredioListHeader>
                 ) : (
@@ -63,8 +64,10 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
                                         <StyledLabel>Valor: </StyledLabel>
                                         <PredioValue>{parcela.prestacao.valor}</PredioValue>
                                     </PredioSingleContainer>
+                                    <PredioSingleContainer  className="hidden-responsive">
+                                        <PredioValue  className="hidden-responsive">{new Date(parcela.prestacao.dataVencimento).toLocaleDateString()}</PredioValue>
+                                    </PredioSingleContainer>
                                     <PredioSingleContainer>
-                                        <StyledLabel>Status: </StyledLabel>
                                         <PredioValue>{parcela.prestacao.statusPagamento}</PredioValue>
                                     </PredioSingleContainer>
                                 </SinglePredio>

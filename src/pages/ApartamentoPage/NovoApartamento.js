@@ -45,12 +45,9 @@ const NovoApartamento = ({ user }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function loadData() {
-            if (loading) {
-                await getPredios(user, setPredios, setLoading);
-            }
+        if (loading && user.accessToken) {
+            getPredios(user, setPredios, setLoading);
         }
-        loadData();
     }, [loading, user]);
 
     const openSidebar = () => {

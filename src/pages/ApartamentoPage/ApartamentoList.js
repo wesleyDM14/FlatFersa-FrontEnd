@@ -83,7 +83,7 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                 currentPageItems.map((apartamento) => (
                     <SinglePredio
                         key={apartamento.apartamento.id}
-                        onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
+                        //onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>

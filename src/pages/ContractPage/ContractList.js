@@ -3,11 +3,23 @@ import { Formik, Form } from "formik";
 import Modal from "react-modal";
 import * as Yup from 'yup';
 
-import { FaCheck, FaClock, FaEdit, FaFileContract, FaTimes, FaTrash, FaUserAlt } from "react-icons/fa";
+import {
+    FaCheck,
+    FaClock,
+    FaCloudUploadAlt,
+    FaEdit,
+    FaFileContract,
+    FaFileInvoice,
+    FaFilePdf,
+    FaTimes,
+    FaTrash,
+    FaUserAlt
+} from "react-icons/fa";
 import {
     AdminPredioContainer,
     BackButton,
     ButtonGroup,
+    ContentIconContainer,
     ContratoCounter,
     DataColumn,
     DataContainer,
@@ -41,6 +53,7 @@ import {
     FormColum,
     FormContent,
     FormInputArea,
+    FormInputLabel,
     FormInputLabelRequired,
     Limitador,
     ListLabel,
@@ -64,12 +77,14 @@ import {
     SubmitButton
 } from "./ContractPage.styles";
 
-import { approveContract, cancelContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
+import { approveContract, assinarContratoById, cancelContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
 import { ThreeDots } from "react-loader-spinner";
 import Pagination from "../../components/Pagination";
+import { ClientCounter, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFileLegend } from "../ClientPage/ClientPage.styles";
+import { PdfPreview } from "../FinanceiroPage/FinanceiroPage.styles";
 
 const ContractList = ({ contratos, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
@@ -80,7 +95,10 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
 
+    const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false);
+
     const [financeiroPage, setFinanceiroPage] = useState(1);
+    const [fileType, setFileType] = useState(null);
 
     const periocidade = [
         { label: 'Anualmente', value: 'ANUALMENTE' },
@@ -103,12 +121,26 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
         setModalDeleteIsOpen(false);
     }
 
+    const openModalAssinatura = () => {
+        setModalAssinaturaIsOpen(true);
+    }
+
+    const closeModalAssinatura = () => {
+        setModalAssinaturaIsOpen(false);
+    }
+
     const openContractModal = () => {
         !(modalEditIsOpen && modalDeleteIsOpen) && setModalContractIsOpen(true);
     }
 
     const closeContractModal = () => {
         setModalContractIsOpen(false);
+    }
+
+    const handleFileChange = (event, setFieldValue) => {
+        const file = event.target.files[0];
+        setFieldValue('contrato', file);
+        setFileType(file.type);
     }
 
     const filteredContratos = useMemo(() => {
@@ -466,7 +498,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                 </DetailContractDataContainer>
                                 <DetailContractButtonGroup>
                                     <DetailContractBackButton onClick={() => closeContractModal()}>Voltar</DetailContractBackButton>
-                                    {(selectedContrato.contrato.statusContrato === 'ATIVO') && (
+                                    {(selectedContrato.contrato.statusContrato === 'ATIVO' && user.isAdmin) && (
                                         <RejectButton onClick={async () => {
                                             if (window.confirm("Tem certeza?")) {
                                                 let message = window.prompt("Por favor informe o motivo: ");
@@ -493,11 +525,95 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                 Download PDF
                                             </DetailContractDownloadButton>
                                     )}
+                                    {!selectedContrato.contrato.assinado && (
+                                        <DetailContractDownloadButton onClick={async () => {
+                                            openModalAssinatura();
+                                        }}>
+                                            Enviar PDF assinado
+                                        </DetailContractDownloadButton>
+                                    )}
                                 </DetailContractButtonGroup>
                             </DetailContractContainer>
                         )
                     )
                 }
+            </Modal>
+            <Modal
+                isOpen={modalAssinaturaIsOpen}
+                onRequestClose={closeModalAssinatura}
+                style={modalStyles}
+            >
+                <StyledFormArea>
+                    <div style={{ display: 'flex', marginBottom: '30px' }}>
+                        <ContentIconContainer>
+                            <FaFileInvoice />
+                        </ContentIconContainer>
+                        <ClientCounter>Enviar Contrato Assinado</ClientCounter>
+                    </div>
+                    <Formik
+                        initialValues={{
+                            contrato: null,
+                            contratoId: selectedContrato.contrato && selectedContrato.contrato.id,
+                        }}
+                        validationSchema={
+                            Yup.object().shape({
+                                contrato: Yup.mixed().required('PDF é Obrigatório'),
+                            })
+                        }
+                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                            await assinarContratoById(user, values, setSubmitting, setFieldError, setLoading, closeModalAssinatura);
+                        }}
+                    >
+                        {
+                            ({ isSubmitting, setFieldValue, values }) => (
+                                <Form>
+                                    <FormInputArea>
+                                        <FormInputLabel>Contrato Assinado</FormInputLabel>
+                                        <StyledFileArea>
+                                            {
+                                                fileType === 'application/pdf' ? (
+                                                    <PdfPreview>
+                                                        <FaFilePdf />
+                                                    </PdfPreview>
+                                                ) : (
+                                                    <div>
+                                                        <StyledFileIconContainer>
+                                                            <FaCloudUploadAlt />
+                                                        </StyledFileIconContainer>
+                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                        <StyledFileLegend>Tamanho máximo 5MB</StyledFileLegend>
+                                                    </div>
+                                                )
+                                            }
+                                            <StyledFileInput
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(event) => handleFileChange(event, setFieldValue)}
+                                            />
+                                        </StyledFileArea>
+                                    </FormInputArea>
+                                    <ButtonGroup>
+                                        <BackButton type='button' onClick={() => closeModalAssinatura()}>Voltar</BackButton>
+                                        {
+                                            !isSubmitting && (
+                                                <SubmitButton type="submit">Registrar</SubmitButton>
+                                            )
+                                        }
+                                        {
+                                            isSubmitting && (
+                                                <ThreeDots
+                                                    color={'#4e4e4e'}
+                                                    height={49}
+                                                    width={100}
+                                                />
+                                            )
+                                        }
+                                    </ButtonGroup>
+                                </Form>
+                            )
+                        }
+                    </Formik>
+                </StyledFormArea>
             </Modal>
             <Modal
                 isOpen={modalEditIsOpen}

@@ -134,6 +134,7 @@ export const downloadContract = async (user, contratoId, setIsDownloading) => {
 }
 
 export const approveContract = async (user, contract, setSubmitting, setFieldError, setLoading) => {
+    contract.leituraInicial = 0;
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/aprovar', contract, {
         headers: {
             "Content-Type": "application/json",
@@ -190,5 +191,26 @@ export const deleteContratoById = async (user, contratoId, setLoading) => {
         setLoading(true);
     }).catch((err) => {
         console.log(err.message);
+    });
+}
+
+export const assinarContratoById = async (user, data, setSubmitting, setFieldError, setLoading, closeModalAssinatura) => {
+    console.log(data);
+    const { contratoId } = data;
+    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/contratos/assinar/${contratoId}`, data, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        const { data } = response;
+        console.log(data);
+        setSubmitting(false);
+        closeModalAssinatura();
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err);
+        setFieldError(err.message);
+        setSubmitting(false);
     });
 }

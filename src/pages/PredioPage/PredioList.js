@@ -81,7 +81,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                 currentPageItems.map((predio) => (
                     <SinglePredio
                         key={predio.id}
-                        onClick={() => navigate(`/predios/${predio.id}`)}
+                        //onClick={() => navigate(`/predios/${predio.id}`)}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>

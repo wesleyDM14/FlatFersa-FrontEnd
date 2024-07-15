@@ -153,6 +153,9 @@ export const PredioValue = styled.a`
     margin-right: 30px;
     text-decoration: none;
     color: ${props => props.theme.colors.dark1};
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     @media (max-width: 1380px) {
         font-weight: 300;
@@ -278,6 +281,11 @@ export const PrestcaoDetailContentContainer = styled.div`
     background-color: #fff;
     box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
     transition: 0.5s ease;
+
+    @media only screen and (max-width: 978px){
+        display: flex;
+        flex-direction: column;
+    }
 `;
 
 export const PrestacaoDetailLeftColumn = styled.div`
@@ -285,6 +293,7 @@ export const PrestacaoDetailLeftColumn = styled.div`
     flex-direction: column;
     gap: 15px;
     margin-right: 15px;
+    flex: 1;
 `;
 
 export const PrestacaoDetailValueContainer = styled.div`
@@ -304,6 +313,11 @@ export const PrestacaoDetailRightColumn = styled.div`
     display: flex;
     flex-direction: column;
     gap: 15px;
+    flex: 1;
+
+    @media only screen and (max-width: 978px){
+        margin-top: 15px;
+    }
 `;
 
 export const PrestacaoDetailPagamentoContainer = styled.div`
@@ -313,7 +327,10 @@ export const PrestacaoDetailPagamentoContainer = styled.div`
     justify-content: center;
 `;
 
-export const QrCodePagamento = styled.img``;
+export const QrCodePagamento = styled.img`
+    width: 250px;
+    margin-top: 15px;
+`;
 
 export const QrCodeCopiaEColaContainer = styled.div`
     width: 80%; /* ou qualquer valor que você preferir */
@@ -383,7 +400,7 @@ export const SubmitButton = styled.button`
     transition: all .2s ease-out;
     background-color: #000;;
     color: ${props => props.theme.colors.primary};
-
+    margin-right: 15px;
     &:hover{
         background-color: #000A;
     }
@@ -391,4 +408,46 @@ export const SubmitButton = styled.button`
     @media only screen and (max-width: 978px){
         //min-width: 45%;
     }
+`;
+
+export const WaitingContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const WaitingIcon = styled.div`
+    margin-top: 5px;
+    font-size: 150px;
+    color: ${props => props.theme.colors.dark2};
+`;
+
+export const WaitingTitle = styled.h2`
+    font-size: 20px;
+`;
+
+export const ComprovanteContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+`;
+
+export const ComprovanteTitle = styled.h2``;
+
+export const ComprovanteImg = styled.img`
+    width: 150px;
+`;
+
+export const ComprovanteIconContainer = styled.div`
+    font-size: 150px;
+    color: ${props => props.theme.colors.dark2};
+`;
+
+export const PdfPreview = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: red;
 `;

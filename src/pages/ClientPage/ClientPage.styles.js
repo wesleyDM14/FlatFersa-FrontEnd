@@ -517,3 +517,8 @@ export const ImgContainer = styled.div`
     flex-direction: column;
     align-items: center;
 `;
+
+export const LinkImgContainer = styled.a`
+    text-decoration: none;
+    cursor: pointer;
+`;

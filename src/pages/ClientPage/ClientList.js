@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
+import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
 import {
     AdminPredioContainer,
     BackButton,
@@ -15,15 +15,23 @@ import {
     FormColum,
     FormContent,
     FormInputArea,
+    FormInputLabel,
     FormInputLabelRequired,
+    Image,
     ImgContainer,
     Limitador,
+    LinkImgContainer,
     ListLabel,
     PredioListContainer,
     PredioListHeader,
     PredioSingleContainer,
     PredioValue,
     SinglePredio,
+    StyledFileArea,
+    StyledFileIconContainer,
+    StyledFileInput,
+    StyledFileInputTitle,
+    StyledFileLegend,
     StyledFormArea,
     StyledLabel,
     SubItensContainer,
@@ -35,8 +43,8 @@ import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
-import { FormInput } from "../../components/FormLib";
-import { aproveClient, deleteClientById, reproveClient } from "../../services/clientService";
+import { FormInput, StyledDatePicker } from "../../components/FormLib";
+import { aproveClient, deleteClientById, reproveClient, updateClientById } from "../../services/clientService";
 import Pagination from "../../components/Pagination";
 import {
     DataColumn,
@@ -56,6 +64,9 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
     const [modalSolicitacaoIsOpen, setModalSolicitacaoIsOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState({});
+    const [startDate, setStartDate] = useState(new Date());
+    const [selectedBackImage, setSelectedBackImage] = useState();
+    const [selectedFrontImage, setSelectedFrontImage] = useState();
 
     const openEditModal = () => {
         setModalEditIsOpen(true);
@@ -107,7 +118,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                 setSelectedClient(cliente);
                                 openSolicitacaoModal();
                             } else {
-                                navigate(`/clientes/${cliente.id}`);
+                                //navigate(`/clientes/${cliente.id}`);
                             }
                         }}
                     >
@@ -133,6 +144,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             <EditIcon onClick={(event) => {
                                 event.stopPropagation();
                                 setSelectedClient(cliente);
+                                setStartDate(new Date(cliente.dateBirth));
                                 openEditModal();
                             }}>
                                 <FaEdit />
@@ -184,24 +196,35 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                     </div>
                     <Formik
                         initialValues={{
+                            id: selectedClient.id,
                             name: selectedClient.name,
                             cpf: selectedClient.cpf,
                             rg: selectedClient.rg,
                             phone: selectedClient.phone,
                             address: selectedClient.address,
+                            dateBirth: selectedClient.dateBirth,
+                            documentoFrente: selectedClient.documentoFrente,
+                            documentoVerso: selectedClient.documentoVerso,
+                            newPassword: '',
+                            confirmPassword: '',
                         }}
                         validationSchema={
                             Yup.object({
                                 name: Yup.string().required('Obrigatório'),
                                 phone: Yup.string().required('Obrigatório'),
+                                address: Yup.string().required('Endereço é Obrigatório'),
+                                dateBirth: Yup.date().required('Data de Nascimento é Obrigatório'),
+                                newPassword: Yup.string(),
+                                confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir'),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            //update client
+                            values.dateBirth = startDate;
+                            await updateClientById(user, values, setSubmitting, setFieldError, closeEditModal, setLoading);
                         }}
                     >
                         {
-                            ({ isSubmitting }) => (
+                            ({ isSubmitting, setFieldValue }) => (
                                 <Form>
                                     <FormContent>
                                         <FormColum>
@@ -235,6 +258,26 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                                     </Limitador>
                                                 </FormInputArea>
                                             </SubItensContainer>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Nova Senha</FormInputLabel>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            name='newPassword'
+                                                            type='password'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Confirmar Nova Senha</FormInputLabel>
+                                                    <Limitador>
+                                                        <FormInput
+                                                            name='confirmPassword'
+                                                            type='password'
+                                                        />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
                                         </FormColum>
                                         <FormColum>
                                             <FormInputArea>
@@ -247,6 +290,12 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                             </FormInputArea>
                                             <SubItensContainer>
                                                 <FormInputArea>
+                                                    <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
                                                     <FormInputLabelRequired>Telefone</FormInputLabelRequired>
                                                     <Limitador>
                                                         <FormInput
@@ -257,6 +306,79 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                                     </Limitador>
                                                 </FormInputArea>
                                             </SubItensContainer>
+                                            <FormInputArea>
+                                                <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
+                                                <StyledFileArea>
+                                                    {
+                                                        selectedFrontImage ? (
+                                                            <Image
+                                                                src={selectedFrontImage}
+                                                            />
+                                                        ) : (
+                                                            selectedClient.documentoFrente ? (
+                                                                <Image
+                                                                    src={selectedClient.documentoFrente}
+                                                                />
+                                                            ) :
+                                                                (
+                                                                    <div>
+                                                                        <StyledFileIconContainer>
+                                                                            <FaCloudUploadAlt />
+                                                                        </StyledFileIconContainer>
+                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                                    </div>
+                                                                )
+                                                        )
+                                                    }
+
+                                                    <StyledFileInput
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(event) => {
+                                                            const file = event.target.files[0];
+                                                            setFieldValue('documentFront', file);
+                                                            setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
+                                                        }}
+                                                    />
+                                                </StyledFileArea>
+                                            </FormInputArea>
+                                            <FormInputArea>
+                                                <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
+                                                <StyledFileArea>
+                                                    {
+                                                        selectedBackImage ? (
+                                                            <Image
+                                                                src={selectedBackImage}
+                                                            />
+                                                        ) : (
+                                                            selectedClient.documentoVerso ? (
+                                                                <Image
+                                                                    src={selectedClient.documentoVerso}
+                                                                />
+                                                            ) :
+                                                                (
+                                                                    <div>
+                                                                        <StyledFileIconContainer>
+                                                                            <FaCloudUploadAlt />
+                                                                        </StyledFileIconContainer>
+                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
+                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                                    </div>
+                                                                )
+                                                        )
+                                                    }
+                                                    <StyledFileInput
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(event) => {
+                                                            const file = event.target.files[0];
+                                                            setFieldValue('documentBack', file);
+                                                            setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
+                                                        }}
+                                                    />
+                                                </StyledFileArea>
+                                            </FormInputArea>
                                         </FormColum>
                                     </FormContent>
                                     <ButtonGroup>
@@ -320,14 +442,20 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                 </DataContainer>
                             </DataColumn>
                             <DataColumn>
-                                <ImgContainer>
-                                    <SolicitacaoModalContentLabel>Documento de Identificação (Frente): </SolicitacaoModalContentLabel>
-                                    <DocumentImage src={selectedClient.documentoFrente} />
-                                </ImgContainer>
-                                <ImgContainer>
-                                    <SolicitacaoModalContentLabel>Documento de Identificação (Verso): </SolicitacaoModalContentLabel>
-                                    <DocumentImage src={selectedClient.documentoVerso} />
-                                </ImgContainer>
+                                <LinkImgContainer href={selectedClient.documentoFrente} target="_blank">
+                                    <ImgContainer>
+                                        <SolicitacaoModalContentLabel>Documento de Identificação (Frente): </SolicitacaoModalContentLabel>
+                                        <DocumentImage src={selectedClient.documentoFrente} />
+                                    </ImgContainer>
+                                </LinkImgContainer>
+
+                                <LinkImgContainer href={selectedClient.documentoVerso} target="_blank">
+                                    <ImgContainer>
+                                        <SolicitacaoModalContentLabel>Documento de Identificação (Verso): </SolicitacaoModalContentLabel>
+                                        <DocumentImage src={selectedClient.documentoVerso} />
+                                    </ImgContainer>
+                                </LinkImgContainer>
+
                             </DataColumn>
                         </SolicitacaoModalContent>
                         <ButtonGroup>

@@ -68,6 +68,40 @@ export const getClienteById = async (user, clientId, setClient, setLoading) => {
     });
 }
 
+export const updateClientById = async (user, client, setSubmitting, setFieldError, closeEditModal, setLoading) => {
+    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/clients/${client.id}`, client, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then(async (response) => {
+        if (client.newPassword) {
+            let newData = { newPassword: client.newPassword, confirmPassword: client.confirmPassword }
+            await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/users/client/${client.id}`, newData, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.accessToken}`,
+                }
+            }).then(async (res) => {
+                alert(res.data.message);
+            }).catch(err => {
+                console.error(err.message);
+                setSubmitting(false);
+                setFieldError('newPassword', err.message);
+                alert('Erro ao mudar a senha');
+            });
+        }
+        setSubmitting(false);
+        alert(response.data.message);
+        closeEditModal();
+        setLoading(true);
+    }).catch((err) => {
+        console.log(err);
+        setFieldError('name', err.message);
+        setSubmitting(false);
+    });
+}
+
 export const deleteClientById = async (user, clientId, setLoading) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/clients/${clientId}`, {
         headers: {

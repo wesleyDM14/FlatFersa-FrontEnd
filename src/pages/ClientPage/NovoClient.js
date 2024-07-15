@@ -35,14 +35,12 @@ import {
     SubmitButton,
 } from "./ClientPage.styles";
 import { FaCloudUploadAlt, FaFileInvoice } from "react-icons/fa";
-import { FormInput, StyledDatePicker } from "../../components/FormLib";
+import { FormInput, MaskedInput, StyledDatePicker } from "../../components/FormLib";
 import { createCliente } from "../../services/clientService";
 import { ThreeDots } from "react-loader-spinner";
 
 const NovoClient = ({ user }) => {
     const navigate = useNavigate();
-    /*const phoneMask = useMask({ mask: '(__) _____-____', replacement: { _: /\d/ } });
-    const cpfMask = useMask({ mask: '___.___.___-__', replacement: { _: /\d/ } });*/
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
     const [selectedBackImage, setSelectedBackImage] = useState();
@@ -87,8 +85,10 @@ const NovoClient = ({ user }) => {
                                 validationSchema={
                                     Yup.object({
                                         name: Yup.string().required('Obrigatório'),
-                                        phone: Yup.string().required('Obrigatório'),
+                                        phone: Yup.string().required('Telefone é obrigatório').matches(/^\d{10,11}$/, 'Telefone inválido'),
                                         email: Yup.string().required('Obrigatório'),
+                                        cpf: Yup.string().required('CPF é obrigatório').matches(/^\d{11}$/, 'CPF inválido'),
+                                        rg: Yup.string().required('RG é obrigatório').min(9, 'RG deve ter no mínimo 9 caracteres'),
                                     })
                                 }
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -97,7 +97,7 @@ const NovoClient = ({ user }) => {
                                 }}
                             >
                                 {
-                                    ({ isSubmitting, setFieldValue }) => (
+                                    ({ isSubmitting, setFieldValue, values }) => (
                                         <Form>
                                             <FormContent>
                                                 <FormColum>
@@ -121,8 +121,10 @@ const NovoClient = ({ user }) => {
                                                         <FormInputArea>
                                                             <FormInputLabelRequired>CPF</FormInputLabelRequired>
                                                             <Limitador>
-                                                                <FormInput
+                                                                <MaskedInput
                                                                     name='cpf'
+                                                                    mask='999.999.999-99'
+                                                                    value={values.cpf}
                                                                     type='text'
                                                                     placeholder='CPF do cliente'
                                                                 />
@@ -159,9 +161,11 @@ const NovoClient = ({ user }) => {
                                                         <FormInputArea>
                                                             <FormInputLabelRequired>Telefone</FormInputLabelRequired>
                                                             <Limitador>
-                                                                <FormInput
+                                                                <MaskedInput
                                                                     name='phone'
                                                                     type='text'
+                                                                    mask='(99)99999-9999'
+                                                                    value={values.phone}
                                                                     placeholder='Telefone'
                                                                 />
                                                             </Limitador>
@@ -172,7 +176,7 @@ const NovoClient = ({ user }) => {
                                                         <StyledFileArea>
                                                             {
                                                                 selectedFrontImage ? (
-                                                                    <Image 
+                                                                    <Image
                                                                         src={selectedFrontImage}
                                                                     />
                                                                 ) : (
@@ -202,7 +206,7 @@ const NovoClient = ({ user }) => {
                                                         <StyledFileArea>
                                                             {
                                                                 selectedBackImage ? (
-                                                                    <Image 
+                                                                    <Image
                                                                         src={selectedBackImage}
                                                                     />
                                                                 ) : (

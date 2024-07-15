@@ -760,6 +760,7 @@ export const DetailContractDownloadButton = styled.button`
     transition: all .2s ease-out;
     background-color: #000;;
     color: ${props => props.theme.colors.primary};
+    margin-right: 5px;
 
     &:hover{
         background-color: #000A;

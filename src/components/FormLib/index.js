@@ -132,7 +132,7 @@ export const PredioSelect = ({ predios, setSelectedPredio, setLoading }) => {
                 placeholder={'Selecione o Prédio do Apartamento'}
                 onChange={(value) => {
                     setSelectedPredio(value);
-                    setLoading(true);
+                    setLoading && setLoading(true);
                 }}
                 menuPlacement="auto"
                 menuPosition="fixed"
@@ -175,8 +175,10 @@ export const ClientSelect = ({ clientes, setSelectedClient }) => {
             let optionsTmp = [];
             for (let index = 0; index < clientes.length; index++) {
                 const element = clientes[index];
-                let temp = { label: element.name, value: element.id };
-                optionsTmp.push(temp);
+                if (element.statusClient === 'ATIVO') {
+                    let temp = { label: element.name, value: element.id };
+                    optionsTmp.push(temp);
+                }
             }
             setOptions(optionsTmp);
         }

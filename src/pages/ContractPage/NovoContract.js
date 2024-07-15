@@ -363,6 +363,7 @@ const NovoContract = ({ user }) => {
                                             dataInicio: new Date(),
                                             duracaoContrato: '',
                                             diaVencimentoAluguel: '',
+                                            leituraAtual: 0,
                                             aptId: '',
                                         }}
                                         validationSchema={
@@ -373,7 +374,7 @@ const NovoContract = ({ user }) => {
                                         }
                                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                             values.dataInicio = selectedDate;
-                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'faltfersa' ? selectedApartamento.id : selectedApartamento.value;
+                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' ? selectedApartamento.id : selectedApartamento.value;
                                             await createContrato(values, user, navigate, setSubmitting, setFieldError);
                                         }}
                                     >

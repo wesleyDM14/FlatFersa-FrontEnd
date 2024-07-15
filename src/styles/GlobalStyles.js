@@ -139,6 +139,12 @@ const GlobalStyle = createGlobalStyle`
         position: absolute;
     }
 
+    .strong {
+        font-size: 25px !important;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
     ::-webkit-datetime-edit { 
         padding: 1em; 
     }
@@ -163,7 +169,7 @@ const GlobalStyle = createGlobalStyle`
             right: 10%;
         }
         .hidden-responsive {
-            display: none;
+            visibility: hidden;
         }
     }
 `;
