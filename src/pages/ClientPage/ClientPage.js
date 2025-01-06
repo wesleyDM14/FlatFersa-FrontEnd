@@ -57,10 +57,31 @@ const ClientPage = ({ user }) => {
     }
 
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getClientes(user, setClientes, setLoading, setClientesSolicitacao, setClientesAtivos);
+        if (user.accessToken) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos);
+                } catch (error) {
+                    console.error("Error loading data", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
         }
-    }, [user, loading]);
+    }, [user]);
+
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos);
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         user.isAdmin && (
@@ -157,7 +178,7 @@ const ClientPage = ({ user }) => {
                                                 clientes={clientes}
                                                 user={user}
                                                 navigate={navigate}
-                                                setLoading={setLoading}
+                                                refreshData={refreshData}
                                                 search={search}
                                                 page={page}
                                                 setPage={setPage}
@@ -169,7 +190,7 @@ const ClientPage = ({ user }) => {
                                                     clientes={clientesAtivos}
                                                     user={user}
                                                     navigate={navigate}
-                                                    setLoading={setLoading}
+                                                    refreshData={refreshData}
                                                     search={search}
                                                     page={page}
                                                     setPage={setPage}
@@ -181,7 +202,7 @@ const ClientPage = ({ user }) => {
                                                         clientes={clientesSolicitacao}
                                                         user={user}
                                                         navigate={navigate}
-                                                        setLoading={setLoading}
+                                                        refreshData={refreshData}
                                                         search={search}
                                                         page={page}
                                                         setPage={setPage}

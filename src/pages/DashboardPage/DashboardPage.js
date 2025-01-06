@@ -28,10 +28,10 @@ const Dashboard = ({ user }) => {
     }
 
     useEffect(() => {
-        if (loading) {
+        if (user.accessToken) {
             setLoading(false);
         }
-    }, [loading]);
+    }, [user]);
 
     return (
         <div className="container">

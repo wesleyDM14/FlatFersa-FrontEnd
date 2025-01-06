@@ -56,10 +56,32 @@ const PerfilPage = ({ user }) => {
     }
 
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getLoggedUserInfo(user, setUserInfo, setLoading, setStartDate);
+        if (user.accessToken) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    await getLoggedUserInfo(user, setUserInfo, setStartDate);
+                } catch (error) {
+                    console.error("Error loading data", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchData();
         }
-    }, [loading, user]);
+    }, [user]);
+
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            await getLoggedUserInfo(user, setUserInfo, setStartDate);
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="container">
@@ -96,7 +118,8 @@ const PerfilPage = ({ user }) => {
                                                 })
                                             }
                                             onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError, setLoading);
+                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError);
+                                                refreshData();
                                             }}
                                         >
                                             {
@@ -185,7 +208,8 @@ const PerfilPage = ({ user }) => {
                                             }
                                             onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                                 values.dateBirth = startDate;
-                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError, setLoading);
+                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError);
+                                                refreshData();
                                             }}
                                         >
                                             {

@@ -40,7 +40,7 @@ import { FormInput } from "../../components/FormLib";
 import { deleteApartamentoById, updateApartamento } from "../../services/apartamentoService";
 import Pagination from "../../components/Pagination";
 
-const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate, search, page, setPage, itemsPerPage }) => {
+const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
 
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
@@ -127,7 +127,9 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-                            await deleteApartamentoById(user, selectedApartamento.id, setLoading, setLoading2);
+                            await deleteApartamentoById(user, selectedApartamento.id);
+                            refreshData();
+                            closeDeleteModal();
                         }}>
                             Excluir
                         </SubmitButton>
@@ -160,7 +162,9 @@ const ApartamentoList = ({ apartamentos, user, setLoading, setLoading2, navigate
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            await updateApartamento(user, values, setLoading, setLoading2, setSubmitting, setFieldError);
+                            await updateApartamento(user, values, setSubmitting, setFieldError);
+                            refreshData();
+                            closeEditModal();
                         }}
                     >
                         {

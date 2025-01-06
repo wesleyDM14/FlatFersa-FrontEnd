@@ -117,7 +117,7 @@ const NovoContract = ({ user }) => {
             <div className="container">
                 <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
                 {
-                    loading || loading2 ? (
+                    loading ? (
                         <LoadingContainer>
                             <ThreeDots
                                 color={'#4e4e4e'}

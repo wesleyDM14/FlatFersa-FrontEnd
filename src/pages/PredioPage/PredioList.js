@@ -38,7 +38,7 @@ import { FinalidadeSelected, FormInput } from "../../components/FormLib";
 import { deletePredioById, updatePredio } from "../../services/predioService";
 import Pagination from "../../components/Pagination";
 
-const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
+const PredioList = ({ predios, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -81,7 +81,7 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                 currentPageItems.map((predio) => (
                     <SinglePredio
                         key={predio.id}
-                        //onClick={() => navigate(`/predios/${predio.id}`)}
+                    //onClick={() => navigate(`/predios/${predio.id}`)}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>
@@ -149,7 +149,9 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                             values.finalidade = selectedFinalidade;
-                            await updatePredio(user, values, setSubmitting, setFieldError, setLoading);
+                            await updatePredio(user, values, setSubmitting, setFieldError);
+                            refreshData();
+                            closeEditModal();
                         }}
                     >
                         {
@@ -284,7 +286,9 @@ const PredioList = ({ predios, user, setLoading, navigate, search, page, setPage
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-                            await deletePredioById(user, selectedPredio.id, setLoading);
+                            await deletePredioById(user, selectedPredio.id);
+                            refreshData();
+                            closeDeleteModal();
                         }}>
                             Excluir
                         </SubmitButton>

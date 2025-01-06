@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
+export const getContratos = async (user, setContratos, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
@@ -32,13 +32,10 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                 }
                 setContratosAtivos(ativos);
                 setContratosSolicitacao(solicitacoes);
-                setLoading(false);
             }).catch((err) => {
-                setLoading(false);
                 console.log(err.message);
             });
         }).catch((err) => {
-            setLoading(false);
             console.log(err.message);
         });
     } else {
@@ -57,9 +54,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                 }
             }
             setContratos(contratos);
-            setLoading(false);
         }).catch((err) => {
-            setLoading(false);
             console.log(err.message);
         });
     }
@@ -133,7 +128,7 @@ export const downloadContract = async (user, contratoId, setIsDownloading) => {
     });
 }
 
-export const approveContract = async (user, contract, setSubmitting, setFieldError, setLoading) => {
+export const approveContract = async (user, contract, setSubmitting, setFieldError) => {
     contract.leituraInicial = 0;
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/aprovar', contract, {
         headers: {
@@ -143,14 +138,13 @@ export const approveContract = async (user, contract, setSubmitting, setFieldErr
     }).then((response) => {
         console.log(response.data);
         setSubmitting(false);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
         setFieldError('limiteKwh', err.message);
     });
 }
 
-export const desapproveContract = async (user, contratoId, setLoading) => {
+export const desapproveContract = async (user, contratoId) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/reprovar/${contratoId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -158,14 +152,13 @@ export const desapproveContract = async (user, contratoId, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
         window.alert('Error: ', err.message);
     });
 }
 
-export const cancelContract = async (user, contratoId, message, setLoading) => {
+export const cancelContract = async (user, contratoId, message) => {
     let data = { contratoId: contratoId, message: message };
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/cancelar', data, {
         headers: {
@@ -174,13 +167,12 @@ export const cancelContract = async (user, contratoId, message, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
     });
 }
 
-export const deleteContratoById = async (user, contratoId, setLoading) => {
+export const deleteContratoById = async (user, contratoId) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/contratos/${contratoId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -188,13 +180,12 @@ export const deleteContratoById = async (user, contratoId, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
     });
 }
 
-export const assinarContratoById = async (user, data, setSubmitting, setFieldError, setLoading, closeModalAssinatura) => {
+export const assinarContratoById = async (user, data, setSubmitting, setFieldError, closeModalAssinatura) => {
     console.log(data);
     const { contratoId } = data;
     await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/contratos/assinar/${contratoId}`, data, {
@@ -207,7 +198,6 @@ export const assinarContratoById = async (user, data, setSubmitting, setFieldErr
         console.log(data);
         setSubmitting(false);
         closeModalAssinatura();
-        setLoading(true);
     }).catch((err) => {
         console.log(err);
         setFieldError(err.message);

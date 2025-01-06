@@ -36,7 +36,6 @@ const ApartamentoPage = ({ user }) => {
     const [apartamentos, setApartamentos] = useState([]);
     const [apartamentoInfos, setApartamentosInfo] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(true);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
@@ -50,23 +49,44 @@ const ApartamentoPage = ({ user }) => {
     }
 
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getApartamentos(user, setApartamentos, setLoading);
+        if (user.accessToken) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    await Promise.all([
+                        getApartamentos(user, setApartamentos),
+                        getApartamentosWithInfos(user, setApartamentosInfo)
+                    ]);
+                } catch (error) {
+                    console.error("Error loading data", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
         }
-    }, [loading, user]);
+    }, [user]);
 
-    useEffect(() => {
-        if (loading2 && user.accessToken) {
-            getApartamentosWithInfos(user, setApartamentosInfo, setLoading2);
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            await Promise.all([
+                getApartamentos(user, setApartamentos),
+                getApartamentosWithInfos(user, setApartamentosInfo)
+            ]);
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
         }
-    }, [loading2, user]);
+    };
 
     return (
         user.isAdmin && (
             <div className="container">
                 <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} apartamentoActive={true} />
                 {
-                    loading && loading2 ? (
+                    loading ? (
                         <LoadingContainer>
                             <ThreeDots
                                 color={'#4e4e4e'}
@@ -93,7 +113,7 @@ const ApartamentoPage = ({ user }) => {
                                     </SearcherContainer>
                                 </ContentApartamentoHeader>
                                 {
-                                    apartamentos.length === 0 ? (
+                                    apartamentoInfos.length === 0 ? (
                                         <NoContentContainer>
                                             <FaHouseUser color='#6c757d' fontSize={150} className='icon-responsive' />
                                             <NoContentAvisoContainer>
@@ -107,8 +127,7 @@ const ApartamentoPage = ({ user }) => {
                                         <ApartamentoList
                                             apartamentos={apartamentoInfos}
                                             user={user}
-                                            setLoading={setLoading}
-                                            setLoading2={setLoading2}
+                                            refreshData={refreshData}
                                             navigate={navigate}
                                             search={search}
                                             page={page}

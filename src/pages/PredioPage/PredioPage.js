@@ -48,10 +48,32 @@ const PredioPage = ({ user }) => {
     }
 
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getPredios(user, setPredios, setLoading);
+        if (user.accessToken) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    await getPredios(user, setPredios);
+                } catch (error) {
+                    console.error("Error loading data", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchData();
         }
-    }, [user, loading]);
+    }, [user]);
+
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            await getPredios(user, setPredios);
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         user.isAdmin && (
@@ -97,11 +119,11 @@ const PredioPage = ({ user }) => {
                                             </NoContentAvisoContainer>
                                         </NoContentContainer>
                                     ) : (
-                                        <PredioList 
+                                        <PredioList
                                             predios={predios}
                                             user={user}
                                             navigate={navigate}
-                                            setLoading={setLoading}
+                                            refreshData={refreshData}
                                             search={search}
                                             page={page}
                                             setPage={setPage}

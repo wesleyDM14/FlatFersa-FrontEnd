@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getClientes = async (user, setClients, setLoading, setClientesSolicitacao, setClientesAtivos) => {
+export const getClientes = async (user, setClients, setClientesSolicitacao, setClientesAtivos) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/clients', {
         headers: {
             "Content-Type": "application/json",
@@ -29,9 +29,7 @@ export const getClientes = async (user, setClients, setLoading, setClientesSolic
         }
 
         setClients(clientes);
-        setLoading(false);
     }).catch((err) => {
-        setLoading(false);
         console.log(err.message);
     });
 }
@@ -52,7 +50,7 @@ export const createCliente = async (cliente, user, navigate, setSubmitting, setF
     });
 }
 
-export const getClienteById = async (user, clientId, setClient, setLoading) => {
+export const getClienteById = async (user, clientId, setClient) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/clients/${clientId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -61,14 +59,12 @@ export const getClienteById = async (user, clientId, setClient, setLoading) => {
     }).then((response) => {
         let client = response.data;
         setClient(client);
-        setLoading(false);
     }).catch((err) => {
         console.log(err.message);
-        setLoading(false);
     });
 }
 
-export const updateClientById = async (user, client, setSubmitting, setFieldError, closeEditModal, setLoading) => {
+export const updateClientById = async (user, client, setSubmitting, setFieldError, closeEditModal) => {
     await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/clients/${client.id}`, client, {
         headers: {
             "Content-Type": "multipart/form-data",
@@ -94,7 +90,6 @@ export const updateClientById = async (user, client, setSubmitting, setFieldErro
         setSubmitting(false);
         alert(response.data.message);
         closeEditModal();
-        setLoading(true);
     }).catch((err) => {
         console.log(err);
         setFieldError('name', err.message);
@@ -102,7 +97,7 @@ export const updateClientById = async (user, client, setSubmitting, setFieldErro
     });
 }
 
-export const deleteClientById = async (user, clientId, setLoading) => {
+export const deleteClientById = async (user, clientId) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/clients/${clientId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -110,13 +105,12 @@ export const deleteClientById = async (user, clientId, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
     });
 }
 
-export const aproveClient = async (user, clientId, setLoading) => {
+export const aproveClient = async (user, clientId) => {
     let client = { clientId: clientId };
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/aprove', client, {
         headers: {
@@ -125,13 +119,12 @@ export const aproveClient = async (user, clientId, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err);
     });
 }
 
-export const reproveClient = async (user, clientId, message, setLoading) => {
+export const reproveClient = async (user, clientId, message) => {
     let client = { clientId: clientId, message: message };
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/reprove', client, {
         headers: {
@@ -140,7 +133,6 @@ export const reproveClient = async (user, clientId, message, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err);
     });

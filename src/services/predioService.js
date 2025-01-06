@@ -10,7 +10,6 @@ export const getPredios = async (user, setPredios, setLoading) => {
         setPredios(response.data);
         setLoading(false);
     }).catch((err) => {
-        setLoading(false);
         console.log(err.message);
     });
 }
@@ -31,7 +30,7 @@ export const createPredio = async (predio, user, navigate, setSubmitting, setFie
     });
 }
 
-export const getPredioById = async (user, predioId, setPredio, setLoading) => {
+export const getPredioById = async (user, predioId, setPredio) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predioId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -40,14 +39,12 @@ export const getPredioById = async (user, predioId, setPredio, setLoading) => {
     }).then((response) => {
         let predio = response.data;
         setPredio(predio);
-        setLoading(false);
     }).catch((err) => {
         console.log(err.message);
-        setLoading(false);
     });
 }
 
-export const deletePredioById = async (user, predioId, setLoading) => {
+export const deletePredioById = async (user, predioId) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predioId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -55,13 +52,12 @@ export const deletePredioById = async (user, predioId, setLoading) => {
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
     });
 }
 
-export const updatePredio = async (user, predio, setSubmitting, setFieldError, setLoading) => {
+export const updatePredio = async (user, predio, setSubmitting, setFieldError) => {
     await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predio.id}`, predio, {
         headers: {
             "Content-Type": "application/json",
@@ -70,7 +66,6 @@ export const updatePredio = async (user, predio, setSubmitting, setFieldError, s
     }).then((response) => {
         console.log(response.data);
         setSubmitting(false);
-        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
         setSubmitting(false);

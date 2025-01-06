@@ -58,7 +58,7 @@ import {
     SolicitacaoTitleContainer
 } from "../ContractPage/ContractPage.styles";
 
-const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
+const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -175,7 +175,9 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-                            await deleteClientById(user, selectedClient.id, setLoading);
+                            await deleteClientById(user, selectedClient.id);
+                            refreshData();
+                            closeDeleteModal();
                         }}>
                             Excluir
                         </SubmitButton>
@@ -220,7 +222,9 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
                             values.dateBirth = startDate;
-                            await updateClientById(user, values, setSubmitting, setFieldError, closeEditModal, setLoading);
+                            await updateClientById(user, values, setSubmitting, setFieldError, closeEditModal);
+                            refreshData();
+                            closeEditModal();
                         }}
                     >
                         {
@@ -476,7 +480,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                                         if (message === null || message === "") {
                                             window.alert("Por favor informe um motivo.");
                                         } else {
-                                            await reproveClient(user, selectedClient.id, message, setLoading);
+                                            await reproveClient(user, selectedClient.id, message);
                                         }
                                     }
                                 }}
@@ -486,7 +490,7 @@ const ClientList = ({ clientes, user, setLoading, navigate, search, page, setPag
                             <SubmitButton
                                 type="button"
                                 onClick={async () => {
-                                    await aproveClient(user, selectedClient.id, setLoading);
+                                    await aproveClient(user, selectedClient.id);
                                 }}
                             >
                                 Aprovar

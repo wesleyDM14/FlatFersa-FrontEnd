@@ -24,7 +24,7 @@ export const loginUser = async (credentials, navigate, setFieldError, setSubmitt
     });
 }
 
-export const getLoggedUserInfo = async (user, setUserInfo, setLoading, setStartDate) => {
+export const getLoggedUserInfo = async (user, setUserInfo, setStartDate) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/user-info', {
         headers: {
             "Content-Type": "application/json",
@@ -36,13 +36,12 @@ export const getLoggedUserInfo = async (user, setUserInfo, setLoading, setStartD
         if (!user.isAdmin) {
             setStartDate(new Date(data.dateBirth));
         }
-        setLoading(false);
     }).catch(err => {
         console.error(err.message);
     });
 }
 
-export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldError, setLoading) => {
+export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldError) => {
     if (user.isAdmin) {
         await axios.put(process.env.REACT_APP_BACKEND_URL + '/api/users/update', data, {
             headers: {
@@ -56,7 +55,6 @@ export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldErro
             await sessionService.saveUser(newToken);
             alert('Senha Alterada com Sucesso');
             setSubmitting(false);
-            setLoading(true);
         }).catch(err => {
             console.error(err.message);
             setSubmitting(false);
@@ -94,7 +92,6 @@ export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldErro
             const { data } = response;
             setSubmitting(false);
             alert(data.message);
-            setLoading(true);
         }).catch((err) => {
             console.log(err);
             setFieldError('newPassword', err.message);

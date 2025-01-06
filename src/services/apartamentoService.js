@@ -1,84 +1,81 @@
 import axios from "axios";
 
-export const getApartamentos = async (user, setApartamentos, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
+export const getApartamentos = async (user, setApartamentos) => {
+    try {
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        });
         setApartamentos(response.data);
-        setLoading(false);
-    }).catch((err) => {
-        setLoading(false);
-        console.log(err.message);
-    });
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
-export const getApartamentosByPredioId = async (user, predioId, setApartamentos, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/predio/${predioId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
+export const getApartamentosByPredioId = async (user, predioId, setApartamentos) => {
+    try {
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/predio/${predioId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        });
         setApartamentos(response.data);
-        setLoading(false);
-    }).catch((err) => {
-        setLoading(false);
-        console.log(err.message);
-    });
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
-export const getApartamentosWithInfos = async (user, setApartamentosInfo, setLoading2) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos-infos', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
+export const getApartamentosWithInfos = async (user, setApartamentosInfo) => {
+    try {
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos-infos', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        });
         setApartamentosInfo(response.data);
-        setLoading2(false);
-    }).catch((err) => {
-        setLoading2(false);
-        console.log(err.message);
-    });
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
 export const createApartamento = async (apartamento, user, navigate, setSubmitting, setFieldError) => {
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', apartamento, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
+    try {
+        const response = await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', apartamento, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        });
         console.log(response.data);
-        setSubmitting(false);
         navigate('/apartamentos');
-    }).catch((err) => {
+    } catch (error) {
+        setFieldError('numero', error.message);
+        console.log(error.message);
+    } finally {
         setSubmitting(false);
-        setFieldError('numero', err.message);
-        console.log(err.message);
-    });
+    }
 }
 
-export const getApartamentoById = async (user, apartamentoId, setApartamento, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
+export const getApartamentoById = async (user, apartamentoId, setApartamento) => {
+    try {
+        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.accessToken}`,
+            }
+        });
         let apartamento = response.data;
         setApartamento(apartamento);
-        setLoading(false);
-    }).catch((err) => {
-        console.log(err);
-        setLoading(false);
-    });
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
-export const updateApartamento = async (user, values, setLoading, setLoading2, setSubmitting, setFieldError) => {
+export const updateApartamento = async (user, values, setSubmitting, setFieldError) => {
     await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${values.id}`, values, {
         headers: {
             "Content-Type": "application/json",
@@ -87,8 +84,6 @@ export const updateApartamento = async (user, values, setLoading, setLoading2, s
     }).then((response) => {
         console.log(response.data);
         setSubmitting(false);
-        setLoading(true);
-        setLoading2(true);
     }).catch((err) => {
         console.log(err.message);
         setSubmitting(false);
@@ -96,7 +91,7 @@ export const updateApartamento = async (user, values, setLoading, setLoading2, s
     });
 }
 
-export const deleteApartamentoById = async (user, apartamentoId, setLoading, setLoading2) => {
+export const deleteApartamentoById = async (user, apartamentoId) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -104,8 +99,6 @@ export const deleteApartamentoById = async (user, apartamentoId, setLoading, set
         }
     }).then((response) => {
         console.log(response.data);
-        setLoading(true);
-        setLoading2(true);
     }).catch((err) => {
         console.log(err.message);
     });

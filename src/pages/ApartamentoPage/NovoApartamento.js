@@ -44,11 +44,23 @@ const NovoApartamento = ({ user }) => {
     const [selectedPredio, setSelectedPredio] = useState({});
     const [loading, setLoading] = useState(true);
 
+
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getPredios(user, setPredios, setLoading);
+        if (user.accessToken) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    await getPredios(user, setPredios);
+                } catch (error) {
+                    console.error("Error loading data", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchData();
         }
-    }, [loading, user]);
+    }, [user]);
 
     const openSidebar = () => {
         setSidebarOpen(true);
