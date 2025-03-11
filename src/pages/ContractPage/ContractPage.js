@@ -65,7 +65,6 @@ const ContractPage = ({ user }) => {
         async function teste() {
             if (loading) {
                 user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao);
-                setLoading(false);
             }
         }
         teste();

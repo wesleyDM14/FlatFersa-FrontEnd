@@ -3,7 +3,9 @@ import { sessionService } from "redux-react-session";
 
 import rootReducer from "./reducers/rootReducer";
 
-const store = configureStore({ reducer: rootReducer });
+const store = configureStore({
+    reducer: rootReducer
+});
 
 sessionService.initSessionService(store);
 

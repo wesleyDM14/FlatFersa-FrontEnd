@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
+export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
@@ -58,7 +58,7 @@ export const getContratos = async (user, setContratos, setContratoAtivo, setCont
             console.log(err.message);
         });
     }
-
+    setLoading(false);
 }
 
 export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {
