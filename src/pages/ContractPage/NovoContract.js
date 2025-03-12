@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import { connect } from "react-redux";
 import Modal from "react-modal";
-//import { useMask } from "@react-input/mask";
 import * as Yup from 'yup';
 
 import Sidebar from "../../components/Sidebar";
@@ -39,8 +38,8 @@ import {
 import { FaFileInvoice } from "react-icons/fa";
 import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker, StyledSelect } from "../../components/FormLib";
 import { ThreeDots } from "react-loader-spinner";
-import { getApartamentos, getApartamentosByPredioId } from "../../services/apartamentoService";
-import { getClientes } from "../../services/clientService";
+import { getApartamentosByPredioId } from "../../services/apartamentoService";
+import { getClientesForContract } from "../../services/clientService";
 import { createContrato } from "../../services/contratoService";
 import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
 import { modalStyles } from "../../styles/ModalStyles";
@@ -92,7 +91,7 @@ const NovoContract = ({ user }) => {
             getPredios(user, setPredios, setLoading);
         }
         if (user.isAdmin && loading2) {
-            getClientes(user, setClientes, setLoading2);
+            getClientesForContract(user, setClientes, setLoading2);
         }
     }, [loading, user, loading2]);
 

@@ -638,7 +638,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                             Cancelar
                         </BackButton>
                         <SubmitButton onClick={async () => {
-                            await deleteContratoById(user, selectedContrato.contrato.id, setLoading);
+                            await deleteContratoById(user, selectedContrato.contrato.id, closeDeleteModal, setLoading);
                         }}>
                             Excluir
                         </SubmitButton>

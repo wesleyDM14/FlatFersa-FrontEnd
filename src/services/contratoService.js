@@ -172,7 +172,7 @@ export const cancelContract = async (user, contratoId, message) => {
     });
 }
 
-export const deleteContratoById = async (user, contratoId) => {
+export const deleteContratoById = async (user, contratoId, closeDeleteModal, setLoading) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/contratos/${contratoId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -180,6 +180,8 @@ export const deleteContratoById = async (user, contratoId) => {
         }
     }).then((response) => {
         console.log(response.data);
+        closeDeleteModal();
+        setLoading(true);
     }).catch((err) => {
         console.log(err.message);
     });

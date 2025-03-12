@@ -113,6 +113,10 @@ export const ContentIconContainer = styled.div`
     display: flex;
     margin-right: 5px;
     font-size: 18px;
+    
+    svg{
+        margin-right: 2px;
+    }
 `;
 
 export const StyledFormArea = styled.div`

@@ -14,7 +14,7 @@ export const getApartamentos = async (user, setApartamentos) => {
     }
 }
 
-export const getApartamentosByPredioId = async (user, predioId, setApartamentos) => {
+export const getApartamentosByPredioId = async (user, predioId, setApartamentos, setLoadingApartamentos) => {
     try {
         const response = await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/predio/${predioId}`, {
             headers: {
@@ -23,6 +23,7 @@ export const getApartamentosByPredioId = async (user, predioId, setApartamentos)
             }
         });
         setApartamentos(response.data);
+        setLoadingApartamentos(false);
     } catch (error) {
         console.log(error.message);
     }

@@ -66,8 +66,8 @@ const NovoClient = ({ user }) => {
                         <ContentClientHeader>
                             <ContentIconContainer>
                                 <FaFileInvoice />
+                                <ClientCounter>Dados do Cliente</ClientCounter>
                             </ContentIconContainer>
-                            <ClientCounter>Dados do Cliente</ClientCounter>
                         </ContentClientHeader>
                         <StyledFormArea>
                             <Formik

@@ -61,7 +61,9 @@ export const ApartamentoCounter = styled.h3`
     color: ${props => props.theme.colors.titleColor};
 `;
 
-export const SearcherContainer = styled.div``;
+export const SearcherContainer = styled.div`
+    width: 100%;
+`;
 
 export const NoContentContainer = styled.div`
     display: flex;
@@ -117,6 +119,11 @@ export const AdicionarApartamentoButton = styled.button`
 export const ContentIconContainer = styled.div`
     margin-right: 5px;
     font-size: 18px;
+    display: flex;
+
+    svg {
+        margin-right: 2px;
+    }
 `;
 
 export const StyledFormArea = styled.div`

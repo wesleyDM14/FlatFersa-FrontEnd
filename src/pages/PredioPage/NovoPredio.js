@@ -59,8 +59,8 @@ const NovoPredio = ({ user }) => {
                         <ContentPredioHeader>
                             <ContentIconContainer>
                                 <FaFileInvoice />
+                                <PredioCounter>Dados do Prédio</PredioCounter>
                             </ContentIconContainer>
-                            <PredioCounter>Dados do Prédio</PredioCounter>
                         </ContentPredioHeader>
                         <StyledFormArea>
                             <Formik

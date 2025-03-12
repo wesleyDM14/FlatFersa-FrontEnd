@@ -1,6 +1,21 @@
 import axios from "axios";
 
-export const getClientes = async (user, setClients, setClientesSolicitacao, setClientesAtivos) => {
+export const getClientesForContract = async (user, setClients, setLoading) => {
+    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/clients', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.accessToken}`,
+        }
+    }).then((response) => {
+        let clientes = response.data;
+        setClients(clientes);
+        setLoading(false);
+    }).catch((err) => {
+        console.log(err.message);
+    });
+}
+
+export const getClientes = async (user, setClients, setClientesSolicitacao, setClientesAtivos, setLoading) => {
     await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/clients', {
         headers: {
             "Content-Type": "application/json",
@@ -29,6 +44,7 @@ export const getClientes = async (user, setClients, setClientesSolicitacao, setC
         }
 
         setClients(clientes);
+        setLoading(false);
     }).catch((err) => {
         console.log(err.message);
     });

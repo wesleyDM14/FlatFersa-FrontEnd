@@ -59,13 +59,10 @@ const ClientPage = ({ user }) => {
     useEffect(() => {
         if (user.accessToken) {
             const fetchData = async () => {
-                setLoading(true);
                 try {
-                    await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos);
+                    await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos, setLoading);
                 } catch (error) {
                     console.error("Error loading data", error);
-                } finally {
-                    setLoading(false);
                 }
             };
             fetchData();
@@ -75,11 +72,9 @@ const ClientPage = ({ user }) => {
     const refreshData = async () => {
         setLoading(true);
         try {
-            await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos);
+            await getClientes(user, setClientes, setClientesSolicitacao, setClientesAtivos, setLoading);
         } catch (error) {
             console.error("Error loading data", error);
-        } finally {
-            setLoading(false);
         }
     };
 

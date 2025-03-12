@@ -92,8 +92,8 @@ const NovoApartamento = ({ user }) => {
                                 <ContentApartamentoHeader>
                                     <ContentIconContainer>
                                         <FaFileInvoice />
+                                        <ApartamentoCounter>Dados do Apartamento</ApartamentoCounter>
                                     </ContentIconContainer>
-                                    <ApartamentoCounter>Dados do Apartamento</ApartamentoCounter>
                                 </ContentApartamentoHeader>
                                 <StyledFormArea>
                                     <Formik

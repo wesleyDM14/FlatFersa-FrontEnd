@@ -116,6 +116,11 @@ export const AdicionarPredioButton = styled.button`
 export const ContentIconContainer = styled.div`
     margin-right: 5px;
     font-size: 18px;
+    display: flex;
+
+    svg {
+        margin-right: 2px;
+    }
 `;
 
 export const StyledFormArea = styled.div`
