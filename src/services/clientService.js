@@ -11,7 +11,8 @@ export const getClientesForContract = async (user, setClients, setLoading) => {
         setClients(clientes);
         setLoading(false);
     }).catch((err) => {
-        console.log(err.message);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
@@ -46,7 +47,8 @@ export const getClientes = async (user, setClients, setClientesSolicitacao, setC
         setClients(clientes);
         setLoading(false);
     }).catch((err) => {
-        console.log(err.message);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
@@ -61,8 +63,8 @@ export const createCliente = async (cliente, user, navigate, setSubmitting, setF
         navigate('/clientes');
     }).catch((err) => {
         setSubmitting(false);
-        setFieldError('name', err.message);
-        console.log(err.message);
+        setFieldError('name', err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
@@ -76,7 +78,8 @@ export const getClienteById = async (user, clientId, setClient) => {
         let client = response.data;
         setClient(client);
     }).catch((err) => {
-        console.log(err.message);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
@@ -107,26 +110,28 @@ export const updateClientById = async (user, client, setSubmitting, setFieldErro
         alert(response.data.message);
         closeEditModal();
     }).catch((err) => {
-        console.log(err);
-        setFieldError('name', err.message);
+        console.log(err.response.data.message);
+        setFieldError('name', err.response.data.message);
         setSubmitting(false);
     });
 }
 
-export const deleteClientById = async (user, clientId) => {
+export const deleteClientById = async (user, clientId, setDeletting) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/clients/${clientId}`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
-        console.log(response.data);
+        window.alert(response.data.message);
+        setDeletting(false);
     }).catch((err) => {
-        console.log(err.message);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
-export const aproveClient = async (user, clientId) => {
+export const aproveClient = async (user, clientId, setLoading, closeSolicitacaoModal) => {
     let client = { clientId: clientId };
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/aprove', client, {
         headers: {
@@ -135,12 +140,15 @@ export const aproveClient = async (user, clientId) => {
         }
     }).then((response) => {
         console.log(response.data);
+        closeSolicitacaoModal();
+        setLoading(true);
     }).catch((err) => {
-        console.log(err);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
-export const reproveClient = async (user, clientId, message) => {
+export const reproveClient = async (user, clientId, message, setLoading, closeSolicitacaoModal) => {
     let client = { clientId: clientId, message: message };
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/requestAccess/reprove', client, {
         headers: {
@@ -149,7 +157,10 @@ export const reproveClient = async (user, clientId, message) => {
         }
     }).then((response) => {
         console.log(response.data);
+        closeSolicitacaoModal();
+        setLoading(true);
     }).catch((err) => {
-        console.log(err);
+        window.alert(err.response.data.message);
+        console.log(err.response.data.message);
     });
 }

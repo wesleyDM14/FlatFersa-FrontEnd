@@ -94,6 +94,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
     const [selectedContrato, setSelectedContrato] = useState({});
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
+    const [deletting, setDeletting] = useState(false);
 
     const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false);
 
@@ -313,11 +314,13 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                         valorAluguel: selectedContrato.apartamento.valorBase,
                                                         periocidade: '',
                                                         limiteKwh: 0,
+                                                        leituraInicial: 0
                                                     }}
 
                                                     validationSchema={Yup.object({
                                                         valorAluguel: Yup.number().required('Obrigatório'),
                                                         limiteKwh: Yup.number().required('Obrigatório'),
+                                                        leituraInicial: Yup.number(),
                                                     })}
 
                                                     onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -333,6 +336,7 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                                         <FormInputArea>
                                                                             <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
                                                                         </FormInputArea>
+
                                                                     </FormColum>
                                                                     <FormColum>
                                                                         <SubItensContainer>
@@ -361,6 +365,16 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                                                                 </Limitador>
                                                                             </FormInputArea>
                                                                         </SubItensContainer>
+                                                                        <FormInputArea>
+                                                                            <FormInputLabelRequired>Leitura Atual do Medidor</FormInputLabelRequired>
+                                                                            <FormInput
+                                                                                type="number"
+                                                                                min="0"
+                                                                                step="1"
+                                                                                name="leituraInicial"
+                                                                                placeholder="leitura kwh"
+                                                                            />
+                                                                        </FormInputArea>
                                                                     </FormColum>
                                                                 </FormContent>
                                                                 <ButtonGroup>
@@ -630,19 +644,26 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                 <DeleteContainer>
                     <DeleteTitle>Deseja excluir o Contrato?</DeleteTitle>
                     <ContratoCounter>Cliente: {selectedContrato.cliente && (selectedContrato.cliente.name)} / Apartamento: {selectedContrato.apartamento && (selectedContrato.apartamento.numero)}</ContratoCounter>
-                    <DeleteButtonContainer>
-                        <BackButton onClick={() => {
-                            setSelectedContrato({});
-                            closeDeleteModal();
-                        }}>
-                            Cancelar
-                        </BackButton>
-                        <SubmitButton onClick={async () => {
-                            await deleteContratoById(user, selectedContrato.contrato.id, closeDeleteModal, setLoading);
-                        }}>
-                            Excluir
-                        </SubmitButton>
-                    </DeleteButtonContainer>
+                    {
+                        deletting ? (
+                            <ThreeDots />
+                        ) : (
+                            <DeleteButtonContainer>
+                                <BackButton onClick={() => {
+                                    setSelectedContrato({});
+                                    closeDeleteModal();
+                                }}>
+                                    Cancelar
+                                </BackButton>
+                                <SubmitButton onClick={async () => {
+                                    setDeletting(true);
+                                    await deleteContratoById(user, selectedContrato.contrato.id, closeDeleteModal, setLoading);
+                                }}>
+                                    Excluir
+                                </SubmitButton>
+                            </DeleteButtonContainer>
+                        )
+                    }
                 </DeleteContainer>
             </Modal>
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />

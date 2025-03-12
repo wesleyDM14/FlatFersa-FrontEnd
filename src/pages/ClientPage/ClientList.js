@@ -58,7 +58,7 @@ import {
     SolicitacaoTitleContainer
 } from "../ContractPage/ContractPage.styles";
 
-const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
+const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPage, itemsPerPage, setLoading }) => {
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
@@ -67,6 +67,7 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
     const [startDate, setStartDate] = useState(new Date());
     const [selectedBackImage, setSelectedBackImage] = useState();
     const [selectedFrontImage, setSelectedFrontImage] = useState();
+    const [deletting, setDeletting] = useState(false);
 
     const openEditModal = () => {
         setModalEditIsOpen(true);
@@ -167,21 +168,28 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
             >
                 <DeleteContainer>
                     <DeleteTitle>Deseja excluir o Cliente {selectedClient.name}?</DeleteTitle>
-                    <DeleteButtonContainer>
-                        <BackButton onClick={() => {
-                            setSelectedClient({});
-                            closeDeleteModal();
-                        }}>
-                            Cancelar
-                        </BackButton>
-                        <SubmitButton onClick={async () => {
-                            await deleteClientById(user, selectedClient.id);
-                            refreshData();
-                            closeDeleteModal();
-                        }}>
-                            Excluir
-                        </SubmitButton>
-                    </DeleteButtonContainer>
+                    {
+                        deletting ? (
+                            <ThreeDots />
+                        ) : (
+                            <DeleteButtonContainer>
+                                <BackButton onClick={() => {
+                                    setSelectedClient({});
+                                    closeDeleteModal();
+                                }}>
+                                    Cancelar
+                                </BackButton>
+                                <SubmitButton onClick={async () => {
+                                    setDeletting(true);
+                                    await deleteClientById(user, selectedClient.id, setDeletting);
+                                    refreshData();
+                                    closeDeleteModal();
+                                }}>
+                                    Excluir
+                                </SubmitButton>
+                            </DeleteButtonContainer>
+                        )
+                    }
                 </DeleteContainer>
             </Modal>
             <Modal
@@ -480,7 +488,7 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
                                         if (message === null || message === "") {
                                             window.alert("Por favor informe um motivo.");
                                         } else {
-                                            await reproveClient(user, selectedClient.id, message);
+                                            await reproveClient(user, selectedClient.id, message, setLoading, closeSolicitacaoModal);
                                         }
                                     }
                                 }}
@@ -490,7 +498,7 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
                             <SubmitButton
                                 type="button"
                                 onClick={async () => {
-                                    await aproveClient(user, selectedClient.id);
+                                    await aproveClient(user, selectedClient.id, setLoading, closeSolicitacaoModal);
                                 }}
                             >
                                 Aprovar

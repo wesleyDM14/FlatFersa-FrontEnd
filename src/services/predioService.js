@@ -10,7 +10,8 @@ export const getPredios = async (user, setPredios, setLoading) => {
         setPredios(response.data);
         setLoading(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -25,8 +26,8 @@ export const createPredio = async (predio, user, navigate, setSubmitting, setFie
         navigate('/predios');
     }).catch((err) => {
         setSubmitting(false);
-        setFieldError('name', err.message);
-        console.log(err.message);
+        setFieldError('nome', err.response.data.message);
+        console.log(err.response.data.message);
     });
 }
 
@@ -40,11 +41,12 @@ export const getPredioById = async (user, predioId, setPredio) => {
         let predio = response.data;
         setPredio(predio);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
-export const deletePredioById = async (user, predioId) => {
+export const deletePredioById = async (user, predioId, setDeletting) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/predios/${predioId}`, {
         headers: {
             "Content-Type": "application/json",
@@ -52,8 +54,10 @@ export const deletePredioById = async (user, predioId) => {
         }
     }).then((response) => {
         console.log(response.data);
+        setDeletting(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -67,8 +71,8 @@ export const updatePredio = async (user, predio, setSubmitting, setFieldError) =
         console.log(response.data);
         setSubmitting(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
         setSubmitting(false);
-        setFieldError('nome', err.message);
+        setFieldError('nome', err.response.data.message);
     });
 }

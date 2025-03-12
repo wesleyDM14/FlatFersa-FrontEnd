@@ -46,6 +46,7 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
     const [selectedApartamento, setSelectedApartamento] = useState({});
+    const [deletting, setDeletting] = useState(false);
 
     const openEditModal = () => {
         setModalEditIsOpen(true);
@@ -83,7 +84,7 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
                 currentPageItems.map((apartamento) => (
                     <SinglePredio
                         key={apartamento.apartamento.id}
-                        //onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
+                    //onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
@@ -119,23 +120,33 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
             >
                 <DeleteContainer>
                     <DeleteTitle>Deseja excluir o Apartamento {selectedApartamento.numero}?</DeleteTitle>
-                    <DeleteButtonContainer>
-                        <BackButton onClick={() => {
-                            setSelectedApartamento({});
-                            closeDeleteModal();
-                        }}>
-                            Cancelar
-                        </BackButton>
-                        <SubmitButton onClick={async () => {
-                            await deleteApartamentoById(user, selectedApartamento.id);
-                            refreshData();
-                            closeDeleteModal();
-                        }}>
-                            Excluir
-                        </SubmitButton>
-                    </DeleteButtonContainer>
+                    {
+                        deletting ? (
+                            <ThreeDots />
+                        ) : (
+                            <DeleteButtonContainer>
+                                <BackButton onClick={
+                                    () => {
+                                        setSelectedApartamento({});
+                                        closeDeleteModal();
+                                    }
+                                }>
+                                    Cancelar
+                                </BackButton>
+                                <SubmitButton onClick={async () => {
+                                    setDeletting(true);
+                                    await deleteApartamentoById(user, selectedApartamento.id, setDeletting);
+                                    refreshData();
+                                    closeDeleteModal();
+                                }}>
+                                    Excluir
+                                </SubmitButton>
+                            </DeleteButtonContainer>
+
+                        )
+                    }
                 </DeleteContainer>
-            </Modal>
+            </Modal >
             <Modal
                 isOpen={modalEditIsOpen}
                 onRequestClose={closeEditModal}

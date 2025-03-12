@@ -10,7 +10,8 @@ export const getDashboardAdmin = async (user, setDashbaordData, setLoading) => {
         setDashbaordData(response.data);
         setLoading(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.error(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -24,6 +25,7 @@ export const getDashboardClient = async (user, setDashbaordData, setLoading) => 
         setDashbaordData(response.data);
         setLoading(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.error(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }

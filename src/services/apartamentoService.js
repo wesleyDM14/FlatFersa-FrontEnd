@@ -10,7 +10,8 @@ export const getApartamentos = async (user, setApartamentos) => {
         });
         setApartamentos(response.data);
     } catch (error) {
-        console.log(error.message);
+        console.log(error.response.data.message);
+        window.alert(error.response.data.message);
     }
 }
 
@@ -25,7 +26,8 @@ export const getApartamentosByPredioId = async (user, predioId, setApartamentos,
         setApartamentos(response.data);
         setLoadingApartamentos(false);
     } catch (error) {
-        console.log(error.message);
+        console.log(error.response.data.message);
+        window.alert(error.response.data.message);
     }
 }
 
@@ -39,7 +41,8 @@ export const getApartamentosWithInfos = async (user, setApartamentosInfo) => {
         });
         setApartamentosInfo(response.data);
     } catch (error) {
-        console.log(error.message);
+        console.log(error.response.data.message);
+        window.alert(error.response.data.message);
     }
 }
 
@@ -54,8 +57,8 @@ export const createApartamento = async (apartamento, user, navigate, setSubmitti
         console.log(response.data);
         navigate('/apartamentos');
     } catch (error) {
-        setFieldError('numero', error.message);
-        console.log(error.message);
+        setFieldError('numero', error.response.data.message);
+        console.log(error.response.data.message);
     } finally {
         setSubmitting(false);
     }
@@ -72,7 +75,8 @@ export const getApartamentoById = async (user, apartamentoId, setApartamento) =>
         let apartamento = response.data;
         setApartamento(apartamento);
     } catch (error) {
-        console.log(error.message);
+        console.log(error.response.data.message);
+        window.alert(error.response.data.message);
     }
 }
 
@@ -83,24 +87,26 @@ export const updateApartamento = async (user, values, setSubmitting, setFieldErr
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
-        console.log(response.data);
+        window.alert(response.data.message);
         setSubmitting(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
         setSubmitting(false);
-        setFieldError('numero', err.message);
+        setFieldError('numero', err.response.data.message);
     });
 }
 
-export const deleteApartamentoById = async (user, apartamentoId) => {
+export const deleteApartamentoById = async (user, apartamentoId, setDeletting) => {
     await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
-        console.log(response.data);
+        window.alert(response.data.message);
+        setDeletting(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }

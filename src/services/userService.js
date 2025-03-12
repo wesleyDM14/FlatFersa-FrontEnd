@@ -18,8 +18,8 @@ export const loginUser = async (credentials, navigate, setFieldError, setSubmitt
         }).catch(err => console.error(err));
     }).catch((err) => {
         const { data } = err.response;
-        setFieldError('email', data.error);
-        setFieldError('password', data.error);
+        setFieldError('email', data.message);
+        setFieldError('password', data.message);
         setSubmitting(false);
     });
 }
@@ -37,7 +37,8 @@ export const getLoggedUserInfo = async (user, setUserInfo, setStartDate) => {
             setStartDate(new Date(data.dateBirth));
         }
     }).catch(err => {
-        console.error(err.message);
+        console.error(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -56,9 +57,9 @@ export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldErro
             alert('Senha Alterada com Sucesso');
             setSubmitting(false);
         }).catch(err => {
-            console.error(err.message);
+            console.error(err.response.data.message);
             setSubmitting(false);
-            setFieldError('newPassword', err.message);
+            setFieldError('newPassword', err.response.data.message);
             alert('Erro ao mudar a senha');
         });
     } else {
@@ -77,9 +78,9 @@ export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldErro
                 await sessionService.saveUser(token);
                 alert('Senha Alterada com Sucesso');
             }).catch(err => {
-                console.error(err.message);
+                console.error(err.response.data.message);
                 setSubmitting(false);
-                setFieldError('newPassword', err.message);
+                setFieldError('newPassword', err.response.data.message);
                 alert('Erro ao mudar a senha');
             });
         }
@@ -94,7 +95,7 @@ export const updateUserLoggedIn = async (user, data, setSubmitting, setFieldErro
             alert(data.message);
         }).catch((err) => {
             console.log(err);
-            setFieldError('newPassword', err.message);
+            setFieldError('newPassword', err.response.data.message);
             setSubmitting(false);
         });
     }
@@ -111,8 +112,8 @@ export const requestCreateClient = async (newClient, navigate, setFieldError, se
         setSubmitting(false);
         navigate('/');
     }).catch((err) => {
-        console.log(err);
-        setFieldError(err.message);
+        console.log(err.response.data.message);
+        setFieldError(err.response.data.message);
         setSubmitting(false);
     });
 }

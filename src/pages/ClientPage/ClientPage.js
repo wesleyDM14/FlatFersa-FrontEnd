@@ -178,6 +178,7 @@ const ClientPage = ({ user }) => {
                                                 page={page}
                                                 setPage={setPage}
                                                 itemsPerPage={itemsPerPage}
+                                                setLoading={setLoading}
                                             />
                                         ) :
                                             ativos ? (

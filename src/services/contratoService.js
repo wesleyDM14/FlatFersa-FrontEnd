@@ -33,10 +33,12 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                 setContratosAtivos(ativos);
                 setContratosSolicitacao(solicitacoes);
             }).catch((err) => {
-                console.log(err.message);
+                console.log(err.response.data.message);
+                window.alert(err.response.data.message);
             });
         }).catch((err) => {
-            console.log(err.message);
+            console.log(err.response.data.message);
+            window.alert(err.response.data.message);
         });
     } else {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos-cliente', {
@@ -55,14 +57,14 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
             }
             setContratos(contratos);
         }).catch((err) => {
-            console.log(err.message);
+            console.log(err.response.data.message);
+            window.alert(err.response.data.message);
         });
     }
     setLoading(false);
 }
 
 export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {
-    console.log(contrato);
     if (user.isAdmin) {
         await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos', contrato, {
             headers: {
@@ -105,7 +107,8 @@ export const getContratoById = async (user, contratoId, setContrato) => {
         let contrato = response.data;
         setContrato(contrato);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -123,13 +126,13 @@ export const downloadContract = async (user, contratoId, setIsDownloading) => {
         saveAs(blob, 'contrato.pdf');
         setIsDownloading(false);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
         setIsDownloading(false);
     });
 }
 
-export const approveContract = async (user, contract, setSubmitting, setFieldError) => {
-    contract.leituraInicial = 0;
+export const approveContract = async (user, contract, setSubmitting, setFieldError, setLoading) => {
     await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/aprovar', contract, {
         headers: {
             "Content-Type": "application/json",
@@ -138,9 +141,10 @@ export const approveContract = async (user, contract, setSubmitting, setFieldErr
     }).then((response) => {
         console.log(response.data);
         setSubmitting(false);
+        setLoading(true);
     }).catch((err) => {
-        console.log(err.message);
-        setFieldError('limiteKwh', err.message);
+        console.log(err.response.data.message);
+        setFieldError('limiteKwh', err.response.data.message);
     });
 }
 
@@ -153,8 +157,8 @@ export const desapproveContract = async (user, contratoId) => {
     }).then((response) => {
         console.log(response.data);
     }).catch((err) => {
-        console.log(err.message);
-        window.alert('Error: ', err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -168,7 +172,8 @@ export const cancelContract = async (user, contratoId, message) => {
     }).then((response) => {
         console.log(response.data);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
@@ -179,16 +184,16 @@ export const deleteContratoById = async (user, contratoId, closeDeleteModal, set
             "Authorization": `Bearer ${user.accessToken}`,
         }
     }).then((response) => {
-        console.log(response.data);
+        window.alert(response.data.message);
         closeDeleteModal();
         setLoading(true);
     }).catch((err) => {
-        console.log(err.message);
+        console.log(err.response.data.message);
+        window.alert(err.response.data.message);
     });
 }
 
 export const assinarContratoById = async (user, data, setSubmitting, setFieldError, closeModalAssinatura) => {
-    console.log(data);
     const { contratoId } = data;
     await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/contratos/assinar/${contratoId}`, data, {
         headers: {
@@ -201,8 +206,8 @@ export const assinarContratoById = async (user, data, setSubmitting, setFieldErr
         setSubmitting(false);
         closeModalAssinatura();
     }).catch((err) => {
-        console.log(err);
-        setFieldError(err.message);
+        console.log(err.response.data.message);
+        setFieldError(err.response.data.message);
         setSubmitting(false);
     });
 }

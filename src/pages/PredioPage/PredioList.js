@@ -42,6 +42,7 @@ const PredioList = ({ predios, user, refreshData, navigate, search, page, setPag
     Modal.setAppElement(document.getElementById('root'));
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
+    const [deletting, setDeletting] = useState(false);
     const [selectedPredio, setSelectedPredio] = useState({});
     const [selectedFinalidade, setSelectedFinalidade] = useState('');
 
@@ -278,21 +279,29 @@ const PredioList = ({ predios, user, refreshData, navigate, search, page, setPag
             >
                 <DeleteContainer>
                     <DeleteTitle>Deseja excluir o Prédio {selectedPredio.nome}?</DeleteTitle>
-                    <DeleteButtonContainer>
-                        <BackButton onClick={() => {
-                            setSelectedPredio({});
-                            closeDeleteModal();
-                        }}>
-                            Cancelar
-                        </BackButton>
-                        <SubmitButton onClick={async () => {
-                            await deletePredioById(user, selectedPredio.id);
-                            refreshData();
-                            closeDeleteModal();
-                        }}>
-                            Excluir
-                        </SubmitButton>
-                    </DeleteButtonContainer>
+                    {
+                        deletting ? (
+                            <ThreeDots />
+                        ) : (
+                            <DeleteButtonContainer>
+                                <BackButton onClick={() => {
+                                    setSelectedPredio({});
+                                    closeDeleteModal();
+                                }}>
+                                    Cancelar
+                                </BackButton>
+                                <SubmitButton onClick={async () => {
+                                    setDeletting(true);
+                                    await deletePredioById(user, selectedPredio.id, setDeletting);
+                                    refreshData();
+                                    closeDeleteModal();
+                                }}>
+                                    Excluir
+                                </SubmitButton>
+                            </DeleteButtonContainer>
+                        )
+                    }
+
                 </DeleteContainer>
             </Modal>
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
