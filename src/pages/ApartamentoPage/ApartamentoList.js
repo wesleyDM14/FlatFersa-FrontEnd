@@ -66,7 +66,7 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
 
     const filteredApartamentos = useMemo(() =>
         apartamentos.filter(apartamento =>
-            apartamento.apartamento.numero.toString().includes(search) ||
+            apartamento.numero.toString().includes(search) ||
             apartamento.predio.nome.toLowerCase().includes(search.toLowerCase())
         ), [apartamentos, search]);
 
@@ -83,12 +83,12 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
             {
                 currentPageItems.map((apartamento) => (
                     <SinglePredio
-                        key={apartamento.apartamento.id}
+                        key={apartamento.id}
                     //onClick={() => navigate(`/apartamentos/${apartamento.apartamento.id}`)}
                     >
                         <PredioSingleContainer>
                             <StyledLabel>Número: </StyledLabel>
-                            <PredioValue>{apartamento.apartamento.numero}</PredioValue>
+                            <PredioValue>{apartamento.numero}</PredioValue>
                         </PredioSingleContainer>
                         <PredioSingleContainer>
                             <StyledLabel>Prédio: </StyledLabel>
@@ -97,14 +97,14 @@ const ApartamentoList = ({ apartamentos, user, refreshData, navigate, search, pa
                         <AdminPredioContainer>
                             <EditIcon onClick={(event) => {
                                 event.stopPropagation();
-                                setSelectedApartamento(apartamento.apartamento);
+                                setSelectedApartamento(apartamento);
                                 openEditModal();
                             }}>
                                 <FaEdit />
                             </EditIcon>
                             <DeleteIcon onClick={(event) => {
                                 event.stopPropagation();
-                                setSelectedApartamento(apartamento.apartamento);
+                                setSelectedApartamento(apartamento);
                                 openDeleteModal();
                             }}>
                                 <FaTrash />

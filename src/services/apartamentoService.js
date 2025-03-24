@@ -31,21 +31,6 @@ export const getApartamentosByPredioId = async (user, predioId, setApartamentos,
     }
 }
 
-export const getApartamentosWithInfos = async (user, setApartamentosInfo) => {
-    try {
-        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos-infos', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        });
-        setApartamentosInfo(response.data);
-    } catch (error) {
-        console.log(error.response.data.message);
-        window.alert(error.response.data.message);
-    }
-}
-
 export const createApartamento = async (apartamento, user, navigate, setSubmitting, setFieldError) => {
     try {
         const response = await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', apartamento, {

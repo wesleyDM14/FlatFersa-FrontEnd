@@ -37,7 +37,6 @@ const ContractPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [contratos, setContratos] = useState([]);
-    const [contratosInfo, setContratosInfo] = useState([]);
     const [contratoAtivo, setContratoAtivo] = useState(false);
 
     const [ativos, setAtivos] = useState(false);
@@ -64,7 +63,7 @@ const ContractPage = ({ user }) => {
     useEffect(() => {
         async function teste() {
             if (loading) {
-                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao);
+                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo, setContratosAtivos, setContratosSolicitacao);
             }
         }
         teste();
@@ -134,7 +133,7 @@ const ContractPage = ({ user }) => {
                                     <CardTitle>Histórico</CardTitle>
                                     <CardIconContainer>
                                         <FaDatabase />
-                                        <ContratoCounter>Contratos Totais ({contratosInfo.length})</ContratoCounter>
+                                        <ContratoCounter>Contratos Totais ({contratos.length})</ContratoCounter>
                                     </CardIconContainer>
                                 </Card>
                             </ContratoCardsContainer>
@@ -163,7 +162,7 @@ const ContractPage = ({ user }) => {
                                         historico ? (
                                             <ContractList
                                                 user={user}
-                                                contratos={contratosInfo}
+                                                contratos={contratos}
                                                 navigate={navigate}
                                                 setLoading={setLoading}
                                                 search={search}

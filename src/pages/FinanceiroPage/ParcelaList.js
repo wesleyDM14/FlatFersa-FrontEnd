@@ -17,8 +17,8 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
     const filteredParcelas = useMemo(() => {
         if (user.isAdmin) {
             return parcelas.filter(parcela =>
-                parcela.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
-                parcela.prestacao.statusPagamento.toLowerCase().includes(search.toLowerCase())
+                parcela.Contract.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
+                parcela.statusPagamento.toLowerCase().includes(search.toLowerCase())
             )
         } else {
             return parcelas.filter(parcela =>
@@ -55,20 +55,20 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
                     <>
                         {
                             currentPageItems.map((parcela) => (
-                                <SinglePredio key={parcela.prestacao.id} onClick={() => navigate(`/prestacao/${parcela.prestacao.id}`)}>
+                                <SinglePredio key={parcela.id} onClick={() => navigate(`/prestacao/${parcela.id}`)}>
                                     <PredioSingleContainer>
                                         <StyledLabel>Cliente: </StyledLabel>
-                                        <PredioValue>{parcela.cliente.name}</PredioValue>
+                                        <PredioValue>{parcela.Contract.cliente.name}</PredioValue>
                                     </PredioSingleContainer>
                                     <PredioSingleContainer>
                                         <StyledLabel>Valor: </StyledLabel>
-                                        <PredioValue>{parcela.prestacao.valor}</PredioValue>
+                                        <PredioValue>{(parcela.valor ? parcela.valor : 0) + (parcela.multa ? parcela.multa : 0) + (parcela.valorExcedenteKWh ? parcela.valorExcedenteKWh : 0)}</PredioValue>
                                     </PredioSingleContainer>
-                                    <PredioSingleContainer  className="hidden-responsive">
-                                        <PredioValue  className="hidden-responsive">{new Date(parcela.prestacao.dataVencimento).toLocaleDateString()}</PredioValue>
+                                    <PredioSingleContainer className="hidden-responsive">
+                                        <PredioValue className="hidden-responsive">{new Date(parcela.dataVencimento).toLocaleDateString()}</PredioValue>
                                     </PredioSingleContainer>
                                     <PredioSingleContainer>
-                                        <PredioValue>{parcela.prestacao.statusPagamento}</PredioValue>
+                                        <PredioValue>{parcela.statusPagamento}</PredioValue>
                                     </PredioSingleContainer>
                                 </SinglePredio>
                             ))
@@ -85,7 +85,7 @@ const ParcelaList = ({ parcelas, user, setLoading, navigate, search, page, setPa
                                     </PredioSingleContainer>
                                     <PredioSingleContainer>
                                         <StyledLabel>Valor: </StyledLabel>
-                                        <PredioValue>{parcela.valor}</PredioValue>
+                                        <PredioValue>{(parcela.valor ? parcela.valor : 0) + (parcela.multa ? parcela.multa : 0) + (parcela.valorExcedenteKWh ? parcela.valorExcedenteKWh : 0)}</PredioValue>
                                     </PredioSingleContainer>
                                     <PredioSingleContainer>
                                         <StyledLabel>Status: </StyledLabel>

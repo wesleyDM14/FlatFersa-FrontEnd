@@ -36,7 +36,6 @@ const FianceiroPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [parcelas, setParcelas] = useState([]);
-    const [parcelasInfo, setParcelasInfo] = useState([]);
 
     const [pendentes, setPendentes] = useState(false);
     const [pagos, setPagos] = useState(false);
@@ -65,7 +64,7 @@ const FianceiroPage = ({ user }) => {
 
     useEffect(() => {
         if (loading && user.accessToken) {
-            getParcelas(user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasInfo, setParcelasAguardando);
+            getParcelas(user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasAguardando);
         }
     }, [user, loading]);
 
@@ -229,7 +228,7 @@ const FianceiroPage = ({ user }) => {
                                                         ) :
                                                             total ? (
                                                                 <ParcelaList
-                                                                    parcelas={parcelasInfo}
+                                                                    parcelas={parcelas}
                                                                     user={user}
                                                                     navigate={navigate}
                                                                     setLoading={setLoading}

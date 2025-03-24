@@ -1,7 +1,7 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosInfo, setContratosAtivos, setContratosSolicitacao) => {
+export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosAtivos, setContratosSolicitacao) => {
     if (user.isAdmin) {
         await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
             headers: {
@@ -9,33 +9,22 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
                 "Authorization": `Bearer ${user.accessToken}`,
             }
         }).then(async (response) => {
-            setContratos(response.data);
-            await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos-infos', {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${user.accessToken}`,
-                }
-            }).then((response) => {
-                setContratosInfo(response.data);
-                let contratos = response.data;
+            let contratos = response.data;
+            setContratos(contratos);
+            let ativos = [];
+            let solicitacoes = [];
 
-                let ativos = [];
-                let solicitacoes = [];
-
-                for (let index = 0; index < contratos.length; index++) {
-                    const contrato = contratos[index];
-                    if (contrato.contrato.statusContrato === 'ATIVO') {
-                        ativos.push(contrato);
-                    } else if (contrato.contrato.statusContrato === 'AGUARDANDO') {
-                        solicitacoes.push(contrato)
-                    }
+            for (let index = 0; index < contratos.length; index++) {
+                const contrato = contratos[index];
+                if (contrato.statusContrato === 'ATIVO') {
+                    ativos.push(contrato);
+                } else if (contrato.statusContrato === 'AGUARDANDO') {
+                    solicitacoes.push(contrato)
                 }
-                setContratosAtivos(ativos);
-                setContratosSolicitacao(solicitacoes);
-            }).catch((err) => {
-                console.log(err.response.data.message);
-                window.alert(err.response.data.message);
-            });
+            }
+
+            setContratosAtivos(ativos);
+            setContratosSolicitacao(solicitacoes);
         }).catch((err) => {
             console.log(err.response.data.message);
             window.alert(err.response.data.message);
@@ -50,7 +39,7 @@ export const getContratos = async (user, setContratos, setLoading, setContratoAt
             let contratos = response.data;
             for (let index = 0; index < contratos.length; index++) {
                 const element = contratos[index];
-                if (element.contrato.statusContrato === 'ATIVO' || element.contrato.statusContrato === 'AGUARDANDO') {
+                if (element.statusContrato === 'ATIVO' || element.statusContrato === 'AGUARDANDO') {
                     setContratoAtivo(true);
                     break;
                 }

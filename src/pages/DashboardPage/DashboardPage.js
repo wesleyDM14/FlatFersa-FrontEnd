@@ -266,7 +266,7 @@ const Dashboard = ({ user }) => {
                                     {metrics.recentActivities.map(activity => (
                                         <tr key={activity.id}>
                                             <td>{activity.cliente}</td>
-                                            <td>R$ {activity.valor.toFixed(2)}</td>
+                                            <td>R$ {(activity.valor).toFixed(2)}</td>
                                             <td>
                                                 {format(activity.data, "dd 'de' MMMM", { locale: ptBR })}
                                             </td>

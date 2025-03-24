@@ -25,7 +25,7 @@ import {
     TextContent,
 } from './ApartamentoPage.styles';
 import { FaHouseUser, FaPlus } from "react-icons/fa";
-import { getApartamentos, getApartamentosWithInfos } from "../../services/apartamentoService";
+import { getApartamentos } from "../../services/apartamentoService";
 import { ThreeDots } from "react-loader-spinner";
 import ApartamentoList from "./ApartamentoList";
 
@@ -34,7 +34,6 @@ const ApartamentoPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [apartamentos, setApartamentos] = useState([]);
-    const [apartamentoInfos, setApartamentosInfo] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -53,10 +52,7 @@ const ApartamentoPage = ({ user }) => {
             const fetchData = async () => {
                 setLoading(true);
                 try {
-                    await Promise.all([
-                        getApartamentos(user, setApartamentos),
-                        getApartamentosWithInfos(user, setApartamentosInfo)
-                    ]);
+                    getApartamentos(user, setApartamentos);
                 } catch (error) {
                     console.error("Error loading data", error);
                 } finally {
@@ -70,10 +66,7 @@ const ApartamentoPage = ({ user }) => {
     const refreshData = async () => {
         setLoading(true);
         try {
-            await Promise.all([
-                getApartamentos(user, setApartamentos),
-                getApartamentosWithInfos(user, setApartamentosInfo)
-            ]);
+            getApartamentos(user, setApartamentos);
         } catch (error) {
             console.error("Error loading data", error);
         } finally {
@@ -113,7 +106,7 @@ const ApartamentoPage = ({ user }) => {
                                     </SearcherContainer>
                                 </ContentApartamentoHeader>
                                 {
-                                    apartamentoInfos.length === 0 ? (
+                                    apartamentos.length === 0 ? (
                                         <NoContentContainer>
                                             <FaHouseUser color='#6c757d' fontSize={150} className='icon-responsive' />
                                             <NoContentAvisoContainer>
@@ -125,7 +118,7 @@ const ApartamentoPage = ({ user }) => {
                                         </NoContentContainer>
                                     ) : (
                                         <ApartamentoList
-                                            apartamentos={apartamentoInfos}
+                                            apartamentos={apartamentos}
                                             user={user}
                                             refreshData={refreshData}
                                             navigate={navigate}
