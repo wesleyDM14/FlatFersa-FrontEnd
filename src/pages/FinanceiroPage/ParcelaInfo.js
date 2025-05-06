@@ -6,7 +6,7 @@ import { logoutUser } from "../../services/userService";
 
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
-import { aprovarPagamento, gerarCodigoPix, getParcelaById, marcarPago, marcarPendente, registrarLeitura, registrarPagamento, reprovarPagamento } from "../../services/financeiroService";
+import { aprovarPagamento, gerarCodigoPix, getComprovante, getParcelaById, marcarPago, marcarPendente, registrarLeitura, registrarPagamento, reprovarPagamento } from "../../services/financeiroService";
 import {
     BackButton,
     ComprovanteContainer,
@@ -58,12 +58,15 @@ const ParcelaInfo = ({ user }) => {
     const [copiaCola, setCopiCola] = useState('');
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(true);
+    const [loading3, setLoading3] = useState(true);
 
     const [modalLeituraIsOpen, setModalLeituraIsOpen] = useState(false);
     const [modalPagamentoIsOpen, setModalPagamentoIsOpen] = useState(false);
 
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
+
+    const [comprovanteLink, setComprovanteLink] = useState();
 
     const monthNames = [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -127,12 +130,28 @@ const ParcelaInfo = ({ user }) => {
         }
     }, [user, loading2, prestacaoId]);
 
+    useEffect(() => {
+
+        const fetchComprovante = async () => {
+            if (loading3 && user.accessToken && parcela.id) {
+                if (parcela.linkComprovante) {
+                    console.log('oi');
+                    await getComprovante(user, parcela.id, setComprovanteLink, setLoading3);
+                } else {
+                    setLoading3(false);
+                }
+            }
+        }
+
+        fetchComprovante();
+    }, [loading3, user, parcela]);
+
 
     return (
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} />
             {
-                loading || loading2 ? (
+                loading || loading2 || loading3 ? (
                     <LoadingContainer>
                         <ThreeDots
                             color={'#4e4e4e'}
@@ -157,10 +176,10 @@ const ParcelaInfo = ({ user }) => {
                                             parcela.linkComprovante ? (
                                                 <PredioValue href={parcela.linkComprovante} target="_blank">
                                                     {
-                                                        isImage(parcela.linkComprovante) ? (
-                                                            <ComprovanteImg src={parcela.linkComprovante} />
+                                                        !loading3 && isImage(comprovanteLink) ? (
+                                                            <ComprovanteImg src={comprovanteLink} />
                                                         ) : (
-                                                            <FaFilePdf size={48} style={{marginTop: '15px'}}/>
+                                                            <FaFilePdf size={48} style={{ marginTop: '15px' }} />
                                                         )
                                                     }
                                                 </PredioValue>

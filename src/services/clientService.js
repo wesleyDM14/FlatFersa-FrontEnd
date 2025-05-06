@@ -164,3 +164,47 @@ export const reproveClient = async (user, clientId, message, setLoading, closeSo
         console.log(err.response.data.message);
     });
 }
+
+export const getDocumentoFrente = async (user, clientId) => {
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL}/api/cliente/documentoFrente/${clientId}`,
+            {
+                responseType: "blob",
+                headers: {
+                    Authorization: `Bearer ${user.accessToken}`,
+                },
+            }
+        );
+
+        const blobUrl = URL.createObjectURL(response.data);
+        return blobUrl;
+    } catch (err) {
+        const message = err?.response?.data?.message || "Erro ao buscar documento.";
+        window.alert(message);
+        console.error(message);
+        return null;
+    }
+}
+
+export const getDocumentoVerso = async (user, clientId) => {
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL}/api/cliente/documentoVerso/${clientId}`,
+            {
+                responseType: "blob",
+                headers: {
+                    Authorization: `Bearer ${user.accessToken}`,
+                },
+            }
+        );
+
+        const blobUrl = URL.createObjectURL(response.data);
+        return blobUrl;
+    } catch (err) {
+        const message = err?.response?.data?.message || "Erro ao buscar documento.";
+        window.alert(message);
+        console.error(message);
+        return null;
+    }
+}

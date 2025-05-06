@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
 import {
     AdminPredioContainer,
@@ -44,7 +44,7 @@ import * as Yup from 'yup';
 import { modalStyles } from "../../styles/ModalStyles";
 import { ThreeDots } from "react-loader-spinner";
 import { FormInput, StyledDatePicker } from "../../components/FormLib";
-import { aproveClient, deleteClientById, reproveClient, updateClientById } from "../../services/clientService";
+import { aproveClient, deleteClientById, getDocumentoFrente, getDocumentoVerso, reproveClient, updateClientById } from "../../services/clientService";
 import Pagination from "../../components/Pagination";
 import {
     DataColumn,
@@ -75,6 +75,8 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
 
     const closeEditModal = () => {
         setModalEditIsOpen(false);
+        setSelectedFrontImage();
+        setSelectedBackImage();
     }
 
     const openDeleteModal = () => {
@@ -101,6 +103,20 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
 
     const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
     const currentPageItems = filteredClients.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    useEffect(() => {
+        const fetchDocumentos = async () => {
+            if (modalEditIsOpen && selectedClient?.id) {
+                const frente = await getDocumentoFrente(user, selectedClient.id);
+                const verso = await getDocumentoVerso(user, selectedClient.id);
+
+                setSelectedFrontImage(frente || undefined);
+                setSelectedBackImage(verso || undefined);
+            }
+        };
+
+        fetchDocumentos();
+    }, [modalEditIsOpen, selectedClient, user]);
 
     return (
         <PredioListContainer>
@@ -329,7 +345,7 @@ const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPa
                                                         ) : (
                                                             selectedClient.documentoFrente ? (
                                                                 <Image
-                                                                    src={selectedClient.documentoFrente}
+                                                                    src={selectedFrontImage}
                                                                 />
                                                             ) :
                                                                 (

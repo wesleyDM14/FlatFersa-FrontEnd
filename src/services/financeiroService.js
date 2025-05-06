@@ -234,3 +234,27 @@ export const marcarPendente = async (user, prestacaoID, setLoading) => {
         console.error(err);
     })
 }
+
+export const getComprovante = async (user, parcelaId, setComprovanteLink, setLoading3) => {
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL}/api/linkAluguel/${parcelaId}`,
+            {
+                responseType: "blob",
+                headers: {
+                    Authorization: `Bearer ${user.accessToken}`,
+                },
+            }
+        );
+
+        const blobUrl = URL.createObjectURL(response.data);
+        setComprovanteLink(blobUrl);
+        console.log(blobUrl);
+        setLoading3(false);
+    } catch (err) {
+        const message = err?.response?.data?.message || "Erro ao buscar documento.";
+        window.alert(message);
+        console.error(message);
+        return null;
+    }
+}
