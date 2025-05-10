@@ -249,7 +249,6 @@ export const getComprovante = async (user, parcelaId, setComprovanteLink, setLoa
 
         const blobUrl = URL.createObjectURL(response.data);
         setComprovanteLink(blobUrl);
-        console.log(blobUrl);
         setLoading3(false);
     } catch (err) {
         const message = err?.response?.data?.message || "Erro ao buscar documento.";

@@ -115,6 +115,7 @@ const ParcelaInfo = ({ user }) => {
     }
 
     const isImage = (url) => {
+        console.log(url);
         return url.match(/\.(jpeg|jpg|gif|png)$/) != null;
     }
 
@@ -135,7 +136,6 @@ const ParcelaInfo = ({ user }) => {
         const fetchComprovante = async () => {
             if (loading3 && user.accessToken && parcela.id) {
                 if (parcela.linkComprovante) {
-                    console.log('oi');
                     await getComprovante(user, parcela.id, setComprovanteLink, setLoading3);
                 } else {
                     setLoading3(false);
@@ -174,9 +174,9 @@ const ParcelaInfo = ({ user }) => {
                                         <ComprovanteTitle>Comprovante: </ComprovanteTitle>
                                         {
                                             parcela.linkComprovante ? (
-                                                <PredioValue href={parcela.linkComprovante} target="_blank">
+                                                <PredioValue href={comprovanteLink} target="_blank">
                                                     {
-                                                        !loading3 && isImage(comprovanteLink) ? (
+                                                        !loading3 && isImage(parcela.linkComprovante) ? (
                                                             <ComprovanteImg src={comprovanteLink} />
                                                         ) : (
                                                             <FaFilePdf size={48} style={{ marginTop: '15px' }} />
