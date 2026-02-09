@@ -1,21 +1,22 @@
 import styled from "styled-components";
 
+// --- LAYOUT GERAL ---
 export const MainClientContainer = styled.main`
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: 20px 30px;
     margin-top: 15px;
     margin-bottom: 28px;
     grid-area: main;
 
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
+    @media (max-width: 768px){
+        padding: 15px;
     }
 `;
 
 export const HeaderClientContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    padding: 20px 35px;
+    align-items: center;
+    padding: 20px 0;
 `;
 
 export const HeaderTitle = styled.h2`
@@ -29,501 +30,465 @@ export const AddClientHeaderButton = styled.div`
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    background: #e6fffa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.2s;
+
+    &:hover { background: #d1fae5; }
 `;
 
 export const AddButtonText = styled.p`
-    margin-left: 5px;
+    margin-left: 8px;
     color: ${props => props.theme.colors.textGreen};
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
 `;
 
+// --- CONTEÚDO PRINCIPAL ---
 export const ContentClientContainer = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 15px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    min-height: 400px;
+    width: 100%;
 `;
 
+// *** O COMPONENTE QUE FALTAVA ***
 export const ContentClientHeader = styled.div`
-    display: flex;
-    flex-direction: column;
-    padding: 20px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-`;
-
-export const ClientCounter = styled.h3`
-    font-size: 16px;
-    color: ${props => props.theme.colors.titleColor};
-`;
-
-export const SearcherContainer = styled.div``;
-
-export const NoContentContainer = styled.div`
-    display: flex;
     align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    padding: 50px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-
-    @media only screen and (max-width: 978px){
-        padding: 30px 10px;
-    }
-`;
-
-export const NoContentAvisoContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-`;
-
-export const TextContent = styled.p`
-    color: ${props => props.theme.colors.secondary};
-    font-size: 1.3rem;
-
-    @media only screen and (max-width: 978px){
-        font-size: 0.9rem;
-    }
-`;
-
-export const AdicionarClientButton = styled.button`
-    display: flex;
-    align-items: center;
-    margin-top: 15px;
-    padding: 10px 25px;
-    background-color: ${props => props.theme.colors.success};
-    border: 1px solid green;
-    border-radius: 3px;
-    font-size: 14px;
-    color: ${props => props.theme.colors.primary};
-    cursor: pointer;
-
-    &:hover{
-        background-color: ${props => props.theme.colors.textGreen};
-    }
-
-    @media only screen and (max-width: 978px){
-        padding: 5px 15px;
-    }
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
 `;
 
 export const ContentIconContainer = styled.div`
-    margin-right: 5px;
-    font-size: 18px;
+    font-size: 24px;
+    color: #4b5563;
+    margin-right: 10px;
     display: flex;
+    align-items: center;
+    gap: 10px;
+`;
 
-    svg {
-        margin-right: 2px;
+export const ClientCounter = styled.h3`
+    font-size: 1.2rem;
+    color: #334155;
+    font-weight: 600;
+`;
+
+// --- CARDS DASHBOARD ---
+export const ClienteCardsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+`;
+
+export const Card = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    &.active {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
     }
 `;
 
-export const StyledFormArea = styled.div`
-    margin-top: 10px;
-    padding: 50px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+export const CardTitle = styled.h3`
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 15px;
+`;
 
-    @media only screen and (max-width: 978px){
-        padding: 30px 10px;
-    }
+export const CardIconContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 2rem;
+    color: #3b82f6;
+`;
+
+// --- FORMULÁRIOS ---
+export const StyledFormArea = styled.div`
+    padding: 10px 0;
 `;
 
 export const FormContent = styled.div`
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
 
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
+    @media (max-width: 900px){
+        grid-template-columns: 1fr;
     }
 `;
 
 export const FormColum = styled.div`
     display: flex;
     flex-direction: column;
-    margin-left: 15px;
-`;
-
-export const FormInputArea = styled.div`
-    box-sizing: inherit;
-    margin-bottom: 20px;
-`;
-
-export const FormInputLabelRequired = styled.p`
-    font-weight: 600;
-    margin-bottom: 5px;
-
-    &::after{
-        display: inline-block;
-        content: "*";
-        margin-left: 2px;
-        color: ${props => props.theme.colors.theme};
-    }
-`;
-
-export const FormInputLabel = styled.p`
-    font-weight: 600;
-    margin-bottom: 5px;
-`;
-
-export const FormTextInput = styled.input`
-    max-width: 100%;
-    width: 90%;
-    background-color: #fff;
-    border-color: #dbdbdb;
-    border-radius: 4px;
-    color: #363636;
-    align-items: center;
-    border: 1px solid #0a0a0a0d;
-    border-radius: 4px;
-    display: inline-flex;
-    font-size: 1rem;
-    height: 2.5em;
-    justify-content: flex-start;
-    padding-bottom: calc(.5em - 1px);
-    padding-left: calc(.75em - 1px);
-    padding-right: calc(.75em - 1px);
-    padding-top: calc(.5em - 1px);
-    line-height: 1.5;
-
-    &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    &::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-`;
-
-export const ButtonGroup = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 0px 35px;
-
-    @media only screen and (max-width: 978px){
-        flex-direction: column;
-        justify-content: center;
-        padding: 30px 10px;
-    }
-`;
-
-export const BackButton = styled.button`
-    cursor: pointer;
-    margin-right: 15px;
-    font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: transparent;
-    color: ${props => props.theme.colors.secondary};
-
-    &:hover{
-        background-color: ${props => props.theme.colors.light2};
-    }
-
-    @media only screen and (max-width: 978px){
-        min-width: 45%;
-    }
-`;
-
-export const SubmitButton = styled.button`
-    cursor: pointer;
-    font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: #000;;
-    color: ${props => props.theme.colors.primary};
-
-    &:hover{
-        background-color: #000A;
-    }
-
-    @media only screen and (max-width: 978px){
-        margin-top: 15px;
-        min-width: 45%;
-        max-width: 95%;
-    }
 `;
 
 export const SubItensContainer = styled.div`
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
+    @media (max-width: 600px){
+        grid-template-columns: 1fr;
     }
+`;
+
+export const FormInputArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+`;
+
+export const FormInputLabelRequired = styled.label`
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 5px;
+    
+    &::after {
+        content: "*";
+        color: red;
+        margin-left: 2px;
+    }
+`;
+
+export const FormInputLabel = styled.label`
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 5px;
 `;
 
 export const Limitador = styled.div`
-    max-width: 90%;
-
-    @media only screen and (max-width: 978px){
-        max-width: 100%;
-    }
+    width: 100%;
 `;
 
-export const StyledFileArea = styled.div`
-    text-align: center;
-    border: 2px dashed #dbdbdb;
-    max-width: 100%;
-    width: 90%;
-    background-color: #fff;
-    border-color: #dbdbdb;
-    border-radius: 4px;
-    color: #363636;
-    padding-bottom: calc(.5em - 1px);
-    padding-left: calc(.75em - 1px);
-    padding-right: calc(.75em - 1px);
-    padding-top: calc(.5em - 1px);
-    cursor: pointer;
-    position: relative;
+// --- BOTÕES ---
+export const ButtonGroup = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+`;
 
-    &:hover{
-        border-color: #000;
+export const BackButton = styled.button`
+    padding: 10px 20px;
+    border: 1px solid #cbd5e1;
+    background: transparent;
+    border-radius: 6px;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: #f1f5f9; }
+`;
+
+export const SubmitButton = styled.button`
+    padding: 10px 20px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    
+    &:hover { background: #333; }
+`;
+
+export const RejectButton = styled(SubmitButton)`
+    background-color: #ef4444;
+    &:hover { background-color: #dc2626; }
+`;
+
+// --- UPLOAD DE ARQUIVOS ---
+export const StyledFileArea = styled.label`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    background-color: #f8fafc;
+    transition: border 0.2s;
+    text-align: center;
+    min-height: 150px;
+
+    &:hover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
     }
 `;
 
 export const StyledFileIconContainer = styled.div`
-    font-size: 60px;
-    color: ${props => props.theme.colors.secondary};
+    font-size: 2.5rem;
+    color: #94a3b8;
+    margin-bottom: 10px;
 `;
 
-export const StyledFileInputTitle = styled.h3`
-
+export const StyledFileInputTitle = styled.span`
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
 `;
 
-export const StyledFileLegend = styled.p`
-    font-size: 0.87rem;
-    color: #bbcada;
+export const StyledFileLegend = styled.span`
+    font-size: 0.8rem;
+    color: #94a3b8;
 `;
 
 export const StyledFileInput = styled.input`
-    opacity: 0;
-    position: absolute;
-    left:0;
-    top:0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
+    display: none;
 `;
 
+export const Image = styled.img`
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 4px;
+`;
+
+// --- TABELA E LISTA ---
 export const PredioListContainer = styled.div`
     display: flex;
-    margin-top: 10px;
     flex-direction: column;
-    padding-right: 30px;
-    margin-bottom: 28px;
 `;
 
 export const PredioListHeader = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
-    height: 40px;
-    width: 100%;
-    align-items: center;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
     padding: 15px;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
-    background-color: ${props => props.theme.colors.primary};
-    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
-
-    @media only screen and (max-width: 978px){
-        grid-template-columns: 2fr 1fr 0.5fr;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 8px 8px 0 0;
+    
+    @media (max-width: 768px){
+        display: none; 
     }
 `;
 
 export const ListLabel = styled.h5`
-    font-size: 14px;
-    color: #2e4a66;
-    margin-right: 10px;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
 `;
 
 export const SinglePredio = styled.div`
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
-    height: 50px;
-    width: 100%;
-    align-items: center;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
     padding: 15px;
-    background-color: #fff;
+    border-bottom: 1px solid #f1f5f9;
+    align-items: center;
     cursor: pointer;
+    transition: background 0.1s;
 
-    @media only screen and (max-width: 978px){
-        grid-template-columns: 2fr 1fr 0.5fr;
+    &:hover { background-color: #f8fafc; }
+
+    @media (max-width: 768px){
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+        border-radius: 8px;
     }
 `;
 
 export const PredioSingleContainer = styled.div`
     display: flex;
-    flex-direction: row;
     align-items: center;
-`;
-
-export const StyledLabel = styled.h1`
-    font-size: 18px;
-    color: ${props => props.theme.colors.lightblue};
-    margin-right: 10px;
-
-    @media only screen and (max-width: 978px){
-        display: none;
+    
+    @media (max-width: 768px){
+        width: 100%;
+        justify-content: space-between;
     }
 `;
 
-export const PredioValue = styled.a`
-    font-size: 14px;
-    font-weight: 700;
-    margin-right: 30px;
-    text-decoration: none;
-    color: ${props => props.theme.colors.dark1};
-
-    @media (max-width: 1380px) {
-        font-weight: 400;
+export const StyledLabel = styled.span`
+    display: none;
+    @media (max-width: 768px){
+        display: inline-block;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.9rem;
     }
+`;
+
+export const PredioValue = styled.span`
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 `;
 
 export const AdminPredioContainer = styled.div`
     display: flex;
-    flex-direction: column;
-
-    @media only screen and (max-width: 978px){
-        flex-direction: row;
+    gap: 15px;
+    
+    @media (max-width: 768px){
+        width: 100%;
+        justify-content: flex-end;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 10px;
     }
 `;
 
 export const EditIcon = styled.div`
-    font-size: 18px;
-    margin-left: 10px;
-    color: ${props => props.theme.colors.lightblue};
+    font-size: 1.2rem;
+    color: #3b82f6;
+    cursor: pointer;
 `;
 
 export const DeleteIcon = styled.div`
-    font-size: 18px;
-    margin-left: 10px;
-    color: ${props => props.theme.colors.textRed};
+    font-size: 1.2rem;
+    color: #ef4444;
+    cursor: pointer;
 `;
 
+// --- ESTADOS VAZIOS E LOADING ---
 export const LoadingContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-top: 15px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    grid-area: main;
+    align-items: center;
+    height: 300px;
+`;
 
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
-    }
+export const NoContentContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+    color: #94a3b8;
+`;
+
+export const NoContentAvisoContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+`;
+
+export const TextContent = styled.p`
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+`;
+
+export const AdicionarClientButton = styled(SubmitButton)`
+    background-color: #10b981;
+    &:hover { background-color: #059669; }
+`;
+
+export const SearcherContainer = styled.div`
+    margin-bottom: 20px;
+`;
+
+// --- MODAIS ---
+export const SolicitacaoModalContainer = styled.div`
+    padding: 20px;
+`;
+
+export const SolicitacaoTitleContainer = styled.div`
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+`;
+
+export const SolicitacaoModalTitle = styled.h2`
+    font-size: 1.5rem;
+    color: #1e293b;
+`;
+
+export const SolicitacaoModalContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+`;
+
+export const DataColumn = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+`;
+
+export const DataContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 8px 0;
+`;
+
+export const SolicitacaoModalContentLabel = styled.span`
+    font-weight: 600;
+    color: #64748b;
+`;
+
+export const SolicitacaoModalContentValue = styled.span`
+    color: #0f172a;
+    font-weight: 500;
+`;
+
+export const LinkImgContainer = styled.a`
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+`;
+
+export const ImgContainer = styled.div`
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+`;
+
+export const DocumentImage = styled.img`
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 4px;
 `;
 
 export const DeleteContainer = styled.div`
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    padding: 25px;
+    text-align: center;
+    padding: 20px;
 `;
 
-export const DeleteTitle = styled.h1`
-    font-size: 20px;
-    color: #2e4a66;
+export const DeleteTitle = styled.h3`
+    margin-bottom: 20px;
+    color: #1f2937;
 `;
 
 export const DeleteButtonContainer = styled.div`
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 25px;
-`;
-
-export const Image = styled.img`
-    max-width: 100%;
-    width: 50%;
-`;
-
-export const ClienteCardsContainer = styled.div`
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-`;
-
-export const Card = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    height: 150px;
-    padding: 25px;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-    cursor: pointer;
-    transition: 0.5s ease;
-
-    &:hover{
-        -webkit-transform: scale(1.1);
-        -ms-transform: scale(1.1);
-        transform: scale(1.1);
-        transition: 0.5s ease;
-    }
-
-    @media only screen and (max-width: 978px){
-        width: 80%;
-    }
-`;
-
-export const CardTitle = styled.h1`
-    font-size: 25px;
-    font-weight: bold;
-    color: ${props => props.theme.colors.titleColor};
-`;
-
-export const CardIconContainer = styled.div`
-    font-size: 35px;
-    color: ${props => props.theme.colors.dark1};
-    text-align: center;
-    margin-top: 15px;
-`;
-
-export const CardContent = styled.p``;
-
-export const DocumentImage = styled.img`
-    margin-top: 15px;
-    margin-bottom: 20px;
-    height: 100px;
-    width: 50%;
-`;
-
-export const ImgContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-`;
-
-export const LinkImgContainer = styled.a`
-    text-decoration: none;
-    cursor: pointer;
+    gap: 15px;
 `;

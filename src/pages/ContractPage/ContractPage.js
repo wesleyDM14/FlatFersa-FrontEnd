@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { ThreeDots } from "react-loader-spinner";
+import { FaDatabase, FaFileContract, FaFileImport, FaHandshake, FaPlus } from "react-icons/fa";
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
 import SearchBar from "../../components/SearchBar";
+import ContractList from "./ContractList";
 
 import { logoutUser } from '../../services/userService';
+import { getContratos } from "../../services/contratoService";
 
 import {
     AddButtonText,
@@ -28,255 +32,198 @@ import {
     CardTitle,
     CardIconContainer,
 } from "./ContractPage.styles";
-import { FaDatabase, FaFileContract, FaFileImport, FaHandshake, FaPlus } from "react-icons/fa";
-import { getContratos } from "../../services/contratoService";
-import { ThreeDots } from "react-loader-spinner";
-import ContractList from "./ContractList";
 
 const ContractPage = ({ user }) => {
     const navigate = useNavigate();
+    const listRef = useRef(null);
+
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [contratos, setContratos] = useState([]);
-    const [contratoAtivo, setContratoAtivo] = useState(false);
 
-    const [ativos, setAtivos] = useState(false);
-    const [solicitacoes, setSolicitacoes] = useState(false);
-    const [historico, setHistorico] = useState(false);
+    // Filtros
+    const [filterType, setFilterType] = useState('TOTAL');
 
     const [contratosAtivos, setContratosAtivos] = useState([]);
     const [contratosSolicitacao, setContratosSolicitacao] = useState([]);
+    const [contratoAtivoUser, setContratoAtivoUser] = useState(false);
 
     const [loading, setLoading] = useState(true);
-
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => logoutUser(navigate);
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
+    // Helper para verificar se é admin com segurança
+    const isAdmin = user && (user.role === 'ADMIN' || user.isAdmin === true);
+
+    const fetchData = async () => {
+        // Não reseta o loading para true aqui para evitar flicker se já estiver carregando
+        try {
+            console.log("Buscando contratos...");
+            await getContratos(
+                setContratos,
+                setContratoAtivoUser,
+                setContratosAtivos,
+                setContratosSolicitacao,
+                null, // Não passamos setLoading aqui
+                isAdmin // Passa a flag de admin calculada
+            );
+        } catch (error) {
+            console.error("Erro ao buscar contratos:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        async function teste() {
-            if (loading) {
-                user.accessToken && await getContratos(user, setContratos, setLoading, setContratoAtivo, setContratosAtivos, setContratosSolicitacao);
-            }
+        // CORREÇÃO CRÍTICA: 
+        // Só tenta buscar se o usuário tiver ID (estiver logado).
+        // Se não tiver token ainda, NÃO mata o loading, espera o Redux atualizar.
+        if (user && user.id) {
+            fetchData();
         }
-        teste();
-    }, [user, loading]);
+        // Se o user for null, o loading continua true (renderizado no if abaixo)
+    }, [user]);
+
+    const handleCardClick = (type) => {
+        setFilterType(type);
+        setPage(1);
+        setTimeout(() => {
+            if (listRef.current) {
+                listRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    };
+
+    const getCurrentList = () => {
+        switch (filterType) {
+            case 'ATIVOS': return contratosAtivos;
+            case 'SOLICITACOES': return contratosSolicitacao;
+            default: return contratos;
+        }
+    };
+
+    const currentList = getCurrentList();
+
+    // Se não tem user ainda, mostra loading para não quebrar a tela
+    if (!user) {
+        return (
+            <LoadingContainer>
+                <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+            </LoadingContainer>
+        );
+    }
 
     return (
-        user.isAdmin ? (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
-                            />
-                        </LoadingContainer>
-                    ) : (
-                        <MainContratoContainer>
-                            <HeaderContratoContainer>
-                                <HeaderTitle>Contratos</HeaderTitle>
-                                <AddContratoHeaderButton onClick={() => navigate('/contratos/novo')}>
-                                    <FaPlus color='green' />
-                                    <AddButtonText>
-                                        Adicionar Novo
-                                    </AddButtonText>
-                                </AddContratoHeaderButton>
-                            </HeaderContratoContainer>
-                            <ContratoCardsContainer>
-                                <Card
-                                    onClick={() => {
-                                        setHistorico(false);
-                                        setAtivos(!ativos);
-                                        setSolicitacoes(false);
-                                    }}
-                                    className={ativos && 'active'}
-                                >
-                                    <CardTitle>Contratos Ativos</CardTitle>
-                                    <CardIconContainer>
-                                        <FaFileContract />
-                                        <ContratoCounter>Contratos Ativos ({contratosAtivos.length})</ContratoCounter>
-                                    </CardIconContainer>
-                                </Card>
-                                <Card
-                                    onClick={() => {
-                                        setHistorico(false);
-                                        setAtivos(false);
-                                        setSolicitacoes(!solicitacoes);
-                                    }}
-                                    className={solicitacoes && 'active'}
-                                >
-                                    <CardTitle>Solicitações</CardTitle>
-                                    <CardIconContainer>
-                                        <FaFileImport />
-                                        <ContratoCounter>Solicitações ({contratosSolicitacao.length})</ContratoCounter>
-                                    </CardIconContainer>
-                                </Card>
-                                <Card
-                                    onClick={() => {
-                                        setHistorico(!historico);
-                                        setAtivos(false);
-                                        setSolicitacoes(false);
-                                    }}
-                                    className={historico && 'active'}
-                                >
-                                    <CardTitle>Histórico</CardTitle>
-                                    <CardIconContainer>
-                                        <FaDatabase />
-                                        <ContratoCounter>Contratos Totais ({contratos.length})</ContratoCounter>
-                                    </CardIconContainer>
-                                </Card>
-                            </ContratoCardsContainer>
-                            <ContentContratoContainer>
-                                <ContentContratoHeader>
-                                    {
-                                        (ativos || solicitacoes || historico) && (
-                                            <SearcherContainer>
-                                                <SearchBar search={search} setSearch={setSearch} />
-                                            </SearcherContainer>
-                                        )
-                                    }
-                                </ContentContratoHeader>
-                                {
-                                    contratos.length === 0 ? (
-                                        <NoContentContainer>
-                                            <FaHandshake color='#6c757d' fontSize={150} className='icon-responsive' />
-                                            <NoContentAvisoContainer>
-                                                <TextContent>Nenhum contrato encontrado.</TextContent>
-                                                <AdicionarContratoButton onClick={() => navigate('/contratos/novo')}>
-                                                    <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Contrato
-                                                </AdicionarContratoButton>
-                                            </NoContentAvisoContainer>
-                                        </NoContentContainer>
-                                    ) : (
-                                        historico ? (
-                                            <ContractList
-                                                user={user}
-                                                contratos={contratos}
-                                                navigate={navigate}
-                                                setLoading={setLoading}
-                                                search={search}
-                                                page={page}
-                                                setPage={setPage}
-                                                itemsPerPage={itemsPerPage}
-                                            />
-                                        ) :
-                                            ativos ? (
-                                                <ContractList
-                                                    user={user}
-                                                    contratos={contratosAtivos}
-                                                    navigate={navigate}
-                                                    setLoading={setLoading}
-                                                    search={search}
-                                                    page={page}
-                                                    setPage={setPage}
-                                                    itemsPerPage={itemsPerPage}
-                                                />
-                                            ) :
-                                                solicitacoes ? (
-                                                    <ContractList
-                                                        user={user}
-                                                        contratos={contratosSolicitacao}
-                                                        navigate={navigate}
-                                                        setLoading={setLoading}
-                                                        search={search}
-                                                        page={page}
-                                                        setPage={setPage}
-                                                        itemsPerPage={itemsPerPage}
-                                                    />
-                                                ) : <></>
-                                    )
-                                }
-                            </ContentContratoContainer>
-                        </MainContratoContainer>
-                    )
-                }
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div>
-        ) : (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
-                            />
-                        </LoadingContainer>
-                    ) : (
-                        <MainContratoContainer>
-                            <HeaderContratoContainer>
-                                <HeaderTitle>Contratos</HeaderTitle>
-                                {
-                                    !contratoAtivo && (
-                                        <AddContratoHeaderButton onClick={() => {
-                                            navigate('/contratos/novo');
-                                        }}>
-                                            <FaPlus color='green' />
-                                            <AddButtonText>
-                                                Nova Solicitação
-                                            </AddButtonText>
-                                        </AddContratoHeaderButton>
-                                    )
-                                }
-                            </HeaderContratoContainer>
-                            <ContentContratoContainer>
-                                <ContentContratoHeader>
-                                    <ContratoCounter>Contratos ({contratos.length})</ContratoCounter>
-                                    <SearcherContainer>
-                                        <SearcherContainer>
-                                            <SearchBar search={search} setSearch={setSearch} />
-                                        </SearcherContainer>
-                                    </SearcherContainer>
-                                </ContentContratoHeader>
-                                {
-                                    contratos.length === 0 ? (
-                                        <NoContentContainer>
-                                            <FaHandshake color='#6c757d' fontSize={150} className='icon-responsive' />
-                                            <NoContentAvisoContainer>
-                                                <TextContent>Nenhum contrato encontrado.</TextContent>
-                                                {
-                                                    !contratoAtivo && (
-                                                        <AdicionarContratoButton onClick={() => navigate('/contratos/novo')}>
-                                                            <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Nova Solicitação
-                                                        </AdicionarContratoButton>
-                                                    )
-                                                }
-                                            </NoContentAvisoContainer>
-                                        </NoContentContainer>
-                                    ) : (
-                                        <ContractList
-                                            user={user}
-                                            contratos={contratos}
-                                            navigate={navigate}
-                                            setLoading={setLoading}
-                                            search={search}
-                                            page={page}
-                                            setPage={setPage}
-                                            itemsPerPage={itemsPerPage}
-                                        />
-                                    )
-                                }
-                            </ContentContratoContainer>
-                        </MainContratoContainer>
-                    )
-                }
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div>
-        )
+        <div className="container">
+            <Sidebar
+                sidebarOpen={sidebarOpen}
+                closeSidebar={() => setSidebarOpen(false)}
+                logoutUser={handleLogout}
+            />
 
+            {loading ? (
+                <LoadingContainer>
+                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                </LoadingContainer>
+            ) : (
+                <MainContratoContainer>
+                    <HeaderContratoContainer>
+                        <HeaderTitle>Contratos</HeaderTitle>
+
+                        {(isAdmin || (!isAdmin && !contratoAtivoUser)) && (
+                            <AddContratoHeaderButton onClick={() => navigate('/contratos/novo')}>
+                                <FaPlus color='green' />
+                                <AddButtonText>
+                                    {isAdmin ? 'Adicionar Novo' : 'Nova Solicitação'}
+                                </AddButtonText>
+                            </AddContratoHeaderButton>
+                        )}
+                    </HeaderContratoContainer>
+
+                    {/* CORREÇÃO: Verificação robusta de Admin para exibir os Cards */}
+                    {isAdmin && (
+                        <ContratoCardsContainer>
+                            <Card
+                                onClick={() => handleCardClick('ATIVOS')}
+                                className={filterType === 'ATIVOS' ? 'active' : ''}
+                            >
+                                <CardTitle>Contratos Ativos</CardTitle>
+                                <CardIconContainer>
+                                    <FaFileContract />
+                                    <ContratoCounter>{contratosAtivos.length}</ContratoCounter>
+                                </CardIconContainer>
+                            </Card>
+
+                            <Card
+                                onClick={() => handleCardClick('SOLICITACOES')}
+                                className={filterType === 'SOLICITACOES' ? 'active' : ''}
+                            >
+                                <CardTitle>Solicitações</CardTitle>
+                                <CardIconContainer>
+                                    <FaFileImport />
+                                    <ContratoCounter>{contratosSolicitacao.length}</ContratoCounter>
+                                </CardIconContainer>
+                            </Card>
+
+                            <Card
+                                onClick={() => handleCardClick('TOTAL')}
+                                className={filterType === 'TOTAL' ? 'active' : ''}
+                            >
+                                <CardTitle>Histórico Total</CardTitle>
+                                <CardIconContainer>
+                                    <FaDatabase />
+                                    <ContratoCounter>{contratos.length}</ContratoCounter>
+                                </CardIconContainer>
+                            </Card>
+                        </ContratoCardsContainer>
+                    )}
+
+                    <div ref={listRef}></div>
+
+                    <ContentContratoContainer>
+                        <ContentContratoHeader>
+                            <ContratoCounter>
+                                {filterType === 'ATIVOS' && 'Listando Ativos'}
+                                {filterType === 'SOLICITACOES' && 'Listando Solicitações'}
+                                {filterType === 'TOTAL' && 'Todos os Contratos'}
+                            </ContratoCounter>
+                            <SearcherContainer>
+                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar..." />
+                            </SearcherContainer>
+                        </ContentContratoHeader>
+
+                        {currentList.length === 0 ? (
+                            <NoContentContainer>
+                                <FaHandshake color='#6c757d' fontSize={80} style={{ marginBottom: 20 }} />
+                                <NoContentAvisoContainer>
+                                    <TextContent>Nenhum contrato encontrado nesta categoria.</TextContent>
+                                    {(!isAdmin && !contratoAtivoUser) && (
+                                        <AdicionarContratoButton onClick={() => navigate('/contratos/novo')}>
+                                            <FaPlus color='#fff' style={{ marginRight: 5 }} /> Nova Solicitação
+                                        </AdicionarContratoButton>
+                                    )}
+                                </NoContentAvisoContainer>
+                            </NoContentContainer>
+                        ) : (
+                            <ContractList
+                                contratos={currentList}
+                                user={user}
+                                setLoading={setLoading}
+                                navigate={navigate}
+                                search={search}
+                                page={page}
+                                setPage={setPage}
+                                itemsPerPage={itemsPerPage}
+                            />
+                        )}
+                    </ContentContratoContainer>
+                </MainContratoContainer>
+            )}
+
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 

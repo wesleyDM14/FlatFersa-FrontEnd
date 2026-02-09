@@ -1,35 +1,30 @@
 import styled from 'styled-components';
 
 export const MainPerfilContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: 20px 30px;
     margin-top: 15px;
     margin-bottom: 28px;
     grid-area: main;
 
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
+    @media (max-width: 768px){
+        padding: 15px;
     }
 `;
 
 export const LoadingContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-top: 15px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    grid-area: main;
-
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
-    }
+    align-items: center;
+    height: 300px;
 `;
 
 export const HeaderPerfilContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    padding: 20px 35px;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
 `;
 
 export const HeaderTitle = styled.h2`
@@ -41,99 +36,142 @@ export const HeaderTitle = styled.h2`
 export const ContentPerfilContainer = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 15px;
+    gap: 20px;
 `;
 
-export const StyledFormArea = styled.div`
-    margin-top: 10px;
-    padding: 50px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+// Card de Perfil
+export const ProfileCard = styled.div`
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+`;
 
-    @media only screen and (max-width: 978px){
-        padding: 30px 10px;
-    }
+export const SectionTitle = styled.h3`
+    font-size: 1.1rem;
+    color: #3b82f6;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
 `;
 
 export const FormContent = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+
+    @media (max-width: 900px){
+        grid-template-columns: 1fr;
+    }
+`;
+
+export const FormColum = styled.div`
     display: flex;
     flex-direction: column;
+    gap: 15px;
+`;
+
+export const SubItensContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    
+    @media (max-width: 600px){
+        grid-template-columns: 1fr;
+    }
 `;
 
 export const FormInputArea = styled.div`
-    box-sizing: inherit;
-    margin-bottom: 20px;
-    width: 50%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+`;
 
-    @media only screen and (max-width: 978px){
-        width:100%;
+export const FormInputLabelRequired = styled.label`
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #334155;
+
+    &::after{
+        content: "*";
+        color: red;
+        margin-left: 2px;
     }
 `;
 
-export const FormInputLabelRequired = styled.p`
+export const FormInputLabel = styled.label`
+    font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 5px;
-
-    &::after{
-        display: inline-block;
-        content: "*";
-        margin-left: 2px;
-        color: ${props => props.theme.colors.theme};
-    }
+    color: #334155;
 `;
 
 export const ButtonGroup = styled.div`
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    padding: 0px 35px;
-
-    @media only screen and (max-width: 978px){
-        justify-content: center;
-        padding: 30px 10px;
-    }
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
 `;
 
 export const BackButton = styled.button`
-    cursor: pointer;
-    margin-right: 15px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: transparent;
-    color: ${props => props.theme.colors.secondary};
+    cursor: pointer;
+    color: #555;
 
-    &:hover{
-        background-color: ${props => props.theme.colors.light2};
-    }
-
-    @media only screen and (max-width: 978px){
-        min-width: 45%;
-    }
+    &:hover { background: #f3f4f6; }
 `;
 
 export const SubmitButton = styled.button`
-    cursor: pointer;
+    padding: 10px 20px;
+    background: #000;
+    color: white;
+    border: none;
+    border-radius: 6px;
     font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: #000;;
-    color: ${props => props.theme.colors.primary};
+    cursor: pointer;
 
-    &:hover{
-        background-color: #000A;
-    }
+    &:hover { background: #333; }
+`;
 
-    @media only screen and (max-width: 978px){
-        min-width: 45%;
-    }
+export const Limitador = styled.div`
+    width: 100%;
+`;
+
+// Upload de Foto
+export const AvatarContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+`;
+
+export const AvatarImage = styled.img`
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #3b82f6;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+`;
+
+export const UploadButton = styled.label`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.9rem;
+    
+    &:hover { text-decoration: underline; }
+    
+    input { display: none; }
 `;

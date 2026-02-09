@@ -1,202 +1,180 @@
 import axios from "axios";
 import { saveAs } from "file-saver";
+import { sessionService } from "redux-react-session";
 
-export const getContratos = async (user, setContratos, setLoading, setContratoAtivo, setContratosAtivos, setContratosSolicitacao) => {
-    if (user.isAdmin) {
-        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then(async (response) => {
-            let contratos = response.data;
-            setContratos(contratos);
-            let ativos = [];
-            let solicitacoes = [];
+const api = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
+});
 
-            for (let index = 0; index < contratos.length; index++) {
-                const contrato = contratos[index];
-                if (contrato.statusContrato === 'ATIVO') {
-                    ativos.push(contrato);
-                } else if (contrato.statusContrato === 'AGUARDANDO') {
-                    solicitacoes.push(contrato)
-                }
-            }
-
-            setContratosAtivos(ativos);
-            setContratosSolicitacao(solicitacoes);
-        }).catch((err) => {
-            console.log(err.response.data.message);
-            window.alert(err.response.data.message);
-        });
-    } else {
-        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/contratos-cliente', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then((response) => {
-            let contratos = response.data;
-            for (let index = 0; index < contratos.length; index++) {
-                const element = contratos[index];
-                if (element.statusContrato === 'ATIVO' || element.statusContrato === 'AGUARDANDO') {
-                    setContratoAtivo(true);
-                    break;
-                }
-            }
-            setContratos(contratos);
-        }).catch((err) => {
-            console.log(err.response.data.message);
-            window.alert(err.response.data.message);
-        });
+// Interceptor
+api.interceptors.request.use(async (config) => {
+    try {
+        const session = await sessionService.loadSession();
+        if (session && session.token) {
+            config.headers.Authorization = `Bearer ${session.token}`;
+        }
+    } catch (err) {
+        console.error("Erro sessão", err);
     }
-    setLoading(false);
-}
+    return config;
+});
 
-export const createContrato = async (contrato, user, navigate, setSubmitting, setFieldError) => {
-    if (user.isAdmin) {
-        await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos', contrato, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then((response) => {
-            console.log(response.data);
-            setSubmitting(false);
-            navigate('/contratos');
-        }).catch((err) => {
-            setSubmitting(false);
-            setFieldError('valorAluguel', err.response.data.message);
-        });
-    } else {
-        await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/solicitar', contrato, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then((response) => {
-            console.log(response.data);
-            setSubmitting(false);
-            navigate('/contratos');
-        }).catch((err) => {
-            setSubmitting(false);
-            setFieldError('duracaoContrato', err.response.data.message);
-        });
+// --- LISTAGEM ---
+export const getContratos = async (setContratos, setContratoAtivo, setContratosAtivos, setContratosSolicitacao, setLoading, isAdmin) => {
+    try {
+        const endpoint = isAdmin ? '/contratos' : '/contratos-cliente';
+        const response = await api.get(endpoint);
+        const contratosData = response.data;
+
+        setContratos(contratosData);
+
+        if (isAdmin) {
+            // Lógica Admin
+            const ativos = contratosData.filter(c => c.statusContrato === 'ATIVO');
+            const solicitacoes = contratosData.filter(c => c.statusContrato === 'AGUARDANDO');
+
+            if (setContratosAtivos) setContratosAtivos(ativos);
+            if (setContratosSolicitacao) setContratosSolicitacao(solicitacoes);
+        } else {
+            // Lógica Cliente
+            const temAtivo = contratosData.some(c => c.statusContrato === 'ATIVO' || c.statusContrato === 'AGUARDANDO');
+            if (setContratoAtivo) setContratoAtivo(temAtivo);
+        }
+
+    } catch (err) {
+        console.error(err);
+        // alert(err.response?.data?.message || "Erro ao buscar contratos");
+    } finally {
+        if (setLoading) setLoading(false);
     }
+};
 
-}
+// --- CRIAÇÃO ---
+export const createContrato = async (contratoData, isAdmin, navigate, setSubmitting, setFieldError) => {
+    try {
+        const endpoint = isAdmin ? '/contratos' : '/contratos/solicitar';
 
-export const getContratoById = async (user, contratoId, setContrato) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/${contratoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
+        await api.post(endpoint, contratoData);
+
+        alert("Contrato/Solicitação criado com sucesso!");
+        navigate('/contratos');
+
+    } catch (err) {
+        const msg = err.response?.data?.message || "Erro ao criar contrato";
+        console.error(msg);
+
+        if (setFieldError) {
+            // Tenta jogar erro num campo genérico ou específico
+            setFieldError('valorAluguel', msg);
+        } else {
+            alert(msg);
         }
-    }).then((response) => {
-        let contrato = response.data;
-        setContrato(contrato);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
-
-export const downloadContract = async (user, contratoId, setIsDownloading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/download/${contratoId}`, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${user.accessToken}`,
-        },
-        responseType: 'arraybuffer'
+    } finally {
+        if (setSubmitting) setSubmitting(false);
     }
-    ).then((response) => {
-        const { data } = response;
-        const blob = new Blob([data], { type: 'application/pdf' });
-        saveAs(blob, 'contrato.pdf');
-        setIsDownloading(false);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-        setIsDownloading(false);
-    });
-}
+};
 
-export const approveContract = async (user, contract, setSubmitting, setFieldError, setLoading) => {
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/aprovar', contract, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setSubmitting(false);
-        setLoading(true);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        setFieldError('limiteKwh', err.response.data.message);
-    });
-}
+// --- GET BY ID ---
+export const getContratoById = async (contratoId, setContrato) => {
+    try {
+        const response = await api.get(`/contratos/${contratoId}`);
+        setContrato(response.data);
+    } catch (err) {
+        console.error(err);
+    }
+};
 
-export const desapproveContract = async (user, contratoId) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/contratos/reprovar/${contratoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`
-        }
-    }).then((response) => {
-        console.log(response.data);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+// --- DOWNLOAD PDF ---
+export const downloadContract = async (contratoId, setIsDownloading) => {
+    try {
+        const response = await api.get(`/contratos/download/${contratoId}`, {
+            responseType: 'blob' // Importante para arquivos
+        });
 
-export const cancelContract = async (user, contratoId, message) => {
-    let data = { contratoId: contratoId, message: message };
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/contratos/cancelar', data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`
-        }
-    }).then((response) => {
-        console.log(response.data);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+        // Cria o blob e dispara o download
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        saveAs(blob, `contrato_${contratoId}.pdf`);
 
-export const deleteContratoById = async (user, contratoId, closeDeleteModal, setLoading) => {
-    await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/contratos/${contratoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        window.alert(response.data.message);
-        closeDeleteModal();
-        setLoading(true);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao baixar o contrato. Verifique se o arquivo existe.");
+    } finally {
+        if (setIsDownloading) setIsDownloading(false);
+    }
+};
 
-export const assinarContratoById = async (user, data, setSubmitting, setFieldError, closeModalAssinatura) => {
-    const { contratoId } = data;
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/contratos/assinar/${contratoId}`, data, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        const { data } = response;
-        console.log(data);
-        setSubmitting(false);
-        closeModalAssinatura();
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        setFieldError(err.response.data.message);
-        setSubmitting(false);
-    });
-}
+// --- APROVAR ---
+export const approveContract = async (contractData, setSubmitting, setFieldError, setLoading) => {
+    try {
+        await api.post('/contratos/aprovar', contractData);
+        alert("Contrato Aprovado com Sucesso!");
+        if (setLoading) setLoading(true); // Força refresh na lista
+    } catch (err) {
+        console.error(err);
+        const msg = err.response?.data?.message || "Erro ao aprovar";
+        if (setFieldError) setFieldError('limiteKwh', msg);
+        else alert(msg);
+    } finally {
+        if (setSubmitting) setSubmitting(false);
+    }
+};
+
+// --- REPROVAR / CANCELAR ---
+export const desapproveContract = async (contratoId, setLoading) => {
+    try {
+        await api.get(`/contratos/reprovar/${contratoId}`);
+        alert("Contrato Reprovado.");
+        if (setLoading) setLoading(true);
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao reprovar.");
+    }
+};
+
+export const cancelContract = async (contratoId, message, setLoading) => {
+    try {
+        await api.post('/contratos/cancelar', { contratoId, message });
+        alert("Contrato Cancelado.");
+        if (setLoading) setLoading(true);
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao cancelar.");
+    }
+};
+
+// --- DELETAR ---
+export const deleteContratoById = async (contratoId, closeDeleteModal, setLoading) => {
+    try {
+        await api.delete(`/contratos/${contratoId}`);
+        alert("Contrato excluído.");
+        if (closeDeleteModal) closeDeleteModal();
+        if (setLoading) setLoading(true);
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao excluir.");
+    }
+};
+
+// --- ASSINAR (UPLOAD) ---
+export const assinarContratoById = async (data, setSubmitting, setFieldError, closeModalAssinatura) => {
+    try {
+        const formData = new FormData();
+        formData.append('contratoId', data.contratoId);
+        formData.append('contrato', data.contrato); // O arquivo PDF
+
+        await api.put(`/contratos/assinar/${data.contratoId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        alert("Contrato assinado enviado com sucesso!");
+        if (closeModalAssinatura) closeModalAssinatura();
+
+    } catch (err) {
+        console.error(err);
+        const msg = err.response?.data?.message || "Erro ao enviar assinatura";
+        if (setFieldError) setFieldError('contrato', msg);
+        else alert(msg);
+    } finally {
+        if (setSubmitting) setSubmitting(false);
+    }
+};

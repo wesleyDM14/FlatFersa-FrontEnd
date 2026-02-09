@@ -2,393 +2,263 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
+import { connect } from "react-redux";
+import { ThreeDots } from "react-loader-spinner";
+import { FaCloudUploadAlt, FaUserEdit, FaLock } from "react-icons/fa";
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
+import { FormInput, StyledDatePicker, MaskedInput } from "../../components/FormLib"; 
 
+// Certifique-se que seu userService está na versão V2 (com interceptors)
 import { getLoggedUserInfo, logoutUser, updateUserLoggedIn } from '../../services/userService';
+
+// Estilos próprios (não dependem mais de ClientPage)
 import {
-    BackButton,
-    ButtonGroup,
-    ContentPerfilContainer,
+    MainPerfilContainer,
     HeaderPerfilContainer,
     HeaderTitle,
+    ContentPerfilContainer,
     LoadingContainer,
-    MainPerfilContainer,
-    StyledFormArea,
-    SubmitButton,
-} from "./PerfilPage.styles";
-import { ThreeDots } from "react-loader-spinner";
-import { connect } from "react-redux";
-import { FormInput, StyledDatePicker } from "../../components/FormLib";
-import {
-    FormColum,
+    ProfileCard,
+    SectionTitle,
     FormContent,
+    FormColum,
     FormInputArea,
     FormInputLabel,
     FormInputLabelRequired,
-    Image,
+    ButtonGroup,
+    BackButton,
+    SubmitButton,
     Limitador,
-    StyledFileArea,
-    StyledFileIconContainer,
-    StyledFileInput,
-    StyledFileInputTitle,
-    StyledFileLegend,
-    SubItensContainer
-} from "../ClientPage/ClientPage.styles";
-import { FaCloudUploadAlt } from "react-icons/fa";
+    SubItensContainer,
+    AvatarContainer,
+    AvatarImage,
+    UploadButton
+} from "./PerfilPage.styles";
+
+import defaultAvatar from '../../assets/user.png'; 
 
 const PerfilPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    
     const [loading, setLoading] = useState(true);
     const [userInfo, setUserInfo] = useState({});
+    
     const [startDate, setStartDate] = useState(new Date());
-    const [selectedBackImage, setSelectedBackImage] = useState();
-    const [selectedFrontImage, setSelectedFrontImage] = useState();
+    const [previewImage, setPreviewImage] = useState(null);
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => logoutUser(navigate);
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
-
-    useEffect(() => {
-        if (user.accessToken) {
-            const fetchData = async () => {
-                setLoading(true);
-                try {
-                    await getLoggedUserInfo(user, setUserInfo, setStartDate);
-                } catch (error) {
-                    console.error("Error loading data", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchData();
-        }
-    }, [user]);
-
-    const refreshData = async () => {
+    // Função de busca isolada
+    const fetchData = async () => {
         setLoading(true);
         try {
-            await getLoggedUserInfo(user, setUserInfo, setStartDate);
+            // V2: Não passamos 'user', o interceptor usa o token da sessão
+            await getLoggedUserInfo(setUserInfo, setStartDate);
         } catch (error) {
-            console.error("Error loading data", error);
+            console.error("Erro ao carregar perfil", error);
         } finally {
             setLoading(false);
         }
     };
 
+    useEffect(() => {
+        // CORREÇÃO DO LOADING INFINITO
+        if (user && user.accessToken) {
+            fetchData();
+        } else {
+            // Se não tem user ou token, para o loading para não travar a tela
+            setLoading(false);
+        }
+    }, [user]);
+
+    // Atualiza a foto quando os dados chegarem
+    useEffect(() => {
+        if (userInfo.photoUrl) {
+            setPreviewImage(userInfo.photoUrl);
+        }
+    }, [userInfo]);
+
+    // Proteção de renderização
+    if (!user) {
+        return (
+            <LoadingContainer>
+                <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+            </LoadingContainer>
+        );
+    }
+
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} perfilActive={true} />
-            {
-                loading ? (
-                    <LoadingContainer>
-                        <ThreeDots
-                            color={'#4e4e4e'}
-                            height={49}
-                            width={100}
-                        />
-                    </LoadingContainer>
-                ) : (
-                    <MainPerfilContainer>
-                        <HeaderPerfilContainer>
-                            <HeaderTitle>Atualizar Perfil</HeaderTitle>
-                        </HeaderPerfilContainer>
-                        <ContentPerfilContainer>
-                            <StyledFormArea>
-                                {
-                                    user.isAdmin ? (
-                                        <Formik
-                                            initialValues={{
-                                                currentPassword: '',
-                                                newPassword: '',
-                                                confirmPassword: '',
-                                            }}
-                                            validationSchema={
-                                                Yup.object({
-                                                    currentPassword: Yup.string().min(6, 'Senha deve ter pelo menos 6 caracteres').required('Senha é obrigatório'),
-                                                    newPassword: Yup.string().min(6, 'Senha deve ter pelo menos 6 caracteres').required('Senha é obrigatório'),
-                                                    confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir').required('Confirmação de senha é obrigatório'),
-                                                })
-                                            }
-                                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError);
-                                                refreshData();
-                                            }}
-                                        >
-                                            {
-                                                ({ isSubmitting }) => (
-                                                    <Form>
-                                                        <FormContent>
-                                                            <FormColum>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Senha Atual</FormInputLabelRequired>
-                                                                    <FormInput
-                                                                        name='currentPassword'
-                                                                        type='password'
-                                                                    />
-                                                                </FormInputArea>
-                                                            </FormColum>
-                                                            <FormColum>
-                                                                <SubItensContainer>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Nova Senha</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                name='newPassword'
-                                                                                type='password'
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Confirmar Nova Senha</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                name='confirmPassword'
-                                                                                type='password'
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                </SubItensContainer>
-                                                            </FormColum>
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} logoutUser={handleLogout} />
+            
+            {loading ? (
+                <LoadingContainer>
+                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                </LoadingContainer>
+            ) : (
+                <MainPerfilContainer>
+                    <HeaderPerfilContainer>
+                        <HeaderTitle>Meu Perfil</HeaderTitle>
+                    </HeaderPerfilContainer>
 
-                                                        </FormContent>
-                                                        <ButtonGroup>
-                                                            <BackButton type='button' onClick={() => navigate('/')}>Voltar</BackButton>
-                                                            {!isSubmitting && (
-                                                                <SubmitButton type="submit">Salvar</SubmitButton>
-                                                            )}
-                                                            {
-                                                                isSubmitting && (
-                                                                    <ThreeDots
-                                                                        color={'#4e4e4e'}
-                                                                        height={49}
-                                                                        width={100}
-                                                                    />
-                                                                )
+                    <ContentPerfilContainer>
+                        <Formik
+                            enableReinitialize={true} // Importante para carregar os dados vindos da API
+                            initialValues={{
+                                id: userInfo.id,
+                                name: userInfo.name || '',
+                                email: userInfo.email || '',
+                                phone: userInfo.phone || '',
+                                address: userInfo.address || '',
+                                cpf: userInfo.cpf || '',
+                                rg: userInfo.rg || '',
+                                photo: null, 
+                                currentPassword: '',
+                                newPassword: '',
+                                confirmPassword: '',
+                            }}
+                            validationSchema={Yup.object({
+                                name: Yup.string().required('Nome é obrigatório'),
+                                email: Yup.string().email().required('Email é obrigatório'),
+                                // Senhas opcionais
+                                newPassword: Yup.string().min(6, 'Mínimo 6 caracteres'),
+                                confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'Senhas não conferem')
+                            })}
+                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                values.dateBirth = startDate;
+                                // V2: Serviço atualizado
+                                await updateUserLoggedIn(values, setSubmitting, setFieldError);
+                                // Recarrega os dados para atualizar a foto/infos na tela
+                                fetchData(); 
+                            }}
+                        >
+                            {({ isSubmitting, setFieldValue }) => (
+                                <Form>
+                                    {/* CARD 1: DADOS PESSOAIS E FOTO */}
+                                    <ProfileCard>
+                                        <SectionTitle>
+                                            <FaUserEdit style={{marginRight: 10}}/> Dados Pessoais
+                                        </SectionTitle>
+                                        
+                                        <AvatarContainer>
+                                            <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                                                <AvatarImage src={previewImage || defaultAvatar} alt="Foto de Perfil" />
+                                                <UploadButton>
+                                                    <FaCloudUploadAlt /> Alterar Foto
+                                                    <input 
+                                                        type="file" 
+                                                        accept="image/*"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files[0];
+                                                            if(file) {
+                                                                setFieldValue('photo', file);
+                                                                setPreviewImage(URL.createObjectURL(file));
                                                             }
+                                                        }}
+                                                    />
+                                                </UploadButton>
+                                            </div>
+                                        </AvatarContainer>
 
-                                                        </ButtonGroup>
-                                                    </Form>
-                                                )
-                                            }
-                                        </Formik>
-                                    ) : (
-                                        <Formik
-                                            initialValues={{
-                                                id: userInfo.id,
-                                                cpf: userInfo.cpf,
-                                                rg: userInfo.rg,
-                                                phone: userInfo.phone,
-                                                address: userInfo.address,
-                                                dateBirth: userInfo.dateBirth,
-                                                name: userInfo.name,
-                                                documentoFrente: userInfo.documentoFrente,
-                                                documentoVerso: userInfo.documentoVerso,
-                                                currentPassword: '',
-                                                newPassword: '',
-                                                confirmPassword: '',
-                                            }}
-                                            validationSchema={
-                                                Yup.object({
-                                                    phone: Yup.string().required('Nome é obrigatório'),
-                                                    address: Yup.string().required('Endereço é Obrigatório'),
-                                                    dateBirth: Yup.date().required('Data de Nascimento é Obrigatório'),
-                                                    name: Yup.string().required('Nome é obrigatório'),
-                                                    currentPassword: Yup.string(),
-                                                    newPassword: Yup.string(),
-                                                    confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir'),
-                                                })
-                                            }
-                                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                                values.dateBirth = startDate;
-                                                await updateUserLoggedIn(user, values, setSubmitting, setFieldError);
-                                                refreshData();
-                                            }}
-                                        >
-                                            {
-                                                ({ isSubmitting, setFieldValue }) => (
-                                                    <Form>
-                                                        <FormContent>
-                                                            <FormColum>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                                    <FormInput
-                                                                        type='text'
-                                                                        name='name'
-                                                                        placeholder='Nome do cliente'
-                                                                    />
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Senha Atual</FormInputLabelRequired>
-                                                                    <FormInput
-                                                                        name='currentPassword'
-                                                                        type='password'
-                                                                    />
-                                                                </FormInputArea>
-                                                                <SubItensContainer>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Nova Senha</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                name='newPassword'
-                                                                                type='password'
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Confirmar Nova Senha</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                name='confirmPassword'
-                                                                                type='password'
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                </SubItensContainer>
-                                                            </FormColum>
-                                                            <FormColum>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                                    <FormInput
-                                                                        type='text'
-                                                                        name='address'
-                                                                        placeholder='Endereço do cliente'
-                                                                    />
-                                                                </FormInputArea>
-                                                                <SubItensContainer>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                    <FormInputArea>
-                                                                        <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                                        <Limitador>
-                                                                            <FormInput
-                                                                                name='phone'
-                                                                                type='text'
-                                                                                placeholder='Telefone'
-                                                                            />
-                                                                        </Limitador>
-                                                                    </FormInputArea>
-                                                                </SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
-                                                                    <StyledFileArea>
-                                                                        {
-                                                                            selectedFrontImage ? (
-                                                                                <Image
-                                                                                    src={selectedFrontImage}
-                                                                                />
-                                                                            ) : (
-                                                                                userInfo.documentoFrente ? (
-                                                                                    <Image
-                                                                                        src={userInfo.documentoFrente}
-                                                                                    />
-                                                                                ) :
-                                                                                    (
-                                                                                        <div>
-                                                                                            <StyledFileIconContainer>
-                                                                                                <FaCloudUploadAlt />
-                                                                                            </StyledFileIconContainer>
-                                                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                                        </div>
-                                                                                    )
-                                                                            )
-                                                                        }
+                                        <FormContent>
+                                            <FormColum>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Nome Completo</FormInputLabelRequired>
+                                                    <FormInput type="text" name="name" />
+                                                </FormInputArea>
+                                                
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Email</FormInputLabelRequired>
+                                                    <FormInput type="email" name="email" disabled style={{backgroundColor: '#f3f4f6', cursor: 'not-allowed'}}/>
+                                                </FormInputArea>
 
-                                                                        <StyledFileInput
-                                                                            type="file"
-                                                                            accept="image/*"
-                                                                            onChange={(event) => {
-                                                                                const file = event.target.files[0];
-                                                                                setFieldValue('documentFront', file);
-                                                                                setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
-                                                                            }}
-                                                                        />
-                                                                    </StyledFileArea>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
-                                                                    <StyledFileArea>
-                                                                        {
-                                                                            selectedBackImage ? (
-                                                                                <Image
-                                                                                    src={selectedBackImage}
-                                                                                />
-                                                                            ) : (
-                                                                                userInfo.documentoVerso ? (
-                                                                                    <Image
-                                                                                        src={userInfo.documentoVerso}
-                                                                                    />
-                                                                                ) :
-                                                                                    (
-                                                                                        <div>
-                                                                                            <StyledFileIconContainer>
-                                                                                                <FaCloudUploadAlt />
-                                                                                            </StyledFileIconContainer>
-                                                                                            <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                                        </div>
-                                                                                    )
-                                                                            )
-                                                                        }
-                                                                        <StyledFileInput
-                                                                            type="file"
-                                                                            accept="image/*"
-                                                                            onChange={(event) => {
-                                                                                const file = event.target.files[0];
-                                                                                setFieldValue('documentBack', file);
-                                                                                setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
-                                                                            }}
-                                                                        />
-                                                                    </StyledFileArea>
-                                                                </FormInputArea>
-                                                            </FormColum>
-                                                        </FormContent>
-                                                        <ButtonGroup>
-                                                            <BackButton type='button' onClick={() => navigate('/')}>Voltar</BackButton>
-                                                            {!isSubmitting && (
-                                                                <SubmitButton type="submit">Salvar</SubmitButton>
-                                                            )}
-                                                            {
-                                                                isSubmitting && (
-                                                                    <ThreeDots
-                                                                        color={'#4e4e4e'}
-                                                                        height={49}
-                                                                        width={100}
-                                                                    />
-                                                                )
-                                                            }
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>CPF</FormInputLabel>
+                                                        <MaskedInput mask="999.999.999-99" name="cpf" type="text" disabled style={{backgroundColor: '#f3f4f6'}}/>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>RG</FormInputLabel>
+                                                        <FormInput type="text" name="rg" />
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                            </FormColum>
 
-                                                        </ButtonGroup>
-                                                    </Form>
-                                                )
-                                            }
-                                        </Formik>
-                                    )
-                                }
-                            </StyledFormArea>
-                        </ContentPerfilContainer>
-                    </MainPerfilContainer >
-                )
-            }
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-        </div >
+                                            <FormColum>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Endereço</FormInputLabel>
+                                                    <FormInput type="text" name="address" />
+                                                </FormInputArea>
+                                                
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>Data Nascimento</FormInputLabel>
+                                                        <Limitador>
+                                                            <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>Telefone</FormInputLabel>
+                                                        <MaskedInput mask="(99) 99999-9999" name="phone" type="text" />
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                            </FormColum>
+                                        </FormContent>
+                                    </ProfileCard>
+
+                                    {/* CARD 2: SEGURANÇA (SENHA) */}
+                                    <ProfileCard style={{marginTop: 20}}>
+                                        <SectionTitle>
+                                            <FaLock style={{marginRight: 10}}/> Segurança
+                                        </SectionTitle>
+                                        <p style={{color: '#666', fontSize: '0.9rem', marginBottom: 20}}>
+                                            Preencha os campos abaixo apenas se desejar alterar sua senha.
+                                        </p>
+                                        
+                                        <FormContent>
+                                            <FormColum>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Senha Atual</FormInputLabel>
+                                                    <FormInput type="password" name="currentPassword" placeholder="Necessário para salvar alterações" />
+                                                </FormInputArea>
+                                            </FormColum>
+                                            <FormColum>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>Nova Senha</FormInputLabel>
+                                                        <FormInput type="password" name="newPassword" />
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabel>Confirmar Nova Senha</FormInputLabel>
+                                                        <FormInput type="password" name="confirmPassword" />
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                            </FormColum>
+                                        </FormContent>
+                                    </ProfileCard>
+
+                                    <ButtonGroup>
+                                        <BackButton type="button" onClick={() => navigate('/dashboard')}>Cancelar</BackButton>
+                                        {!isSubmitting ? (
+                                            <SubmitButton type="submit">Salvar Alterações</SubmitButton>
+                                        ) : (
+                                            <ThreeDots color="#4e4e4e" height={40} width={80} />
+                                        )}
+                                    </ButtonGroup>
+                                </Form>
+                            )}
+                        </Formik>
+                    </ContentPerfilContainer>
+                </MainPerfilContainer>
+            )}
+            
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 
-const mapStateToProps = ({ session }) => ({
-    user: session.user
-});
-
+const mapStateToProps = ({ session }) => ({ user: session.user });
 export default connect(mapStateToProps)(PerfilPage);

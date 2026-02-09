@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
+import { ThreeDots } from "react-loader-spinner";
+import { FaPlus, FaBuilding } from "react-icons/fa";
 
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import SearchBar from "../../components/SearchBar";
+import ApartamentoList from "./ApartamentoList";
 
 import { logoutUser } from "../../services/userService";
+import { getApartamentos } from "../../services/apartamentoService";
 
 import {
     AddApartamentoHeaderButton,
@@ -24,13 +28,8 @@ import {
     SearcherContainer,
     TextContent,
 } from './ApartamentoPage.styles';
-import { FaHouseUser, FaPlus } from "react-icons/fa";
-import { getApartamentos } from "../../services/apartamentoService";
-import { ThreeDots } from "react-loader-spinner";
-import ApartamentoList from "./ApartamentoList";
 
 const ApartamentoPage = ({ user }) => {
-
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [apartamentos, setApartamentos] = useState([]);
@@ -39,103 +38,93 @@ const ApartamentoPage = ({ user }) => {
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => {
+        logoutUser(navigate);
+    };
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
-
-    useEffect(() => {
-        if (user.accessToken) {
-            const fetchData = async () => {
-                setLoading(true);
-                try {
-                    getApartamentos(user, setApartamentos);
-                } catch (error) {
-                    console.error("Error loading data", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchData();
-        }
-    }, [user]);
-
-    const refreshData = async () => {
+    // Função de busca de dados
+    const fetchData = async () => {
         setLoading(true);
         try {
-            getApartamentos(user, setApartamentos);
+            await getApartamentos(setApartamentos);
         } catch (error) {
-            console.error("Error loading data", error);
+            console.error("Erro ao carregar dados", error);
         } finally {
             setLoading(false);
         }
     };
 
+    useEffect(() => {
+        if (user && user.role === 'ADMIN') {
+            fetchData();
+        }
+    }, [user]);
+
+    // Proteção de Rota
+    if (!user || user.role !== 'ADMIN') return null;
+
     return (
-        user.isAdmin && (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} apartamentoActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
+        <div className="container">
+            <Sidebar
+                sidebarOpen={sidebarOpen}
+                closeSidebar={() => setSidebarOpen(false)}
+                logoutUser={handleLogout}
+            />
+
+            {loading ? (
+                <LoadingContainer>
+                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                </LoadingContainer>
+            ) : (
+                <MainApartamentoContainer>
+                    <HeaderApartamentoContainer>
+                        <HeaderTitle>Gestão de Apartamentos</HeaderTitle>
+                        <AddApartamentoHeaderButton onClick={() => navigate('/apartamentos/novo')}>
+                            <FaPlus color='green' />
+                            <AddButtonText>Adicionar Novo</AddButtonText>
+                        </AddApartamentoHeaderButton>
+                    </HeaderApartamentoContainer>
+
+                    <ContentApartamentoContainer>
+                        <ContentApartamentoHeader>
+                            <ApartamentoCounter>Total: {apartamentos.length} apartamentos</ApartamentoCounter>
+                            <SearcherContainer>
+                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar por número ou prédio..." />
+                            </SearcherContainer>
+                        </ContentApartamentoHeader>
+
+                        {apartamentos.length === 0 ? (
+                            <NoContentContainer>
+                                <FaBuilding color='#6c757d' fontSize={80} style={{ opacity: 0.5, marginBottom: 20 }} />
+                                <NoContentAvisoContainer>
+                                    <TextContent>Nenhum apartamento encontrado.</TextContent>
+                                    <AdicionarApartamentoButton onClick={() => navigate('/apartamentos/novo')}>
+                                        <FaPlus color='#fff' style={{ marginRight: 5 }} />
+                                        Cadastrar Apartamento
+                                    </AdicionarApartamentoButton>
+                                </NoContentAvisoContainer>
+                            </NoContentContainer>
+                        ) : (
+                            <ApartamentoList
+                                apartamentos={apartamentos}
+                                refreshData={fetchData}
+                                navigate={navigate}
+                                search={search}
+                                page={page}
+                                setPage={setPage}
+                                itemsPerPage={itemsPerPage}
                             />
-                        </LoadingContainer>
-                    ) : (
-                        <MainApartamentoContainer>
-                            <HeaderApartamentoContainer>
-                                <HeaderTitle>Apartamentos</HeaderTitle>
-                                <AddApartamentoHeaderButton onClick={() => navigate('/apartamentos/novo')}>
-                                    <FaPlus color='green' />
-                                    <AddButtonText>
-                                        Adicionar Novo
-                                    </AddButtonText>
-                                </AddApartamentoHeaderButton>
-                            </HeaderApartamentoContainer>
-                            <ContentApartamentoContainer>
-                                <ContentApartamentoHeader>
-                                    <ApartamentoCounter>Apartamentos ({apartamentos.length})</ApartamentoCounter>
-                                    <SearcherContainer>
-                                        <SearchBar search={search} setSearch={setSearch} />
-                                    </SearcherContainer>
-                                </ContentApartamentoHeader>
-                                {
-                                    apartamentos.length === 0 ? (
-                                        <NoContentContainer>
-                                            <FaHouseUser color='#6c757d' fontSize={150} className='icon-responsive' />
-                                            <NoContentAvisoContainer>
-                                                <TextContent>Nenhum apartamento encontrado.</TextContent>
-                                                <AdicionarApartamentoButton onClick={() => navigate('/apartamentos/novo')}>
-                                                    <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Apartamento
-                                                </AdicionarApartamentoButton>
-                                            </NoContentAvisoContainer>
-                                        </NoContentContainer>
-                                    ) : (
-                                        <ApartamentoList
-                                            apartamentos={apartamentos}
-                                            user={user}
-                                            refreshData={refreshData}
-                                            navigate={navigate}
-                                            search={search}
-                                            page={page}
-                                            setPage={setPage}
-                                            itemsPerPage={itemsPerPage}
-                                        />
-                                    )
-                                }
-                            </ContentApartamentoContainer>
-                        </MainApartamentoContainer>
-                    )
-                }
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div>
-        )
+                        )}
+                    </ContentApartamentoContainer>
+                </MainApartamentoContainer>
+            )}
+
+            <Navbar
+                openSidebar={() => setSidebarOpen(true)}
+                user={user}
+                logout={handleLogout}
+            />
+        </div>
     );
 }
 

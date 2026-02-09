@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { ThreeDots } from 'react-loader-spinner';
+import { FaBuilding, FaPlus } from 'react-icons/fa';
 
+// Serviços e Ações
 import { logoutUser } from '../../services/userService';
 import { getPredios } from '../../services/predioService';
 
+// Componentes
+import Navbar from '../../components/Navbar';
+import Sidebar from '../../components/Sidebar';
+import SearchBar from '../../components/SearchBar';
+import PredioList from './PredioList';
+
+// Estilos
 import {
     MainPredioContainer,
     HeaderPredioContainer,
@@ -22,14 +32,6 @@ import {
     LoadingContainer
 } from './PredioPage.styles';
 
-import Navbar from '../../components/Navbar';
-import Sidebar from '../../components/Sidebar';
-import SearchBar from '../../components/SearchBar';
-
-import { FaBuilding, FaPlus } from 'react-icons/fa';
-import { ThreeDots } from 'react-loader-spinner';
-import PredioList from './PredioList';
-
 const PredioPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,105 +41,102 @@ const PredioPage = ({ user }) => {
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
-
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
-
+    // Busca dados iniciais
     useEffect(() => {
-        if (user.accessToken) {
-            const fetchData = async () => {
-                setLoading(true);
-                try {
-                    await getPredios(user, setPredios);
-                } catch (error) {
-                    console.error("Error loading data", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
+        // Agora verificamos user.role em vez de user.accessToken apenas
+        if (user && user.role === 'ADMIN') {
             fetchData();
         }
     }, [user]);
 
-    const refreshData = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            await getPredios(user, setPredios);
+            // Nova assinatura: não precisa passar 'user', o serviço pega o token sozinho
+            await getPredios(setPredios);
         } catch (error) {
-            console.error("Error loading data", error);
+            console.error("Erro ao carregar prédios", error);
         } finally {
             setLoading(false);
         }
     };
 
-    return (
-        user.isAdmin && (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} predioActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
-                            />
-                        </LoadingContainer>
+    const handleLogout = () => {
+        logoutUser(navigate);
+    };
 
-                    ) : (
-                        <MainPredioContainer>
-                            <HeaderPredioContainer>
-                                <HeaderTitle>Prédios</HeaderTitle>
-                                <AddPredioHeaderButton onClick={() => navigate('/predios/novo')}>
-                                    <FaPlus color='green' />
-                                    <AddButtonText>
-                                        Adicionar Novo
-                                    </AddButtonText>
-                                </AddPredioHeaderButton>
-                            </HeaderPredioContainer>
-                            <ContentPredioContainer>
-                                <ContentPredioHeader>
-                                    <PredioCounter>Prédios ({predios.length})</PredioCounter>
-                                    <SearcherContainer>
-                                        <SearchBar search={search} setSearch={setSearch} />
-                                    </SearcherContainer>
-                                </ContentPredioHeader>
-                                {
-                                    predios.length === 0 ? (
-                                        <NoContentContainer>
-                                            <FaBuilding color='#6c757d' fontSize={150} className='icon-responsive' />
-                                            <NoContentAvisoContainer>
-                                                <TextContent>Nenhum prédio encontrado.</TextContent>
-                                                <AdicionarPredioButton onClick={() => navigate('/predios/novo')}>
-                                                    <FaPlus color='#fff' fontSize={15} className="icon-add-button" /> Novo Prédio
-                                                </AdicionarPredioButton>
-                                            </NoContentAvisoContainer>
-                                        </NoContentContainer>
-                                    ) : (
-                                        <PredioList
-                                            predios={predios}
-                                            user={user}
-                                            navigate={navigate}
-                                            refreshData={refreshData}
-                                            search={search}
-                                            page={page}
-                                            setPage={setPage}
-                                            itemsPerPage={itemsPerPage}
-                                        />
-                                    )
-                                }
-                            </ContentPredioContainer>
-                        </MainPredioContainer>
-                    )
-                }
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div>
-        )
+    // Proteção de Rota (Redundância, já que o PrivateRoute cuida disso)
+    if (!user || user.role !== 'ADMIN') {
+        return null;
+    }
+
+    return (
+        <div className="container">
+            {/* SIDEBAR ATUALIZADO */}
+            <Sidebar
+                sidebarOpen={sidebarOpen}
+                closeSidebar={() => setSidebarOpen(false)}
+                logoutUser={handleLogout}
+            // navigate não é mais necessário passar
+            />
+
+            {loading ? (
+                <LoadingContainer>
+                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                </LoadingContainer>
+            ) : (
+                <MainPredioContainer>
+                    <HeaderPredioContainer>
+                        <HeaderTitle>Gestão de Prédios</HeaderTitle>
+                        <AddPredioHeaderButton onClick={() => navigate('/predios/novo')}>
+                            <FaPlus color='green' />
+                            <AddButtonText>Adicionar Novo</AddButtonText>
+                        </AddPredioHeaderButton>
+                    </HeaderPredioContainer>
+
+                    <ContentPredioContainer>
+                        <ContentPredioHeader>
+                            <PredioCounter>Total: {predios.length} prédios</PredioCounter>
+                            <SearcherContainer>
+                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar prédio..." />
+                            </SearcherContainer>
+                        </ContentPredioHeader>
+
+                        {predios.length === 0 ? (
+                            <NoContentContainer>
+                                <FaBuilding color='#6c757d' fontSize={80} style={{ opacity: 0.5, marginBottom: 20 }} />
+                                <NoContentAvisoContainer>
+                                    <TextContent>Nenhum prédio encontrado.</TextContent>
+                                    <AdicionarPredioButton onClick={() => navigate('/predios/novo')}>
+                                        <FaPlus color='#fff' style={{ marginRight: 5 }} />
+                                        Cadastrar Prédio
+                                    </AdicionarPredioButton>
+                                </NoContentAvisoContainer>
+                            </NoContentContainer>
+                        ) : (
+                            <PredioList
+                                predios={predios}
+                                user={user}
+                                navigate={navigate}
+                                refreshData={fetchData} // Passa a função de refresh direto
+                                search={search}
+                                page={page}
+                                setPage={setPage}
+                                itemsPerPage={itemsPerPage}
+                            />
+                        )}
+                    </ContentPredioContainer>
+                </MainPredioContainer>
+            )}
+
+            {/* NAVBAR ATUALIZADO */}
+            <Navbar
+                openSidebar={() => setSidebarOpen(true)}
+                user={user}
+                logout={handleLogout}
+            // navigate não é mais necessário se o Navbar já usa o hook, mas se não atualizou lá, mantenha
+            />
+        </div>
     );
 }
 

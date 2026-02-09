@@ -2,673 +2,396 @@ import { useState, useMemo } from "react";
 import { Formik, Form } from "formik";
 import Modal from "react-modal";
 import * as Yup from 'yup';
+import { ThreeDots } from "react-loader-spinner";
 
 import {
-    FaCheck,
-    FaClock,
-    FaCloudUploadAlt,
-    FaEdit,
-    FaFileContract,
-    FaFileInvoice,
-    FaFilePdf,
-    FaTimes,
-    FaTrash,
-    FaUserAlt
+    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFileContract,
+    FaFileInvoice, FaFilePdf, FaTimes, FaTrash, FaUserAlt
 } from "react-icons/fa";
+import { FaHouse } from "react-icons/fa6";
+
 import {
-    AdminPredioContainer,
-    BackButton,
-    ButtonGroup,
-    ContentIconContainer,
-    ContratoCounter,
-    DataColumn,
-    DataContainer,
-    DataIconContainer,
-    DataSection,
-    DeleteButtonContainer,
-    DeleteContainer,
-    DeleteIcon,
-    DeleteTitle,
-    DetailContractBackButton,
-    DetailContractButtonGroup,
-    DetailContractContainer,
-    DetailContractDataColumnLeft,
-    DetailContractDataColumnRight,
-    DetailContractDataContainer,
-    DetailContractDataLabel,
-    DetailContractDataSectionContainer,
-    DetailContractDataSectionTitle,
-    DetailContractDataValue,
-    DetailContractDownloadButton,
-    DetailContractHeaderContainer,
-    DetailContractHeaderSubTitle,
-    DetailContractHeaderTitle,
-    DetailContractValueContainer,
-    EditIcon,
-    FinanceiroList,
-    FinanceiroListElement,
-    FinanceiroListElementContainer,
-    FinanceiroListIconContainer,
-    FinanceiroListValue,
-    FormColum,
-    FormContent,
-    FormInputArea,
-    FormInputLabel,
-    FormInputLabelRequired,
-    Limitador,
-    ListLabel,
-    PredioListContainer,
-    PredioListHeader,
-    PredioSingleContainer,
-    PredioValue,
-    RejectButton,
-    SinglePredio,
-    SolicitacaoContratoDataContainer,
-    SolicitacaoModalContainer,
-    SolicitacaoModalContent,
-    SolicitacaoModalContentLabel,
-    SolicitacaoModalContentValue,
-    SolicitacaoModalTitle,
-    SolicitacaoTitleContainer,
-    StyledFormArea,
-    StyledLabel,
-    SubItensContainer,
-    SubTitle,
-    SubmitButton
+    AdminPredioContainer, BackButton, ButtonGroup, ClientCounter, ContentIconContainer,
+    ContratoCounter, DataColumn, DataContainer, DataIconContainer, DataSection,
+    DeleteButtonContainer, DeleteContainer, DeleteIcon, DeleteTitle,
+    DetailContractBackButton, DetailContractButtonGroup, DetailContractContainer,
+    DetailContractDataColumnLeft, DetailContractDataColumnRight, DetailContractDataContainer,
+    DetailContractDataLabel, DetailContractDataSectionContainer, DetailContractDataSectionTitle,
+    DetailContractDataValue, DetailContractDownloadButton, DetailContractHeaderContainer,
+    DetailContractHeaderSubTitle, DetailContractHeaderTitle, DetailContractValueContainer,
+    EditIcon, FinanceiroList, FinanceiroListElement, FinanceiroListElementContainer,
+    FinanceiroListIconContainer, FinanceiroListValue, FormColum, FormContent,
+    FormInputArea, FormInputLabel, FormInputLabelRequired, Limitador, ListLabel,
+    PredioListContainer, PredioListHeader, PredioSingleContainer, PredioValue,
+    RejectButton, SinglePredio, SolicitacaoContratoDataContainer, SolicitacaoModalContainer,
+    SolicitacaoModalContent, SolicitacaoModalContentLabel, SolicitacaoModalContentValue,
+    SolicitacaoModalTitle, SolicitacaoTitleContainer, StyledFormArea, StyledLabel,
+    SubItensContainer, SubTitle, SubmitButton, PdfPreview
 } from "./ContractPage.styles";
 
-import { approveContract, assinarContratoById, cancelContract, deleteContratoById, desapproveContract, downloadContract } from "../../services/contratoService";
+import {
+    approveContract, assinarContratoById, cancelContract,
+    deleteContratoById, desapproveContract, downloadContract
+} from "../../services/contratoService";
+
 import { modalStyles } from "../../styles/ModalStyles";
-import { FaHouse } from "react-icons/fa6";
 import { FormInput, StyledSelect } from "../../components/FormLib";
-import { ThreeDots } from "react-loader-spinner";
 import Pagination from "../../components/Pagination";
-import { ClientCounter, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFileLegend } from "../ClientPage/ClientPage.styles";
-import { PdfPreview } from "../FinanceiroPage/FinanceiroPage.styles";
+import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFileLegend } from "../ClientPage/ClientPage.styles";
 
 const ContractList = ({ contratos, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
-    Modal.setAppElement(document.getElementById('root'));
-    const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
+    Modal.setAppElement('#root');
+
+    // Estados dos Modais
+    const [modalEditIsOpen, setModalEditIsOpen] = useState(false); // Para Admin aprovar/editar
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
-    const [modalContractIsOpen, setModalContractIsOpen] = useState(false);
+    const [modalContractIsOpen, setModalContractIsOpen] = useState(false); // Detalhes gerais
+    const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false); // Upload PDF
+
     const [selectedContrato, setSelectedContrato] = useState({});
+
+    // Estados de Form/Ação
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
     const [deletting, setDeletting] = useState(false);
-
-    const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false);
-
-    const [financeiroPage, setFinanceiroPage] = useState(1);
     const [fileType, setFileType] = useState(null);
+    const [financeiroPage, setFinanceiroPage] = useState(1);
 
     const periocidade = [
         { label: 'Anualmente', value: 'ANUALMENTE' },
         { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
     ];
 
-    const openEditModal = () => {
-        setModalEditIsOpen(true);
-    }
-
-    const closeEditModal = () => {
-        setModalEditIsOpen(false);
-    }
-
-    const openDeleteModal = () => {
-        setModalDeleteIsOpen(true);
-    }
-
-    const closeDeleteModal = () => {
-        setModalDeleteIsOpen(false);
-    }
-
-    const openModalAssinatura = () => {
-        setModalAssinaturaIsOpen(true);
-    }
-
-    const closeModalAssinatura = () => {
-        setModalAssinaturaIsOpen(false);
-    }
-
-    const openContractModal = () => {
-        !(modalEditIsOpen && modalDeleteIsOpen) && setModalContractIsOpen(true);
-    }
-
-    const closeContractModal = () => {
-        setModalContractIsOpen(false);
-    }
+    // --- MANIPULAÇÃO DE MODAIS ---
+    const openContractModal = (contrato) => {
+        setSelectedContrato(contrato);
+        setModalContractIsOpen(true);
+    };
 
     const handleFileChange = (event, setFieldValue) => {
         const file = event.target.files[0];
         setFieldValue('contrato', file);
-        setFileType(file.type);
-    }
+        setFileType(file?.type);
+    };
 
+    // --- FILTRO E PAGINAÇÃO ---
     const filteredContratos = useMemo(() => {
-        if (user.isAdmin) {
-            return contratos.filter(contrato =>
-                contrato.cliente.name.toLowerCase().includes(search.toLowerCase()) ||
-                contrato.apt.numero.toString().includes(search) ||
-                contrato.statusContrato.toLowerCase().includes(search.toLowerCase())
-            );
-        } else {
-            return contratos.filter(contrato =>
-                contrato.apt.numero.toString().includes(search) ||
-                contrato.statusContrato.toLowerCase().includes(search.toLowerCase())
-            );
-        }
+        return contratos.filter(contrato => {
+            const clienteName = contrato.cliente?.name?.toLowerCase() || '';
+            const aptNum = contrato.apt?.numero?.toString() || '';
+            const status = contrato.statusContrato?.toLowerCase() || '';
+            const term = search.toLowerCase();
+
+            if (user.isAdmin) {
+                return clienteName.includes(term) || aptNum.includes(term) || status.includes(term);
+            } else {
+                return aptNum.includes(term) || status.includes(term);
+            }
+        });
     }, [contratos, search, user]);
 
     const totalPages = Math.ceil(filteredContratos.length / itemsPerPage);
     const currentPageItems = filteredContratos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-    const totalPagesFinanceiro = selectedContrato.prestacaoAluguel && Math.ceil(selectedContrato.prestacaoAluguel.length / itemsPerPage);
-    const currentPageItemsFinanceiro = selectedContrato.prestacaoAluguel && selectedContrato.prestacaoAluguel.slice((financeiroPage - 1) * itemsPerPage, financeiroPage * itemsPerPage);
+    // Paginação interna do financeiro (dentro do modal)
+    const financeiroItems = selectedContrato.prestacaoAluguel || [];
+    const totalPagesFinanceiro = Math.ceil(financeiroItems.length / itemsPerPage);
+    const currentPageItemsFinanceiro = financeiroItems.slice((financeiroPage - 1) * itemsPerPage, financeiroPage * itemsPerPage);
 
     return (
         <PredioListContainer>
             <PredioListHeader $isadmin={user.isAdmin.toString()}>
-                {
-                    user.isAdmin && (<ListLabel>Cliente</ListLabel>)
-                }
+                {user.isAdmin && <ListLabel>Cliente</ListLabel>}
                 <ListLabel>Apartamento</ListLabel>
                 <ListLabel>Status</ListLabel>
-                {
-                    user.isAdmin && (<ListLabel>Opções</ListLabel>)
-                }
+                {user.isAdmin && <ListLabel>Opções</ListLabel>}
             </PredioListHeader>
-            {
-                currentPageItems.map((contract) => (
-                    <SinglePredio
-                        key={contract.id}
-                        $isadmin={user.isAdmin.toString()}
-                        onClick={() => {
-                            setSelectedContrato(contract);
-                            openContractModal();
-                        }}
-                    >
-                        {
-                            user.isAdmin && (
-                                <PredioSingleContainer>
-                                    <StyledLabel>Cliente: </StyledLabel>
-                                    <PredioValue>{contract.cliente.name}</PredioValue>
-                                </PredioSingleContainer>
-                            )
-                        }
-                        <PredioSingleContainer >
-                            <StyledLabel>Apartamento: </StyledLabel>
-                            <PredioValue>{contract.apt.numero}</PredioValue>
-                        </PredioSingleContainer>
+
+            {currentPageItems.map((contract) => (
+                <SinglePredio
+                    key={contract.id}
+                    $isadmin={user.isAdmin.toString()}
+                    onClick={() => openContractModal(contract)}
+                >
+                    {user.isAdmin && (
                         <PredioSingleContainer>
-                            <StyledLabel>Status: </StyledLabel>
-                            <PredioValue>{contract.statusContrato}</PredioValue>
+                            <StyledLabel>Cliente: </StyledLabel>
+                            <PredioValue>{contract.cliente?.name}</PredioValue>
                         </PredioSingleContainer>
-                        {
-                            user.isAdmin && (
-                                <AdminPredioContainer>
-                                    <EditIcon>
-                                        <FaEdit
-                                            onClick={(event) => {
-                                                event.stopPropagation();
-                                                setSelectedContrato(contract);
-                                                openEditModal();
-                                            }}
-                                        />
-                                    </EditIcon>
-                                    <DeleteIcon>
-                                        <FaTrash
-                                            onClick={(event) => {
-                                                event.stopPropagation();
-                                                setSelectedContrato(contract);
-                                                openDeleteModal();
-                                            }}
-                                        />
-                                    </DeleteIcon>
-                                </AdminPredioContainer>
-                            )
-                        }
-                    </SinglePredio>
-                ))
-            }
+                    )}
+
+                    <PredioSingleContainer>
+                        <StyledLabel>Apt: </StyledLabel>
+                        <PredioValue>{contract.apt?.numero}</PredioValue>
+                    </PredioSingleContainer>
+
+                    <PredioSingleContainer>
+                        <StyledLabel>Status: </StyledLabel>
+                        <span style={{
+                            fontWeight: 700,
+                            color: contract.statusContrato === 'ATIVO' ? '#10b981' :
+                                contract.statusContrato === 'CANCELADO' ? '#ef4444' : '#f59e0b'
+                        }}>
+                            {contract.statusContrato}
+                        </span>
+                    </PredioSingleContainer>
+
+                    {user.isAdmin && (
+                        <AdminPredioContainer>
+                            <EditIcon onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedContrato(contract);
+                                // Se estiver aguardando, abre form de aprovação, senão nada por enquanto
+                                if (contract.statusContrato === 'AGUARDANDO') setModalEditIsOpen(true);
+                                else openContractModal(contract);
+                            }}>
+                                <FaEdit />
+                            </EditIcon>
+                            <DeleteIcon onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedContrato(contract);
+                                setModalDeleteIsOpen(true);
+                            }}>
+                                <FaTrash />
+                            </DeleteIcon>
+                        </AdminPredioContainer>
+                    )}
+                </SinglePredio>
+            ))}
+
+            {/* --- MODAL DETALHES (Visão Geral e Financeiro) --- */}
             <Modal
                 isOpen={modalContractIsOpen}
-                onRequestClose={closeContractModal}
+                onRequestClose={() => setModalContractIsOpen(false)}
                 style={modalStyles}
             >
-                {
-                    selectedContrato.id && (
-                        selectedContrato.statusContrato === 'AGUARDANDO' ? (
-                            <div>
-                                <SolicitacaoModalContainer>
-                                    <SolicitacaoTitleContainer>
-                                        <SolicitacaoModalTitle>Detalhes da Solicitação</SolicitacaoModalTitle>
-                                    </SolicitacaoTitleContainer>
-                                    <SolicitacaoModalContent>
-                                        <DataColumn>
-                                            <DataSection>
-                                                <DataIconContainer>
-                                                    <FaUserAlt />
-                                                </DataIconContainer>
-                                                <SubTitle>Dados do Cliente</SubTitle>
-                                            </DataSection>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>Nome: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{selectedContrato.cliente.name}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>CPF: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{selectedContrato.cliente.cpf}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>Nascimento: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{new Date(selectedContrato.cliente.dateBirth).toLocaleDateString()}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                        </DataColumn>
-                                        <DataColumn>
-                                            <DataSection>
-                                                <DataIconContainer>
-                                                    <FaHouse />
-                                                </DataIconContainer>
-                                                <SubTitle>Dados do Apartamento</SubTitle>
-                                            </DataSection>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>Prédio: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{selectedContrato.apt.predio.nome}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>Número: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{selectedContrato.apt.numero}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                            <DataContainer>
-                                                <SolicitacaoModalContentLabel>Climatizado: </SolicitacaoModalContentLabel>
-                                                <SolicitacaoModalContentValue>{selectedContrato.apt.climatizado ? <FaCheck color="#0F0" /> : <FaTimes color="#F00" />}</SolicitacaoModalContentValue>
-                                            </DataContainer>
-                                        </DataColumn>
-                                    </SolicitacaoModalContent>
-                                    <SolicitacaoContratoDataContainer>
-                                        <DataSection>
-                                            <DataIconContainer>
-                                                <FaFileContract />
-                                            </DataIconContainer>
-                                            <SubTitle>Dados do Contrato</SubTitle>
-                                        </DataSection>
-                                        <DataContainer>
-                                            <SolicitacaoModalContentLabel>Data de Incício: </SolicitacaoModalContentLabel>
-                                            <SolicitacaoModalContentValue>{new Date(selectedContrato.dataInicio).toLocaleDateString()}</SolicitacaoModalContentValue>
-                                        </DataContainer>
-                                        <DataContainer>
-                                            <SolicitacaoModalContentLabel>Duração: </SolicitacaoModalContentLabel>
-                                            <SolicitacaoModalContentValue>{selectedContrato.duracaoContrato} Meses</SolicitacaoModalContentValue>
-                                        </DataContainer>
-                                        <DataContainer>
-                                            <SolicitacaoModalContentLabel>Vencimento: </SolicitacaoModalContentLabel>
-                                            <SolicitacaoModalContentValue>Todo dia {selectedContrato.diaVencimentoPagamento}</SolicitacaoModalContentValue>
-                                        </DataContainer>
-                                    </SolicitacaoContratoDataContainer>
-                                    {
-                                        user.isAdmin && (
-                                            <StyledFormArea>
-                                                <Formik
-                                                    initialValues={{
-                                                        contratoId: selectedContrato.id,
-                                                        valorAluguel: selectedContrato.apt.valorBase,
-                                                        periocidade: '',
-                                                        limiteKwh: 0,
-                                                        leituraInicial: 0
-                                                    }}
+                {selectedContrato.id && (
+                    selectedContrato.statusContrato === 'AGUARDANDO' && user.isAdmin ? (
+                        /* MODO APROVAÇÃO (AGUARDANDO) - Redireciona para o modal de edição ou mostra dados básicos */
+                        <SolicitacaoModalContainer>
+                            {/* ... Layout de Solicitação igual ao original, mas simplificado ... */}
+                            <SolicitacaoTitleContainer>
+                                <SolicitacaoModalTitle>Solicitação Pendente</SolicitacaoModalTitle>
+                            </SolicitacaoTitleContainer>
+                            {/* Botões para abrir modal de edição real para aprovar */}
+                            <ButtonGroup>
+                                <BackButton onClick={() => setModalContractIsOpen(false)}>Fechar</BackButton>
+                                <SubmitButton onClick={() => {
+                                    setModalContractIsOpen(false);
+                                    setModalEditIsOpen(true); // Abre o form de aprovação
+                                }}>
+                                    Analisar para Aprovar
+                                </SubmitButton>
+                            </ButtonGroup>
+                        </SolicitacaoModalContainer>
+                    ) : (
+                        /* MODO DETALHES COMPLETO */
+                        <DetailContractContainer>
+                            <DetailContractHeaderContainer>
+                                <DetailContractHeaderTitle>Detalhes do Contrato</DetailContractHeaderTitle>
+                                <DetailContractHeaderSubTitle
+                                    style={{ color: selectedContrato.statusContrato === 'ATIVO' ? 'green' : 'red' }}
+                                >
+                                    {selectedContrato.statusContrato}
+                                </DetailContractHeaderSubTitle>
+                            </DetailContractHeaderContainer>
 
-                                                    validationSchema={Yup.object({
-                                                        valorAluguel: Yup.number().required('Obrigatório'),
-                                                        limiteKwh: Yup.number().required('Obrigatório'),
-                                                        leituraInicial: Yup.number(),
-                                                    })}
+                            <DetailContractDataContainer>
+                                <DetailContractDataColumnLeft>
+                                    <DetailContractDataSectionTitle>Informações</DetailContractDataSectionTitle>
+                                    <DetailContractDataSectionContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Cliente:</DetailContractDataLabel>
+                                            <DetailContractDataValue>{selectedContrato.cliente?.name}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Apt:</DetailContractDataLabel>
+                                            <DetailContractDataValue>{selectedContrato.apt?.predio?.nome} - {selectedContrato.apt?.numero}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Aluguel:</DetailContractDataLabel>
+                                            <DetailContractDataValue>R$ {selectedContrato.valorAluguel}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Vencimento:</DetailContractDataLabel>
+                                            <DetailContractDataValue>Dia {selectedContrato.diaVencimentoPagamento}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                    </DetailContractDataSectionContainer>
+                                </DetailContractDataColumnLeft>
 
-                                                    onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                                        values.periocidade = selectedPeriocidade.value;
-                                                        await approveContract(user, values, setSubmitting, setFieldError, setLoading);
-                                                    }}
-                                                >
-                                                    {
-                                                        ({ isSubmitting }) => (
-                                                            <Form>
-                                                                <FormContent>
-                                                                    <FormColum>
-                                                                        <FormInputArea>
-                                                                            <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
-                                                                        </FormInputArea>
+                                <DetailContractDataColumnRight>
+                                    <DetailContractDataSectionTitle>Financeiro (Prestações)</DetailContractDataSectionTitle>
+                                    <FinanceiroList>
+                                        {currentPageItemsFinanceiro.map((parcela, index) => (
+                                            <FinanceiroListElementContainer key={index} onClick={() => navigate(`/faturas/${parcela.id}`)}>
+                                                <FinanceiroListElement>
+                                                    <FinanceiroListValue>
+                                                        {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo}
+                                                    </FinanceiroListValue>
+                                                    <FinanceiroListIconContainer>
+                                                        {parcela.statusPagamento === 'PAGO' && <FaCheck color="#10b981" />}
+                                                        {parcela.statusPagamento === 'PENDENTE' && <FaClock color="#f59e0b" />}
+                                                        {parcela.statusPagamento === 'ATRASADO' && <FaTimes color="#ef4444" />}
+                                                    </FinanceiroListIconContainer>
+                                                </FinanceiroListElement>
+                                            </FinanceiroListElementContainer>
+                                        ))}
+                                    </FinanceiroList>
+                                    <Pagination totalPages={totalPagesFinanceiro} currentPage={financeiroPage} setPage={setFinanceiroPage} />
+                                </DetailContractDataColumnRight>
+                            </DetailContractDataContainer>
 
-                                                                    </FormColum>
-                                                                    <FormColum>
-                                                                        <SubItensContainer>
-                                                                            <FormInputArea>
-                                                                                <FormInputLabelRequired>Limite de KWh</FormInputLabelRequired>
-                                                                                <Limitador>
-                                                                                    <FormInput
-                                                                                        type="number"
-                                                                                        min="0"
-                                                                                        step="1"
-                                                                                        name="limiteKwh"
-                                                                                        placeholder="Valor limite de KWh"
-                                                                                    />
-                                                                                </Limitador>
-                                                                            </FormInputArea>
-                                                                            <FormInputArea>
-                                                                                <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
-                                                                                <Limitador>
-                                                                                    <FormInput
-                                                                                        type="number"
-                                                                                        min="0.00"
-                                                                                        step="0.01"
-                                                                                        name="valorAluguel"
-                                                                                        placeholder="Valor do Aluguel"
-                                                                                    />
-                                                                                </Limitador>
-                                                                            </FormInputArea>
-                                                                        </SubItensContainer>
-                                                                        <FormInputArea>
-                                                                            <FormInputLabelRequired>Leitura Atual do Medidor</FormInputLabelRequired>
-                                                                            <FormInput
-                                                                                type="number"
-                                                                                min="0"
-                                                                                step="1"
-                                                                                name="leituraInicial"
-                                                                                placeholder="leitura kwh"
-                                                                            />
-                                                                        </FormInputArea>
-                                                                    </FormColum>
-                                                                </FormContent>
-                                                                <ButtonGroup>
-                                                                    <BackButton
-                                                                        type='button'
-                                                                        onClick={() => {
-                                                                            setSelectedContrato({});
-                                                                            closeContractModal();
-                                                                        }}
-                                                                    >
-                                                                        Fechar
-                                                                    </BackButton>
-                                                                    <RejectButton
-                                                                        type='button'
-                                                                        onClick={async () => {
-                                                                            await desapproveContract(user, selectedContrato.id, setLoading);
-                                                                        }}
-                                                                    >
-                                                                        Rejeitar
-                                                                    </RejectButton>
-                                                                    {!isSubmitting && (
-                                                                        <SubmitButton type="submit">Aprovar</SubmitButton>
-                                                                    )}
-                                                                    {
-                                                                        isSubmitting && (
-                                                                            <ThreeDots
-                                                                                color={'#4e4e4e'}
-                                                                                height={49}
-                                                                                width={100}
-                                                                            />
-                                                                        )
-                                                                    }
-                                                                </ButtonGroup>
-                                                            </Form>
-                                                        )
-                                                    }
-                                                </Formik>
-                                            </StyledFormArea>
-                                        )
-                                    }
-                                </SolicitacaoModalContainer>
-                            </div>
-                        ) : (
-                            <DetailContractContainer>
-                                <DetailContractHeaderContainer>
-                                    <DetailContractHeaderTitle>Detalhes do Contrato</DetailContractHeaderTitle>
-                                    <DetailContractHeaderSubTitle>Contrato {selectedContrato.statusContrato}</DetailContractHeaderSubTitle>
-                                </DetailContractHeaderContainer>
-                                <DetailContractDataContainer>
-                                    <DetailContractDataColumnLeft>
-                                        <DetailContractDataSectionTitle>Dados do Cliente</DetailContractDataSectionTitle>
-                                        <DetailContractDataSectionContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Nome: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.cliente.name}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>CPF: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.cliente.cpf}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>RG: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.cliente.rg}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                        </DetailContractDataSectionContainer>
-                                        <DetailContractDataSectionTitle>Dados do Apartamento</DetailContractDataSectionTitle>
-                                        <DetailContractDataSectionContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Predio: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.apt.predio.nome}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Numero: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.apt.numero}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Climatizado: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.apt.climatizado ? <FaCheck color="#0F0" /> : <FaTimes color="#F00" />}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                        </DetailContractDataSectionContainer>
-                                        <DetailContractDataSectionTitle>Dados do Contrato</DetailContractDataSectionTitle>
-                                        <DetailContractDataSectionContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Valor Aluguel: </DetailContractDataLabel>
-                                                <DetailContractDataValue>R$ {parseFloat(selectedContrato.valorAluguel).toFixed(2)}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Inicio: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{new Date(selectedContrato.dataInicio).toLocaleDateString()}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Duração: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.duracaoContrato} meses</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                            <DetailContractValueContainer>
-                                                <DetailContractDataLabel>Reajuste: </DetailContractDataLabel>
-                                                <DetailContractDataValue>{selectedContrato.periodicidadeReajuste}</DetailContractDataValue>
-                                            </DetailContractValueContainer>
-                                        </DetailContractDataSectionContainer>
-                                    </DetailContractDataColumnLeft>
-                                    <DetailContractDataColumnRight>
-                                        <DetailContractDataSectionTitle>Financeiro</DetailContractDataSectionTitle>
-                                        <FinanceiroList>
-                                            {
-                                                currentPageItemsFinanceiro.map((parcela, index) => (
-                                                    <FinanceiroListElementContainer key={index} onClick={() => navigate(`/prestacao/${parcela.id}`)}>
-                                                        <FinanceiroListElement>
-                                                            <FinanceiroListValue>
-                                                                {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo} - {parcela.statusPagamento}
-                                                                <FinanceiroListIconContainer>
-                                                                    {
-                                                                        parcela.statusPagamento === 'PENDENTE' && (
-                                                                            <FaClock />
-                                                                        )
-                                                                    }
-                                                                    {
-                                                                        parcela.statusPagamento === 'PAGO' && (
-                                                                            <FaCheck color="#0F0" />
-                                                                        )
-                                                                    }
-                                                                    {
-                                                                        parcela.statusPagamento === 'ATRASADO' && (
-                                                                            <FaTimes color="#F00" />
-                                                                        )
-                                                                    }
-                                                                </FinanceiroListIconContainer>
-                                                            </FinanceiroListValue>
-                                                        </FinanceiroListElement>
-                                                    </FinanceiroListElementContainer>
-                                                ))
-                                            }
-                                            <Pagination totalPages={totalPagesFinanceiro} currentPage={financeiroPage} setPage={setFinanceiroPage} />
-                                        </FinanceiroList>
-                                    </DetailContractDataColumnRight>
-                                </DetailContractDataContainer>
-                                <DetailContractButtonGroup>
-                                    <DetailContractBackButton onClick={() => closeContractModal()}>Voltar</DetailContractBackButton>
-                                    {(selectedContrato.statusContrato === 'ATIVO' && user.isAdmin) && (
-                                        <RejectButton onClick={async () => {
-                                            if (window.confirm("Tem certeza?")) {
-                                                let message = window.prompt("Por favor informe o motivo: ");
-                                                if (message === null || message === "") {
-                                                    window.alert("Por favor informe um motivo.");
-                                                } else {
-                                                    await cancelContract(user, selectedContrato.id, message, setLoading);
-                                                }
-                                            } else {
-                                                return;
-                                            }
-                                        }}>
-                                            Cancelar Contrato
-                                        </RejectButton>
-                                    )}
-                                    {!(selectedContrato.statusContrato === 'CANCELADO') && (
-                                        isDownloading ?
-                                            <ThreeDots />
-                                            :
-                                            <DetailContractDownloadButton onClick={async () => {
-                                                setIsDownloading(true);
-                                                await downloadContract(user, selectedContrato.id, setIsDownloading);
-                                            }}>
-                                                Download PDF
-                                            </DetailContractDownloadButton>
-                                    )}
-                                    {!selectedContrato.assinado && (
-                                        <DetailContractDownloadButton onClick={async () => {
-                                            openModalAssinatura();
-                                        }}>
-                                            Enviar PDF assinado
-                                        </DetailContractDownloadButton>
-                                    )}
-                                </DetailContractButtonGroup>
-                            </DetailContractContainer>
-                        )
+                            <DetailContractButtonGroup>
+                                <DetailContractBackButton onClick={() => setModalContractIsOpen(false)}>Voltar</DetailContractBackButton>
+
+                                {selectedContrato.statusContrato === 'ATIVO' && user.isAdmin && (
+                                    <RejectButton onClick={() => {
+                                        if (window.confirm("Deseja cancelar este contrato?")) {
+                                            const motivo = prompt("Motivo:");
+                                            if (motivo) cancelContract(selectedContrato.id, motivo, setLoading);
+                                        }
+                                    }}>
+                                        Cancelar Contrato
+                                    </RejectButton>
+                                )}
+
+                                <DetailContractDownloadButton onClick={() => {
+                                    setIsDownloading(true);
+                                    downloadContract(selectedContrato.id, setIsDownloading);
+                                }}>
+                                    {isDownloading ? <ThreeDots height={20} width={20} color="#fff" /> : "Download PDF"}
+                                </DetailContractDownloadButton>
+
+                                {!selectedContrato.assinado && (
+                                    <SubmitButton onClick={() => setModalAssinaturaIsOpen(true)}>
+                                        Anexar Assinado
+                                    </SubmitButton>
+                                )}
+                            </DetailContractButtonGroup>
+                        </DetailContractContainer>
                     )
-                }
+                )}
             </Modal>
-            <Modal
-                isOpen={modalAssinaturaIsOpen}
-                onRequestClose={closeModalAssinatura}
-                style={modalStyles}
-            >
+
+            {/* --- MODAL APROVAR (ADMIN) --- */}
+            <Modal isOpen={modalEditIsOpen} onRequestClose={() => setModalEditIsOpen(false)} style={modalStyles}>
                 <StyledFormArea>
-                    <div style={{ display: 'flex', marginBottom: '30px' }}>
-                        <ContentIconContainer>
-                            <FaFileInvoice />
-                        </ContentIconContainer>
-                        <ClientCounter>Enviar Contrato Assinado</ClientCounter>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+                        <FaCheck size={24} color="#10b981" />
+                        <ContratoCounter>Aprovar Contrato</ContratoCounter>
                     </div>
                     <Formik
                         initialValues={{
-                            contrato: null,
-                            contratoId: selectedContrato && selectedContrato.id,
+                            contratoId: selectedContrato.id,
+                            valorAluguel: selectedContrato.valorAluguel || '',
+                            periocidade: '',
+                            limiteKwh: '',
+                            leituraInicial: 0
                         }}
-                        validationSchema={
-                            Yup.object().shape({
-                                contrato: Yup.mixed().required('PDF é Obrigatório'),
-                            })
-                        }
+                        validationSchema={Yup.object({
+                            valorAluguel: Yup.number().required('Obrigatório'),
+                            limiteKwh: Yup.number().required('Obrigatório'),
+                            leituraInicial: Yup.number().required('Obrigatório'),
+                        })}
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            await assinarContratoById(user, values, setSubmitting, setFieldError, setLoading, closeModalAssinatura);
+                            values.periocidade = selectedPeriocidade.value;
+                            await approveContract(values, setSubmitting, setFieldError, setLoading);
+                            setModalEditIsOpen(false);
                         }}
                     >
-                        {
-                            ({ isSubmitting, setFieldValue, values }) => (
-                                <Form>
+                        {({ isSubmitting }) => (
+                            <Form>
+                                <FormContent>
                                     <FormInputArea>
-                                        <FormInputLabel>Contrato Assinado</FormInputLabel>
-                                        <StyledFileArea>
-                                            {
-                                                fileType === 'application/pdf' ? (
-                                                    <PdfPreview>
-                                                        <FaFilePdf />
-                                                    </PdfPreview>
-                                                ) : (
-                                                    <div>
-                                                        <StyledFileIconContainer>
-                                                            <FaCloudUploadAlt />
-                                                        </StyledFileIconContainer>
-                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                        <StyledFileLegend>Tamanho máximo 5MB</StyledFileLegend>
-                                                    </div>
-                                                )
-                                            }
-                                            <StyledFileInput
-                                                type="file"
-                                                accept="application/pdf"
-                                                onChange={(event) => handleFileChange(event, setFieldValue)}
-                                            />
-                                        </StyledFileArea>
+                                        <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Reajuste' />
                                     </FormInputArea>
-                                    <ButtonGroup>
-                                        <BackButton type='button' onClick={() => closeModalAssinatura()}>Voltar</BackButton>
-                                        {
-                                            !isSubmitting && (
-                                                <SubmitButton type="submit">Registrar</SubmitButton>
-                                            )
-                                        }
-                                        {
-                                            isSubmitting && (
-                                                <ThreeDots
-                                                    color={'#4e4e4e'}
-                                                    height={49}
-                                                    width={100}
-                                                />
-                                            )
-                                        }
-                                    </ButtonGroup>
-                                </Form>
-                            )
-                        }
+                                    <SubItensContainer>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Limite KWh</FormInputLabelRequired>
+                                            <Limitador>
+                                                <FormInput type="number" name="limiteKwh" />
+                                            </Limitador>
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Valor Aluguel</FormInputLabelRequired>
+                                            <Limitador>
+                                                <FormInput type="number" step="0.01" name="valorAluguel" />
+                                            </Limitador>
+                                        </FormInputArea>
+                                    </SubItensContainer>
+                                    <FormInputArea>
+                                        <FormInputLabelRequired>Leitura Inicial</FormInputLabelRequired>
+                                        <FormInput type="number" name="leituraInicial" />
+                                    </FormInputArea>
+                                </FormContent>
+                                <ButtonGroup>
+                                    <BackButton type="button" onClick={() => setModalEditIsOpen(false)}>Cancelar</BackButton>
+                                    {!isSubmitting ? <SubmitButton type="submit">Aprovar</SubmitButton> : <ThreeDots color="#333" />}
+                                </ButtonGroup>
+                            </Form>
+                        )}
                     </Formik>
                 </StyledFormArea>
             </Modal>
-            <Modal
-                isOpen={modalEditIsOpen}
-                onRequestClose={closeEditModal}
-                style={modalStyles}
-            >
-                <h1>Modal Edit</h1>
+
+            {/* --- MODAL UPLOAD ASSINATURA --- */}
+            <Modal isOpen={modalAssinaturaIsOpen} onRequestClose={() => setModalAssinaturaIsOpen(false)} style={modalStyles}>
+                <StyledFormArea>
+                    <div style={{ marginBottom: 20 }}>
+                        <h3>Enviar Contrato Assinado</h3>
+                    </div>
+                    <Formik
+                        initialValues={{ contrato: null, contratoId: selectedContrato.id }}
+                        validationSchema={Yup.object({ contrato: Yup.mixed().required() })}
+                        onSubmit={(values, { setSubmitting, setFieldError }) => {
+                            assinarContratoById(values, setSubmitting, setFieldError, () => setModalAssinaturaIsOpen(false));
+                        }}
+                    >
+                        {({ setFieldValue, isSubmitting }) => (
+                            <Form>
+                                <StyledFileArea>
+                                    <StyledFileIconContainer><FaCloudUploadAlt /></StyledFileIconContainer>
+                                    <StyledFileInputTitle>Selecione o PDF Assinado</StyledFileInputTitle>
+                                    <StyledFileInput
+                                        type="file" accept="application/pdf"
+                                        onChange={(e) => handleFileChange(e, setFieldValue)}
+                                    />
+                                </StyledFileArea>
+                                {fileType === 'application/pdf' && <PdfPreview><FaFilePdf /></PdfPreview>}
+                                <ButtonGroup>
+                                    <BackButton type="button" onClick={() => setModalAssinaturaIsOpen(false)}>Cancelar</BackButton>
+                                    {!isSubmitting ? <SubmitButton type="submit">Enviar</SubmitButton> : <ThreeDots />}
+                                </ButtonGroup>
+                            </Form>
+                        )}
+                    </Formik>
+                </StyledFormArea>
             </Modal>
-            <Modal
-                isOpen={modalDeleteIsOpen}
-                onRequestClose={closeDeleteModal}
-                style={modalStyles}
-            >
+
+            {/* --- MODAL EXCLUIR --- */}
+            <Modal isOpen={modalDeleteIsOpen} onRequestClose={() => setModalDeleteIsOpen(false)} style={modalStyles}>
                 <DeleteContainer>
-                    <DeleteTitle>Deseja excluir o Contrato?</DeleteTitle>
-                    <ContratoCounter>Cliente: {selectedContrato.cliente && (selectedContrato.cliente.name)} / Apartamento: {selectedContrato.apartamento && (selectedContrato.apartamento.numero)}</ContratoCounter>
-                    {
-                        deletting ? (
-                            <ThreeDots />
-                        ) : (
-                            <DeleteButtonContainer>
-                                <BackButton onClick={() => {
-                                    setSelectedContrato({});
-                                    closeDeleteModal();
-                                }}>
-                                    Cancelar
-                                </BackButton>
-                                <SubmitButton onClick={async () => {
+                    <DeleteTitle>Excluir Contrato?</DeleteTitle>
+                    {deletting ? <ThreeDots color="red" /> : (
+                        <DeleteButtonContainer>
+                            <BackButton onClick={() => setModalDeleteIsOpen(false)}>Cancelar</BackButton>
+                            <SubmitButton
+                                style={{ backgroundColor: '#ef4444' }}
+                                onClick={async () => {
                                     setDeletting(true);
-                                    await deleteContratoById(user, selectedContrato.id, closeDeleteModal, setLoading);
-                                }}>
-                                    Excluir
-                                </SubmitButton>
-                            </DeleteButtonContainer>
-                        )
-                    }
+                                    await deleteContratoById(selectedContrato.id, () => setModalDeleteIsOpen(false), setLoading);
+                                }}
+                            >
+                                Excluir
+                            </SubmitButton>
+                        </DeleteButtonContainer>
+                    )}
                 </DeleteContainer>
             </Modal>
+
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
-        </PredioListContainer >
+        </PredioListContainer>
     );
-}
+};
 
 export default ContractList;

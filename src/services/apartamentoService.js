@@ -1,97 +1,92 @@
 import axios from "axios";
+import { sessionService } from "redux-react-session";
 
-export const getApartamentos = async (user, setApartamentos) => {
+const api = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
+});
+
+// Interceptor para injetar o token
+api.interceptors.request.use(async (config) => {
     try {
-        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        });
+        const session = await sessionService.loadSession();
+        if (session && session.token) {
+            config.headers.Authorization = `Bearer ${session.token}`;
+        }
+    } catch (err) {
+        console.error("Erro ao carregar sessão", err);
+    }
+    return config;
+});
+
+export const getApartamentos = async (setApartamentos) => {
+    try {
+        const response = await api.get('/apartamentos');
         setApartamentos(response.data);
     } catch (error) {
-        console.log(error.response.data.message);
-        window.alert(error.response.data.message);
+        console.error(error.response?.data?.message || error.message);
     }
-}
+};
 
-export const getApartamentosByPredioId = async (user, predioId, setApartamentos, setLoadingApartamentos) => {
+export const getApartamentosByPredioId = async (predioId, setApartamentos) => {
     try {
-        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/predio/${predioId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        });
+        const response = await api.get(`/apartamentos/predio/${predioId}`);
         setApartamentos(response.data);
-        setLoadingApartamentos(false);
     } catch (error) {
-        console.log(error.response.data.message);
-        window.alert(error.response.data.message);
+        console.error(error.response?.data?.message || error.message);
+        setApartamentos([]); // Garante array vazio em caso de erro
     }
-}
+};
 
-export const createApartamento = async (apartamento, user, navigate, setSubmitting, setFieldError) => {
+export const createApartamento = async (apartamentoData, navigate, setSubmitting, setFieldError) => {
     try {
-        const response = await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/apartamentos', apartamento, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        });
-        console.log(response.data);
+        const response = await api.post('/apartamentos', apartamentoData);
+        alert(response.data.message || "Apartamento criado com sucesso!");
         navigate('/apartamentos');
     } catch (error) {
-        setFieldError('numero', error.response.data.message);
-        console.log(error.response.data.message);
+        console.error(error.response?.data?.message);
+        if (setFieldError) {
+            setFieldError('numero', error.response?.data?.message || "Erro ao criar");
+        } else {
+            alert(error.response?.data?.message);
+        }
     } finally {
-        setSubmitting(false);
+        if (setSubmitting) setSubmitting(false);
     }
-}
+};
 
-export const getApartamentoById = async (user, apartamentoId, setApartamento) => {
+export const getApartamentoById = async (apartamentoId, setApartamento) => {
     try {
-        const response = await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        });
-        let apartamento = response.data;
-        setApartamento(apartamento);
+        const response = await api.get(`/apartamentos/${apartamentoId}`);
+        setApartamento(response.data);
     } catch (error) {
-        console.log(error.response.data.message);
-        window.alert(error.response.data.message);
+        console.error(error.response?.data?.message);
     }
-}
+};
 
-export const updateApartamento = async (user, values, setSubmitting, setFieldError) => {
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${values.id}`, values, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
+export const updateApartamento = async (values, setSubmitting, setFieldError) => {
+    try {
+        const response = await api.put(`/apartamentos/${values.id}`, values);
+        alert(response.data.message || "Atualizado com sucesso");
+    } catch (error) {
+        console.error(error.response?.data?.message);
+        if (setFieldError) {
+            setFieldError('numero', error.response?.data?.message);
+        } else {
+            alert(error.response?.data?.message);
         }
-    }).then((response) => {
-        window.alert(response.data.message);
-        setSubmitting(false);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        setSubmitting(false);
-        setFieldError('numero', err.response.data.message);
-    });
-}
+    } finally {
+        if (setSubmitting) setSubmitting(false);
+    }
+};
 
-export const deleteApartamentoById = async (user, apartamentoId, setDeletting) => {
-    await axios.delete(process.env.REACT_APP_BACKEND_URL + `/api/apartamentos/${apartamentoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        window.alert(response.data.message);
-        setDeletting(false);
-    }).catch((err) => {
-        console.log(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+export const deleteApartamentoById = async (apartamentoId, setDeletting) => {
+    try {
+        const response = await api.delete(`/apartamentos/${apartamentoId}`);
+        alert(response.data.message || "Excluído com sucesso");
+    } catch (error) {
+        console.error(error.response?.data?.message);
+        alert(error.response?.data?.message || "Erro ao excluir");
+    } finally {
+        if (setDeletting) setDeletting(false);
+    }
+};

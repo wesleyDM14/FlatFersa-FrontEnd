@@ -4,503 +4,318 @@ import { Formik, Form } from "formik";
 import { connect } from "react-redux";
 import Modal from "react-modal";
 import * as Yup from 'yup';
+import { FaFileInvoice } from "react-icons/fa";
+import { ThreeDots } from "react-loader-spinner";
 
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
-
-import { logoutUser } from "../../services/userService";
-
-import {
-    AlertButton,
-    AlertContainer,
-    AlertText,
-    BackButton,
-    ButtonGroup,
-    ContentContratoContainer,
-    ContentContratoHeader,
-    ContentIconContainer,
-    ContratoCounter,
-    FormColum,
-    FormContent,
-    FormInputArea,
-    FormInputLabelRequired,
-    HeaderContratoContainer,
-    HeaderTitle,
-    Limitador,
-    LoadingContainer,
-    MainContratoContainer,
-    SelectedAptTitle,
-    SelectedAptTitleContainer,
-    StyledFormArea,
-    SubItensContainer,
-    SubmitButton,
-} from "./ContractPage.styles";
-import { FaFileInvoice } from "react-icons/fa";
-import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker, StyledSelect } from "../../components/FormLib";
-import { ThreeDots } from "react-loader-spinner";
-import { getApartamentosByPredioId } from "../../services/apartamentoService";
-import { getClientesForContract } from "../../services/clientService";
-import { createContrato } from "../../services/contratoService";
 import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
-import { modalStyles } from "../../styles/ModalStyles";
+import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker, StyledSelect } from "../../components/FormLib";
+
+// Serviços (Atualizados para V2)
+import { logoutUser } from "../../services/userService";
 import { getPredios } from "../../services/predioService";
+import { getClientesForContract } from "../../services/clientService"; // Agora existe!
+import { getApartamentosByPredioId } from "../../services/apartamentoService";
+import { createContrato } from "../../services/contratoService";
+
+import { modalStyles } from "../../styles/ModalStyles";
+import {
+    AlertButton, AlertContainer, AlertText, BackButton, ButtonGroup,
+    ContentContratoContainer, ContentContratoHeader, ContentIconContainer,
+    ContratoCounter, FormColum, FormContent, FormInputArea, FormInputLabelRequired,
+    HeaderContratoContainer, HeaderTitle, Limitador, LoadingContainer,
+    MainContratoContainer, SelectedAptTitle, SelectedAptTitleContainer,
+    StyledFormArea, SubItensContainer, SubmitButton
+} from "./ContractPage.styles";
 
 const NovoContract = ({ user }) => {
-    Modal.setAppElement(document.getElementById('root'));
+    Modal.setAppElement('#root');
     const navigate = useNavigate();
-    const [clientes, setClientes] = useState([]);
-    const [selectedClient, setSelectedClient] = useState({});
-    const [predios, setPredios] = useState([]);
-    const [selectedPredio, setSelectedPredio] = useState(null);
-    const [apartamentos, setApatamentos] = useState([]);
-    const [selectedApartamento, setSelectedApartamento] = useState({});
+
+    // Estados
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(true);
-    const [loadingApartamentos, setLoadingApartamentos] = useState(true);
+    const [loading2, setLoading2] = useState(true); // Loading específico para clientes
+
+    // Dados para selects
+    const [predios, setPredios] = useState([]);
+    const [clientes, setClientes] = useState([]);
+    const [apartamentos, setApartamentos] = useState([]);
+
+    // Selecionados
+    const [selectedPredio, setSelectedPredio] = useState(null);
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [selectedApartamento, setSelectedApartamento] = useState({});
+
+    // Auxiliares
+    const [loadingApartamentos, setLoadingApartamentos] = useState(false);
     const [modalAlertIsOpen, setModalAlertIsOpen] = useState(false);
 
-    const [periocidade, setPeriocidade] = useState([
-        { label: 'Anualmente', value: 'ANUALMENTE' },
-        { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
-    ]);
+    const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
 
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const periocidade = [
+        { label: 'Anualmente', value: 'ANUALMENTE' },
+        { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
+    ];
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => logoutUser(navigate);
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
-
-    const openAlertModal = () => {
-        setModalAlertIsOpen(true);
-    }
-
-    const closeAlertModal = () => {
-        setModalAlertIsOpen(false);
-        setSelectedApartamento({});
-    }
-
+    // Carregar Prédios e Clientes iniciais
     useEffect(() => {
+        const fetchData = async () => {
+            if (user && user.accessToken) {
+                setLoading(true);
+                try {
+                    // Busca Prédios
+                    await getPredios(setPredios);
 
-        if (loading && user.accessToken) {
-            getPredios(user, setPredios, setLoading);
-        }
-        if (user.isAdmin && loading2) {
-            getClientesForContract(user, setClientes, setLoading2);
-        }
-    }, [loading, user, loading2]);
-
-    useEffect(() => {
-        if (selectedApartamento.status) {
-            if (selectedApartamento.status === 'OCUPADO') {
-                setModalAlertIsOpen(true);
-            } else {
-                window.alert(`Apartamento ${selectedApartamento.numero} selecionado.`);
+                    // Busca Clientes (Só se for Admin)
+                    if (user.isAdmin) {
+                        // V2: Não passa user, e passa setLoading2 para controle fino
+                        await getClientesForContract(setClientes, setLoading2);
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    setLoading(false);
+                }
             }
+        };
+        fetchData();
+    }, [user]);
+
+    // Carregar Apartamentos quando prédio muda
+    useEffect(() => {
+        if (selectedPredio?.value) {
+            setLoadingApartamentos(true);
+            // V2: Não passa user
+            getApartamentosByPredioId(selectedPredio.value, setApartamentos)
+                .finally(() => setLoadingApartamentos(false));
+        }
+    }, [selectedPredio]);
+
+    // Alerta de Ocupado
+    useEffect(() => {
+        if (selectedApartamento?.status === 'OCUPADO') {
+            setModalAlertIsOpen(true);
         }
     }, [selectedApartamento]);
 
-    useEffect(() => {
-        if (selectedPredio && user.accessToken && loadingApartamentos) {
-            getApartamentosByPredioId(user, selectedPredio.value, setApatamentos, setLoadingApartamentos);
-        }
-    }, [selectedPredio, user, loadingApartamentos]);
+    if (!user) return null;
 
     return (
-        user.isAdmin ? (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
-                            />
-                        </LoadingContainer>
-                    ) : (
-                        <MainContratoContainer>
-                            <HeaderContratoContainer>
-                                <HeaderTitle>Adicionar Novo Contrato</HeaderTitle>
-                            </HeaderContratoContainer >
-                            <ContentContratoContainer>
-                                <ContentContratoHeader>
-                                    <ContentIconContainer>
-                                        <FaFileInvoice />
-                                        <ContratoCounter>Dados do Contrato</ContratoCounter>
-                                    </ContentIconContainer>
-                                </ContentContratoHeader>
-                                <StyledFormArea>
-                                    <Formik
-                                        initialValues={{
-                                            dataInicio: new Date(),
-                                            duracaoContrato: '',
-                                            diaVencimentoAluguel: '',
-                                            valorAluguel: '',
-                                            limiteKwh: '',
-                                            aptId: '',
-                                            clienteId: '',
-                                            periocidade: '',
-                                            leituraAtual: '',
-                                            leituraInicial: '',
-                                        }}
-                                        validationSchema={
-                                            Yup.object({
-                                                duracaoContrato: Yup.number().required('Obrigatório'),
-                                                diaVencimentoAluguel: Yup.number().required('Obrigatório'),
-                                                valorAluguel: Yup.number().required('Obrigatório'),
-                                                limiteKwh: Yup.number().required('Obrigatório'),
-                                                leituraInicial: Yup.number().required('Obrigatório')
-                                            })
+        <div className="container">
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} logoutUser={handleLogout} />
+
+            {loading ? (
+                <LoadingContainer><ThreeDots color={'#4e4e4e'} /></LoadingContainer>
+            ) : (
+                <MainContratoContainer>
+                    <HeaderContratoContainer>
+                        <HeaderTitle>{user.isAdmin ? 'Adicionar Novo Contrato' : 'Solicitar Contrato'}</HeaderTitle>
+                    </HeaderContratoContainer>
+
+                    <ContentContratoContainer>
+                        <ContentContratoHeader>
+                            <ContentIconContainer>
+                                <FaFileInvoice />
+                                <ContratoCounter>Dados do Contrato</ContratoCounter>
+                            </ContentIconContainer>
+                        </ContentContratoHeader>
+
+                        <StyledFormArea>
+                            <Formik
+                                initialValues={{
+                                    duracaoContrato: '',
+                                    diaVencimentoAluguel: '',
+                                    valorAluguel: '',
+                                    limiteKwh: '',
+                                    leituraInicial: '',
+                                    // Campos ocultos
+                                    dataInicio: new Date(),
+                                    aptId: '',
+                                    clienteId: '',
+                                    periocidade: ''
+                                }}
+                                validationSchema={Yup.object({
+                                    duracaoContrato: Yup.number().required('Obrigatório'),
+                                    diaVencimentoAluguel: Yup.number().required('Obrigatório').max(31),
+                                    // Se for Admin, valor é obrigatório
+                                    valorAluguel: user.isAdmin ? Yup.number().required('Obrigatório') : Yup.number(),
+                                })}
+                                onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                    if (!selectedApartamento.id) {
+                                        alert("Selecione um apartamento");
+                                        setSubmitting(false);
+                                        return;
+                                    }
+
+                                    values.dataInicio = selectedDate;
+                                    values.aptId = selectedApartamento.id;
+
+                                    if (user.isAdmin) {
+                                        if (!selectedClient?.value) {
+                                            alert("Selecione um cliente");
+                                            setSubmitting(false);
+                                            return;
                                         }
-                                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                            values.dataInicio = selectedDate;
-                                            values.leituraAtual = values.leituraInicial;
-                                            values.periocidade = selectedPeriocidade.value;
-                                            values.clienteId = selectedClient.value;
-                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' ? selectedApartamento.id : selectedApartamento.value;
-                                            await createContrato(values, user, navigate, setSubmitting, setFieldError);
-                                        }}
-                                    >
-                                        {
-                                            ({ isSubmitting }) => (
-                                                <Form>
-                                                    <FormContent>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} setLoading={setLoadingApartamentos} />
-                                                            </FormInputArea>
-                                                            <FormInputArea>
-                                                                <ClientSelect clientes={clientes} setSelectedClient={setSelectedClient} />
-                                                            </FormInputArea>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Data Início</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <StyledDatePicker
-                                                                            selectedDate={selectedDate}
-                                                                            setSelectedDate={setSelectedDate}
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Duração (meses)</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="0"
-                                                                            step="1"
-                                                                            name="duracaoContrato"
-                                                                            placeholder="Duração do Contrato"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                        <FormColum>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Dia de Vencimento</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="1"
-                                                                            max='31'
-                                                                            step="1"
-                                                                            name="diaVencimentoAluguel"
-                                                                            placeholder="Dia de Vencimento"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="0.00"
-                                                                            step="0.01"
-                                                                            name="valorAluguel"
-                                                                            placeholder="Valor do Aluguel"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Limite de KWh</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="0"
-                                                                            step="1"
-                                                                            name="limiteKwh"
-                                                                            placeholder="Valor limite de KWh"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade de Reajuste' />
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Leitura Inicial Medidor</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="0"
-                                                                            step="1"
-                                                                            name="leituraInicial"
-                                                                            placeholder="Leitura Inicial"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                            {
-                                                                selectedPredio && selectedPredio.label.toLowerCase() !== 'flatfersa' && (
-                                                                    loadingApartamentos ? (
-                                                                        <LoadingContainer>
-                                                                            <ThreeDots />
-                                                                        </LoadingContainer>
-                                                                    ) : (
-                                                                        <FormInputArea>
-                                                                            <ApartamentoSelect apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
-                                                                        </FormInputArea>
-                                                                    )
-                                                                )
-                                                            }
-                                                        </FormColum>
-                                                    </FormContent>
-                                                    {
-                                                        selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' && (
-                                                            loadingApartamentos ? (
-                                                                <LoadingContainer>
-                                                                    <ThreeDots />
-                                                                </LoadingContainer>
-                                                            ) : (
-                                                                <>
-                                                                    <SelectedAptTitleContainer>
-                                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
-                                                                    </SelectedAptTitleContainer>
-                                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
-                                                                </>
-                                                            )
-                                                        )
-                                                    }
-                                                    <ButtonGroup>
-                                                        <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
-                                                        {!isSubmitting && (
-                                                            <SubmitButton type="submit">Salvar</SubmitButton>
+                                        values.clienteId = selectedClient.value;
+                                        values.periocidade = selectedPeriocidade.value;
+                                        values.leituraAtual = values.leituraInicial;
+                                    }
+
+                                    // V2: Não passa user
+                                    await createContrato(values, user.isAdmin, navigate, setSubmitting, setFieldError);
+                                }}
+                            >
+                                {({ isSubmitting }) => (
+                                    <Form>
+                                        <FormContent>
+                                            <FormColum>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Prédio</FormInputLabelRequired>
+                                                    <PredioSelect
+                                                        predios={predios}
+                                                        setSelectedPredio={setSelectedPredio}
+                                                    />
+                                                </FormInputArea>
+
+                                                {/* Seleção de Cliente (Só Admin) */}
+                                                {user.isAdmin && (
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Cliente</FormInputLabelRequired>
+                                                        {loading2 ? <ThreeDots height={20} width={40} color="#999" /> : (
+                                                            <ClientSelect
+                                                                clientes={clientes}
+                                                                setSelectedClient={setSelectedClient}
+                                                            />
                                                         )}
-                                                        {
-                                                            isSubmitting && (
-                                                                <ThreeDots
-                                                                    color={'#4e4e4e'}
-                                                                    height={49}
-                                                                    width={100}
-                                                                />
-                                                            )
-                                                        }
-                                                    </ButtonGroup>
-                                                </Form>
+                                                    </FormInputArea>
+                                                )}
+
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Data Início</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <StyledDatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Duração (meses)</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <FormInput type="number" name="duracaoContrato" placeholder="Ex: 12" />
+                                                        </Limitador>
+                                                    </FormInputArea>
+                                                </SubItensContainer>
+                                            </FormColum>
+
+                                            <FormColum>
+                                                <SubItensContainer>
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Dia Vencimento</FormInputLabelRequired>
+                                                        <Limitador>
+                                                            <FormInput type="number" name="diaVencimentoAluguel" max="31" />
+                                                        </Limitador>
+                                                    </FormInputArea>
+
+                                                    {user.isAdmin && (
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput type="number" step="0.01" name="valorAluguel" />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                    )}
+                                                </SubItensContainer>
+
+                                                {user.isAdmin && (
+                                                    <SubItensContainer>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Limite KWh</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput type="number" name="limiteKwh" />
+                                                            </Limitador>
+                                                        </FormInputArea>
+                                                        <FormInputArea>
+                                                            <FormInputLabelRequired>Reajuste</FormInputLabelRequired>
+                                                            <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade' />
+                                                        </FormInputArea>
+                                                    </SubItensContainer>
+                                                )}
+
+                                                {user.isAdmin && (
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Leitura Inicial (KWh)</FormInputLabelRequired>
+                                                        <FormInput type="number" name="leituraInicial" />
+                                                    </FormInputArea>
+                                                )}
+                                            </FormColum>
+                                        </FormContent>
+
+                                        {/* SELEÇÃO DE APARTAMENTO (Lógica FlatFersa vs Lista) */}
+                                        {selectedPredio && (
+                                            loadingApartamentos ? (
+                                                <LoadingContainer><ThreeDots color='#4e4e4e' /></LoadingContainer>
+                                            ) : (
+                                                selectedPredio.label.toLowerCase().includes('fersa') ? (
+                                                    // Layout Visual para Flat Fersa
+                                                    <>
+                                                        <SelectedAptTitleContainer>
+                                                            <SelectedAptTitle>
+                                                                {selectedApartamento.id
+                                                                    ? `Selecionado: Apt ${selectedApartamento.numero}`
+                                                                    : "Selecione o Apartamento na Planta Abaixo"}
+                                                            </SelectedAptTitle>
+                                                        </SelectedAptTitleContainer>
+                                                        <LayoutPlanta
+                                                            apartamentos={apartamentos}
+                                                            setSelectedApartamento={setSelectedApartamento}
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    // Dropdown Padrão para outros prédios
+                                                    <FormInputArea>
+                                                        <FormInputLabelRequired>Apartamento</FormInputLabelRequired>
+                                                        <ApartamentoSelect
+                                                            apartamentos={apartamentos}
+                                                            setSelectedApartamento={setSelectedApartamento}
+                                                        />
+                                                    </FormInputArea>
+                                                )
                                             )
-                                        }
-                                    </Formik>
-                                </StyledFormArea>
-                            </ContentContratoContainer>
-                        </MainContratoContainer >
-                    )
-                }
-                <Modal
-                    isOpen={modalAlertIsOpen}
-                    onRequestClose={closeAlertModal}
-                    style={modalStyles}
-                >
-                    <AlertContainer>
-                        <AlertText>Apartamento Ocupado</AlertText>
-                        <AlertButton onClick={() => {
-                            closeAlertModal();
-                            setSelectedApartamento({});
-                        }}>Fechar</AlertButton>
-                    </AlertContainer>
-                </Modal>
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div >
-        ) : (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} contratoActive={true} />
-                {
-                    loading ? (
-                        <LoadingContainer>
-                            <ThreeDots
-                                color={'#4e4e4e'}
-                                height={49}
-                                width={100}
-                            />
-                        </LoadingContainer>
-                    ) : (
-                        <MainContratoContainer>
-                            <HeaderContratoContainer>
-                                <HeaderTitle>Nova Solicitaçãode Contrato</HeaderTitle>
-                            </HeaderContratoContainer >
-                            <ContentContratoContainer>
-                                <ContentContratoHeader>
-                                    <ContentIconContainer>
-                                        <FaFileInvoice />
-                                        <ContratoCounter>Dados da Solicitação</ContratoCounter>
-                                    </ContentIconContainer>
-                                </ContentContratoHeader>
-                                <StyledFormArea>
-                                    <Formik
-                                        initialValues={{
-                                            dataInicio: new Date(),
-                                            duracaoContrato: '',
-                                            diaVencimentoAluguel: '',
-                                            leituraAtual: 0,
-                                            aptId: '',
-                                        }}
-                                        validationSchema={
-                                            Yup.object({
-                                                duracaoContrato: Yup.number().required('Obrigatório').min(6, 'Mínimo de 6 meses'),
-                                                diaVencimentoAluguel: Yup.number().required('Obrigatório').min(1, 'Dia não pode ser menor que 1').max(31, 'Dia não pode ser maior que 31'),
-                                            })
-                                        }
-                                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                            values.dataInicio = selectedDate;
-                                            values.aptId = selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' ? selectedApartamento.id : selectedApartamento.value;
-                                            await createContrato(values, user, navigate, setSubmitting, setFieldError);
-                                        }}
-                                    >
-                                        {
-                                            ({ isSubmitting }) => (
-                                                <Form>
-                                                    <FormContent>
-                                                        <FormColum>
-                                                            <FormInputArea>
-                                                                <PredioSelect predios={predios} setSelectedPredio={setSelectedPredio} setLoading={setLoadingApartamentos} />
-                                                            </FormInputArea>
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Data Início</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <StyledDatePicker
-                                                                            selectedDate={selectedDate}
-                                                                            setSelectedDate={setSelectedDate}
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Duração (meses)</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="0"
-                                                                            step="1"
-                                                                            name="duracaoContrato"
-                                                                            placeholder="Duração do Contrato"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                        <FormColum>
-                                                            {
-                                                                selectedPredio && selectedPredio.label.toLowerCase() !== 'flatfersa' && (
-                                                                    loadingApartamentos ? (
-                                                                        <LoadingContainer>
-                                                                            <ThreeDots />
-                                                                        </LoadingContainer>
-                                                                    ) : (
-                                                                        <FormInputArea>
-                                                                            <ApartamentoSelect apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
-                                                                        </FormInputArea>
-                                                                    )
-                                                                )
-                                                            }
-                                                            <SubItensContainer>
-                                                                <FormInputArea>
-                                                                    <FormInputLabelRequired>Dia de Vencimento</FormInputLabelRequired>
-                                                                    <Limitador>
-                                                                        <FormInput
-                                                                            type="number"
-                                                                            min="1"
-                                                                            max='31'
-                                                                            step="1"
-                                                                            name="diaVencimentoAluguel"
-                                                                            placeholder="Dia de Vencimento"
-                                                                        />
-                                                                    </Limitador>
-                                                                </FormInputArea>
-                                                            </SubItensContainer>
-                                                        </FormColum>
-                                                    </FormContent>
-                                                    {
-                                                        selectedPredio && selectedPredio.label.toLowerCase() === 'flatfersa' && (
-                                                            loadingApartamentos ? (
-                                                                <LoadingContainer>
-                                                                    <ThreeDots />
-                                                                </LoadingContainer>
-                                                            ) : (
-                                                                <>
-                                                                    <SelectedAptTitleContainer>
-                                                                        <SelectedAptTitle>Selecionar Apartamento Desejado</SelectedAptTitle>
-                                                                    </SelectedAptTitleContainer>
-                                                                    <LayoutPlanta apartamentos={apartamentos} setSelectedApartamento={setSelectedApartamento} />
-                                                                </>
-                                                            )
-                                                        )
-                                                    }
-                                                    <ButtonGroup>
-                                                        <BackButton type='button' onClick={() => navigate('/contratos')}>Voltar</BackButton>
-                                                        {!isSubmitting && (
-                                                            <SubmitButton type="submit">Salvar</SubmitButton>
-                                                        )}
-                                                        {
-                                                            isSubmitting && (
-                                                                <ThreeDots
-                                                                    color={'#4e4e4e'}
-                                                                    height={49}
-                                                                    width={100}
-                                                                />
-                                                            )
-                                                        }
-                                                    </ButtonGroup>
-                                                </Form>
-                                            )
-                                        }
-                                    </Formik>
-                                </StyledFormArea>
-                            </ContentContratoContainer>
-                        </MainContratoContainer >
-                    )
-                }
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-                <Modal
-                    isOpen={modalAlertIsOpen}
-                    onRequestClose={closeAlertModal}
-                    style={modalStyles}
-                >
-                    <AlertContainer>
-                        <AlertText>Apartamento Ocupado</AlertText>
-                        <AlertButton onClick={() => {
-                            closeAlertModal();
-                            setSelectedApartamento({});
-                        }}>Fechar</AlertButton>
-                    </AlertContainer>
-                </Modal>
-            </div >
-        )
+                                        )}
+
+                                        <ButtonGroup>
+                                            <BackButton type='button' onClick={() => navigate('/contratos')}>Cancelar</BackButton>
+                                            {!isSubmitting ? (
+                                                <SubmitButton type="submit">Salvar Contrato</SubmitButton>
+                                            ) : <ThreeDots height={40} />}
+                                        </ButtonGroup>
+                                    </Form>
+                                )}
+                            </Formik>
+                        </StyledFormArea>
+                    </ContentContratoContainer>
+                </MainContratoContainer>
+            )}
+
+            {/* Modal de Alerta de Ocupado */}
+            <Modal isOpen={modalAlertIsOpen} onRequestClose={() => setModalAlertIsOpen(false)} style={modalStyles}>
+                <AlertContainer>
+                    <AlertText>Este apartamento já está ocupado!</AlertText>
+                    <AlertButton onClick={() => {
+                        setModalAlertIsOpen(false);
+                        setSelectedApartamento({});
+                    }}>Entendi</AlertButton>
+                </AlertContainer>
+            </Modal>
+
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 
-const mapStateToProps = ({ session }) => ({
-    user: session.user
-});
-
+const mapStateToProps = ({ session }) => ({ user: session.user });
 export default connect(mapStateToProps)(NovoContract);

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import {Link} from "react-router-dom";
 
 export const StyledFormArea = styled.div`
     background-color: ${props => props.bg || props.theme.colors.light};
@@ -57,7 +58,7 @@ export const StyledContainer = styled.div`
     align-items: center;
 `;
 
-export const StyledLink = styled.a`
+export const StyledLink = styled(Link)`
     cursor: pointer;
     text-decoration: none;
     color: ${props => props.theme.colors.dark1};

@@ -1,13 +1,18 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
+import { FaCloudUploadAlt, FaFileInvoice } from "react-icons/fa";
+import { ThreeDots } from "react-loader-spinner";
 
-import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import { FormInput, MaskedInput, StyledDatePicker } from "../../components/FormLib";
 
 import { logoutUser } from "../../services/userService";
+import { createCliente } from "../../services/clientService";
+
 import {
     BackButton,
     ButtonGroup,
@@ -29,15 +34,10 @@ import {
     StyledFileIconContainer,
     StyledFileInput,
     StyledFileInputTitle,
-    StyledFileLegend,
     StyledFormArea,
     SubItensContainer,
     SubmitButton,
 } from "./ClientPage.styles";
-import { FaCloudUploadAlt, FaFileInvoice } from "react-icons/fa";
-import { FormInput, MaskedInput, StyledDatePicker } from "../../components/FormLib";
-import { createCliente } from "../../services/clientService";
-import { ThreeDots } from "react-loader-spinner";
 
 const NovoClient = ({ user }) => {
     const navigate = useNavigate();
@@ -46,222 +46,165 @@ const NovoClient = ({ user }) => {
     const [selectedBackImage, setSelectedBackImage] = useState();
     const [selectedFrontImage, setSelectedFrontImage] = useState();
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => logoutUser(navigate);
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
+    if (!user || user.role !== 'ADMIN') return null;
 
     return (
-        user.isAdmin && (
-            <div className="container">
-                <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} clienteActive={true} />
-                <MainClientContainer>
-                    <HeaderClientContainer>
-                        <HeaderTitle>Adicionar Novo Cliente</HeaderTitle>
-                    </HeaderClientContainer>
-                    <ContentClientContainer>
-                        <ContentClientHeader>
-                            <ContentIconContainer>
-                                <FaFileInvoice />
-                                <ClientCounter>Dados do Cliente</ClientCounter>
-                            </ContentIconContainer>
-                        </ContentClientHeader>
-                        <StyledFormArea>
-                            <Formik
-                                initialValues={{
-                                    name: '',
-                                    cpf: '',
-                                    rg: '',
-                                    dateBirth: new Date(),
-                                    phone: '',
-                                    address: '',
-                                    email: '',
-                                    documentFront: null,
-                                    documentBack: null
-                                }}
-                                validationSchema={
-                                    Yup.object({
-                                        name: Yup.string().required('Obrigatório'),
-                                        phone: Yup.string().required('Telefone é obrigatório').matches(/^\d{10,11}$/, 'Telefone inválido'),
-                                        email: Yup.string().required('Obrigatório'),
-                                        cpf: Yup.string().required('CPF é obrigatório').matches(/^\d{11}$/, 'CPF inválido'),
-                                        rg: Yup.string().required('RG é obrigatório').min(9, 'RG deve ter no mínimo 9 caracteres'),
-                                    })
-                                }
-                                onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                                    values.dateBirth = startDate;
-                                    await createCliente(values, user, navigate, setSubmitting, setFieldError);
-                                }}
-                            >
-                                {
-                                    ({ isSubmitting, setFieldValue, values }) => (
-                                        <Form>
-                                            <FormContent>
-                                                <FormColum>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                        <FormInput
-                                                            type='text'
-                                                            name='name'
-                                                            placeholder='Nome do cliente'
-                                                        />
-                                                    </FormInputArea>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Email</FormInputLabelRequired>
-                                                        <FormInput
-                                                            type='text'
-                                                            name='email'
-                                                            placeholder='Email do cliente'
-                                                        />
-                                                    </FormInputArea>
-                                                    <SubItensContainer>
-                                                        <FormInputArea>
-                                                            <FormInputLabelRequired>CPF</FormInputLabelRequired>
-                                                            <Limitador>
-                                                                <MaskedInput
-                                                                    name='cpf'
-                                                                    mask='999.999.999-99'
-                                                                    value={values.cpf}
-                                                                    type='text'
-                                                                    placeholder='CPF do cliente'
-                                                                />
-                                                            </Limitador>
-                                                        </FormInputArea>
-                                                        <FormInputArea>
-                                                            <FormInputLabelRequired>RG</FormInputLabelRequired>
-                                                            <Limitador>
-                                                                <FormInput
-                                                                    name='rg'
-                                                                    type='text'
-                                                                    placeholder='RG do cliente'
-                                                                />
-                                                            </Limitador>
-                                                        </FormInputArea>
-                                                    </SubItensContainer>
-                                                </FormColum>
-                                                <FormColum>
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                        <FormInput
-                                                            type='text'
-                                                            name='address'
-                                                            placeholder='Endereço do cliente'
-                                                        />
-                                                    </FormInputArea>
-                                                    <SubItensContainer>
-                                                        <FormInputArea>
-                                                            <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
-                                                            <Limitador>
-                                                                <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
-                                                            </Limitador>
-                                                        </FormInputArea>
-                                                        <FormInputArea>
-                                                            <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                            <Limitador>
-                                                                <MaskedInput
-                                                                    name='phone'
-                                                                    type='text'
-                                                                    mask='(99)99999-9999'
-                                                                    value={values.phone}
-                                                                    placeholder='Telefone'
-                                                                />
-                                                            </Limitador>
-                                                        </FormInputArea>
-                                                    </SubItensContainer>
-                                                    <FormInputArea>
-                                                        <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
-                                                        <StyledFileArea>
-                                                            {
-                                                                selectedFrontImage ? (
-                                                                    <Image
-                                                                        src={selectedFrontImage}
-                                                                    />
-                                                                ) : (
-                                                                    <div>
-                                                                        <StyledFileIconContainer>
-                                                                            <FaCloudUploadAlt />
-                                                                        </StyledFileIconContainer>
-                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                    </div>
-                                                                )
-                                                            }
+        <div className="container">
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} logoutUser={handleLogout} />
 
-                                                            <StyledFileInput
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(event) => {
-                                                                    const file = event.target.files[0];
-                                                                    setFieldValue('documentFront', file);
-                                                                    setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
-                                                                }}
-                                                            />
-                                                        </StyledFileArea>
-                                                    </FormInputArea>
-                                                    <FormInputArea>
-                                                        <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
-                                                        <StyledFileArea>
-                                                            {
-                                                                selectedBackImage ? (
-                                                                    <Image
-                                                                        src={selectedBackImage}
-                                                                    />
-                                                                ) : (
-                                                                    <div>
-                                                                        <StyledFileIconContainer>
-                                                                            <FaCloudUploadAlt />
-                                                                        </StyledFileIconContainer>
-                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                    </div>
-                                                                )
-                                                            }
-                                                            <StyledFileInput
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(event) => {
-                                                                    const file = event.target.files[0];
-                                                                    setFieldValue('documentBack', file);
-                                                                    setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
-                                                                }}
-                                                            />
-                                                        </StyledFileArea>
-                                                    </FormInputArea>
-                                                </FormColum>
-                                            </FormContent>
-                                            <ButtonGroup>
-                                                <BackButton type='button' onClick={() => navigate('/clientes')}>Voltar</BackButton>
-                                                {!isSubmitting && (
-                                                    <SubmitButton type="submit">Salvar</SubmitButton>
-                                                )}
-                                                {
-                                                    isSubmitting && (
-                                                        <ThreeDots
-                                                            color={'#4e4e4e'}
-                                                            height={49}
-                                                            width={100}
+            <MainClientContainer>
+                <HeaderClientContainer>
+                    <HeaderTitle>Adicionar Novo Cliente</HeaderTitle>
+                </HeaderClientContainer>
+
+                <ContentClientContainer>
+                    <ContentClientHeader>
+                        <ContentIconContainer>
+                            <FaFileInvoice />
+                            <ClientCounter>Dados do Cliente</ClientCounter>
+                        </ContentIconContainer>
+                    </ContentClientHeader>
+
+                    <StyledFormArea>
+                        <Formik
+                            initialValues={{
+                                name: '', cpf: '', rg: '', phone: '', address: '', email: '',
+                                documentFront: null, documentBack: null
+                            }}
+                            validationSchema={Yup.object({
+                                name: Yup.string().required('Nome é obrigatório'),
+                                email: Yup.string().email('Email inválido').required('Email é obrigatório'),
+                                cpf: Yup.string().required('CPF é obrigatório'),
+                                phone: Yup.string().required('Telefone é obrigatório'),
+                                address: Yup.string().required('Endereço é obrigatório'),
+                            })}
+                            onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                                values.dateBirth = startDate;
+                                await createCliente(values, navigate, setSubmitting, setFieldError);
+                            }}
+                        >
+                            {({ isSubmitting, setFieldValue, values }) => (
+                                <Form>
+                                    <FormContent>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Nome Completo</FormInputLabelRequired>
+                                                <FormInput type='text' name='name' placeholder='Ex: João da Silva' />
+                                            </FormInputArea>
+
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Email (Login)</FormInputLabelRequired>
+                                                <FormInput type='email' name='email' placeholder='email@exemplo.com' />
+                                            </FormInputArea>
+
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>CPF</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <MaskedInput mask='999.999.999-99' name='cpf' type='text' placeholder='000.000.000-00' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>RG</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput name='rg' type='text' placeholder='RG' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Senha Provisória</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput name='password' type='password' placeholder='******' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Endereço Completo</FormInputLabelRequired>
+                                                <FormInput type='text' name='address' placeholder='Rua, Número, Bairro' />
+                                            </FormInputArea>
+
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Nascimento</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Telefone/WhatsApp</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <MaskedInput mask='(99) 99999-9999' name='phone' type='text' placeholder='(00) 00000-0000' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+
+                                            {/* UPLOAD DOCS */}
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Foto RG/CNH (Frente)</FormInputLabel>
+                                                    <StyledFileArea>
+                                                        {selectedFrontImage ? <Image src={selectedFrontImage} /> : (
+                                                            <>
+                                                                <StyledFileIconContainer><FaCloudUploadAlt /></StyledFileIconContainer>
+                                                                <StyledFileInputTitle>Enviar Frente</StyledFileInputTitle>
+                                                            </>
+                                                        )}
+                                                        <StyledFileInput
+                                                            type="file" accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files[0];
+                                                                setFieldValue('documentFront', file);
+                                                                setSelectedFrontImage(file ? URL.createObjectURL(file) : null);
+                                                            }}
                                                         />
-                                                    )
-                                                }
-                                            </ButtonGroup>
-                                        </Form>
-                                    )
-                                }
-                            </Formik>
-                        </StyledFormArea>
-                    </ContentClientContainer>
-                </MainClientContainer >
-                <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-            </div >
-        )
+                                                    </StyledFileArea>
+                                                </FormInputArea>
+
+                                                <FormInputArea>
+                                                    <FormInputLabel>Foto RG/CNH (Verso)</FormInputLabel>
+                                                    <StyledFileArea>
+                                                        {selectedBackImage ? <Image src={selectedBackImage} /> : (
+                                                            <>
+                                                                <StyledFileIconContainer><FaCloudUploadAlt /></StyledFileIconContainer>
+                                                                <StyledFileInputTitle>Enviar Verso</StyledFileInputTitle>
+                                                            </>
+                                                        )}
+                                                        <StyledFileInput
+                                                            type="file" accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files[0];
+                                                                setFieldValue('documentBack', file);
+                                                                setSelectedBackImage(file ? URL.createObjectURL(file) : null);
+                                                            }}
+                                                        />
+                                                    </StyledFileArea>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                    </FormContent>
+
+                                    <ButtonGroup>
+                                        <BackButton type='button' onClick={() => navigate('/clientes')}>Cancelar</BackButton>
+                                        {isSubmitting ? <ThreeDots color="#4e4e4e" height={40} /> : <SubmitButton type="submit">Salvar Cliente</SubmitButton>}
+                                    </ButtonGroup>
+                                </Form>
+                            )}
+                        </Formik>
+                    </StyledFormArea>
+                </ContentClientContainer>
+            </MainClientContainer>
+
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 
-const mapStateToProps = ({ session }) => ({
-    user: session.user
-});
-
+const mapStateToProps = ({ session }) => ({ user: session.user });
 export default connect(mapStateToProps)(NovoClient);

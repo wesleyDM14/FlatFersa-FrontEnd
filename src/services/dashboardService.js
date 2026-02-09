@@ -1,31 +1,53 @@
 import axios from "axios";
+import { sessionService } from "redux-react-session";
 
-export const getDashboardAdmin = async (user, setDashbaordData, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/dashboard/admin', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        setDashbaordData(response.data);
-        setLoading(false);
-    }).catch((err) => {
-        console.error(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+const api = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
+});
 
-export const getDashboardClient = async (user, setDashbaordData, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/dashboard/client', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
+api.interceptors.request.use(async (config) => {
+    try {
+        const session = await sessionService.loadSession();
+        if (session && session.token) {
+            config.headers.Authorization = `Bearer ${session.token}`;
         }
-    }).then((response) => {
-        setDashbaordData(response.data);
+    } catch (err) {
+    }
+    return config;
+});
+
+export const getDashboardAdmin = async (setLoading, setDashboardData) => {
+    try {
+        setLoading(true);
+        const response = await api.get('/dashboard/admin');
+
+        setDashboardData(response.data);
         setLoading(false);
-    }).catch((err) => {
-        console.error(err.response.data.message);
-        window.alert(err.response.data.message);
-    });
-}
+    } catch (err) {
+        console.error("Erro ao buscar dashboard admin:", err);
+        setLoading(false);
+
+        const message = err.response?.data?.message || "Erro ao carregar dados.";
+        if (message !== "Unauthorized") {
+            window.alert(message);
+        }
+    }
+};
+
+export const getDashboardClient = async (setLoading, setDashboardData) => {
+    try {
+        setLoading(true);
+        const response = await api.get('/dashboard/client');
+
+        setDashboardData(response.data);
+        setLoading(false);
+    } catch (err) {
+        console.error("Erro ao buscar dashboard cliente:", err);
+        setLoading(false);
+
+        const message = err.response?.data?.message || "Erro ao carregar dados.";
+        if (message !== "Unauthorized") {
+            window.alert(message);
+        }
+    }
+};

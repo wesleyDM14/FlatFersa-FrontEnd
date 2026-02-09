@@ -1,16 +1,10 @@
-import React from "react";
-import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
 import { Formik, Form } from "formik";
 import { TextInput } from "../../components/FormLib";
 import * as Yup from 'yup';
-
 import { ThreeDots } from "react-loader-spinner";
-import logo from '../../assets/favicon.png';
-
 import { FiMail, FiLock } from "react-icons/fi";
-
+import logo from '../../assets/favicon.png';
 import {
     StyledFormArea,
     Avatar,
@@ -20,18 +14,19 @@ import {
     StyledContainer,
     StyledLink
 } from './LoginPage.styles';
-
 import { loginUser } from "../../services/userService";
 
-const LoginPage = ({ loginUser }) => {
-
+const LoginPage = () => {
     const navigate = useNavigate();
 
     return (
         <StyledContainer>
             <StyledFormArea>
                 <Avatar $image={logo} />
-                <StyledTitle size={30}>Área de Login</StyledTitle>
+                <StyledTitle size={30} color="#333">
+                    Acesso ao Sistema
+                </StyledTitle>
+
                 <Formik
                     initialValues={{
                         email: "",
@@ -39,8 +34,11 @@ const LoginPage = ({ loginUser }) => {
                     }}
                     validationSchema={
                         Yup.object({
-                            email: Yup.string().email("Endereço de email inválido").required("Obrigatório"),
-                            password: Yup.string().min(8, "Senha curta").max(30, "Senha longa").required("Obrigatório"),
+                            email: Yup.string()
+                                .email("Endereço de email inválido")
+                                .required("O e-mail é obrigatório"),
+                            password: Yup.string()
+                                .required("A senha é obrigatória"),
                         })
                     }
                     onSubmit={(values, { setSubmitting, setFieldError }) => {
@@ -53,40 +51,46 @@ const LoginPage = ({ loginUser }) => {
                                 name='email'
                                 type='text'
                                 label='Email'
-                                placeholder='Digite seu email'
+                                placeholder='exemplo@email.com'
                                 icon={<FiMail />}
-                                width={350}
                             />
+
                             <TextInput
                                 name='password'
                                 type='password'
                                 label='Senha'
                                 placeholder='********'
                                 icon={<FiLock />}
-                                width={350}
                             />
+
                             <ButtonGroup>
-                                {
-                                    !isSubmitting && (
-                                        <StyledFormButton type='submit'>Login</StyledFormButton>
-                                    )
-                                }
-                                {
-                                    isSubmitting && (
-                                        <ThreeDots
-                                            height={49}
-                                            width={100}
-                                        />
-                                    )
-                                }
+                                {!isSubmitting && (
+                                    <StyledFormButton type='submit'>
+                                        Entrar
+                                    </StyledFormButton>
+                                )}
+
+                                {isSubmitting && (
+                                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                        <ThreeDots color="#d32f2f" height={45} width={50} />
+                                    </div>
+                                )}
                             </ButtonGroup>
                         </Form>
                     )}
                 </Formik>
+
+                <div style={{ marginTop: '25px', textAlign: 'center' }}>
+                    <StyledLink to="/signin">
+                        Não tem conta? <strong>Solicitar Acesso</strong>
+                    </StyledLink>
+                </div>
+                <p style={{ textAlign: 'center', marginTop: '30px', fontSize: '12px', color: '#999' }}>
+                    © Flat Fersa V2
+                </p>
             </StyledFormArea>
-            <StyledLink href="/signin"> Não possui conta? Solicitar Acesso</StyledLink>
         </StyledContainer>
     )
 }
 
-export default connect(null, { loginUser })(LoginPage);
+export default LoginPage;

@@ -1,259 +1,155 @@
 import axios from "axios";
+import { sessionService } from "redux-react-session";
 
-import pago from '../assets/pago.png';
-import cancel from '../assets/cancel.png';
-import waiting from '../assets/waiting.png';
+// Importe suas imagens de assets aqui se precisar usar no frontend, 
+// mas geralmente imagens estáticas ficam no componente.
+// Vou retornar strings de status para o componente decidir qual imagem mostrar.
 
-export const getParcelas = async (user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasAguardando) => {
-    if (user.isAdmin) {
-        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/aluguel', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then(async (response) => {
-            setParcelas(response.data);
-            let parcelas = response.data;
-            let pagos = [];
-            let pendentes = [];
-            let atrasados = [];
-            let aguardando = [];
+const api = axios.create({
+    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
+});
 
-            for (let index = 0; index < parcelas.length; index++) {
-                const parcela = parcelas[index];
-                if (parcela.statusPagamento === 'PAGO') {
-                    pagos.push(parcela);
-                } else if (parcela.statusPagamento === 'PENDENTE') {
-                    pendentes.push(parcela);
-                } else if (parcela.statusPagamento === 'ATRASADO') {
-                    atrasados.push(parcela);
-                } else if (parcela.statusPagamento === 'AGUARDANDO') {
-                    aguardando.push(parcela);
-                }
-            }
-            setParcelasPagos(pagos);
-            setParcelasPendentes(pendentes);
-            setParcelasAtrasados(atrasados);
-            setParcelasAguardando(aguardando);
-            setLoading(false);
-        }).catch((err) => {
-            setLoading(false);
-            console.log(err.message);
-        });
-    } else {
-        await axios.get(process.env.REACT_APP_BACKEND_URL + '/api/aluguel-cliente', {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then((response) => {
-            let parcelas = [];
-
-            if (response.data[0]) {
-                parcelas = response.data[0];
-            }
-
-            let pagos = [];
-            let pendentes = [];
-            let atrasados = [];
-
-            for (let index = 0; index < parcelas.length; index++) {
-                const parcela = parcelas[index];
-                if (parcela.statusPagamento === 'PAGO') {
-                    pagos.push(parcela);
-                } else if (parcela.statusPagamento === 'PENDENTE') {
-                    pendentes.push(parcela);
-                } else if (parcela.statusPagamento === 'ATRASADO') {
-                    atrasados.push(parcela);
-                }
-            }
-            setParcelas(parcelas);
-            setParcelasPagos(pagos);
-            setParcelasPendentes(pendentes);
-            setParcelasAtrasados(atrasados);
-            setLoading(false);
-        }).catch((err) => {
-            setLoading(false);
-            console.log(err.message);
-        });
-    }
-}
-
-export const getParcelaById = async (user, prestacaoId, setParcela, setParcelasInfo, setLoading) => {
-    await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/${prestacaoId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then(async (response) => {
-        setParcela(response.data);
-        await axios.get(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/infos/${prestacaoId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.accessToken}`,
-            }
-        }).then((response) => {
-            setParcelasInfo(response.data);
-            setLoading(false);
-        }).catch((err) => {
-            setLoading(false);
-            console.log(err.message);
-        });
-    }).catch((err) => {
-        setLoading(false);
-        console.error(err);
-    });
-}
-
-export const gerarCodigoPix = async (user, prestacaoId, setImgb64, setLoading2, setCopiCola) => {
-    let data = { prestacaoId: prestacaoId };
-    await axios.post(process.env.REACT_APP_BACKEND_URL + '/api/aluguel/generateQrCode', data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        const { data } = response;
-        const { status } = data;
-
-        if (status && status === 'CANCELADO') {
-            setImgb64(cancel);
-        } else if (status && status === 'PAGO') {
-            setImgb64(pago);
-        } else if (status && status === 'AGUARDANDO') {
-            setImgb64(waiting);
-        } else {
-            setImgb64(response.data.base64);
-            setCopiCola(response.data.payload);
-        }
-        setLoading2(false);
-    }).catch(err => {
-        console.error(err);
-        setLoading2(false);
-    });
-}
-
-export const registrarLeitura = async (user, data, setLoading, setSubmitting, setFieldError, closeModalLeitura) => {
-    const { prestacaoId } = data;
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/${prestacaoId}`, data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setSubmitting(false);
-        closeModalLeitura();
-        setLoading(true);
-    }).catch(err => {
-        console.error(err);
-        setFieldError('novaLeitura', err.message)
-        setSubmitting(false);
-    });
-}
-
-export const registrarPagamento = async (user, data, setLoading, setSubmitting, setFieldError, closeModalPagamento, setLoading2) => {
-    const { prestacaoId } = data;
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/pagamento/${prestacaoId}`, data, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        const { data } = response;
-        console.log(data);
-        setSubmitting(false);
-        closeModalPagamento();
-        setLoading(true);
-        setLoading2(true);
-    }).catch((err) => {
-        console.log(err);
-        setFieldError(err.message);
-        setSubmitting(false);
-    });
-}
-
-export const aprovarPagamento = async (user, prestacaoId, setLoading) => {
-    let data = { prestacaoId: prestacaoId };
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/aprovar/${prestacaoId}`, data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setLoading(true);
-    }).catch(err => {
-        console.error(err);
-    });
-}
-
-export const reprovarPagamento = async (user, prestacaoId, setLoading) => {
-    let data = { prestacaoId: prestacaoId };
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/reprovar/${prestacaoId}`, data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setLoading(true);
-    }).catch(err => {
-        console.error(err);
-    });
-}
-
-export const marcarPago = async (user, prestacaoID, setLoading) => {
-    let data = { prestacaoId: prestacaoID };
-
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/marcarPago/${prestacaoID}`, data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setLoading(true);
-    }).catch(err => {
-        console.error(err);
-    })
-}
-
-export const marcarPendente = async (user, prestacaoID, setLoading) => {
-    let data = { prestacaoId: prestacaoID };
-
-    await axios.put(process.env.REACT_APP_BACKEND_URL + `/api/aluguel/marcarPendente/${prestacaoID}`, data, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.accessToken}`,
-        }
-    }).then((response) => {
-        console.log(response.data);
-        setLoading(true);
-    }).catch(err => {
-        console.error(err);
-    })
-}
-
-export const getComprovante = async (user, parcelaId, setComprovanteLink, setLoading3) => {
+// Interceptor
+api.interceptors.request.use(async (config) => {
     try {
-        const response = await axios.get(
-            `${process.env.REACT_APP_BACKEND_URL}/api/linkAluguel/${parcelaId}`,
-            {
-                responseType: "blob",
-                headers: {
-                    Authorization: `Bearer ${user.accessToken}`,
-                },
-            }
-        );
-
-        const blobUrl = URL.createObjectURL(response.data);
-        setComprovanteLink(blobUrl);
-        setLoading3(false);
+        const session = await sessionService.loadSession();
+        if (session && session.token) {
+            config.headers.Authorization = `Bearer ${session.token}`;
+        }
     } catch (err) {
-        const message = err?.response?.data?.message || "Erro ao buscar documento.";
-        window.alert(message);
-        console.error(message);
+        console.error("Erro sessão", err);
+    }
+    return config;
+});
+
+// --- LISTAGEM ---
+export const getParcelas = async (isAdmin) => {
+    try {
+        const endpoint = isAdmin ? '/aluguel' : '/aluguel-cliente';
+        const response = await api.get(endpoint);
+
+        // Retorna os dados puros (array de parcelas).
+        // Se for cliente, a API antiga retornava array dentro de array? 
+        // Vou tratar para garantir que retorne sempre um array plano.
+        const data = response.data;
+        if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+            return data[0]; // Correção para estrutura aninhada antiga
+        }
+        return data;
+
+    } catch (err) {
+        console.error(err);
+        throw err; // Lança erro para o componente tratar
+    }
+};
+
+// --- DETALHES ---
+export const getParcelaById = async (prestacaoId) => {
+    try {
+        // Busca dados da parcela
+        const resParcela = await api.get(`/aluguel/${prestacaoId}`);
+        // Busca infos extras (contrato, etc)
+        const resInfos = await api.get(`/aluguel/infos/${prestacaoId}`);
+
+        return {
+            parcela: resParcela.data,
+            infos: resInfos.data
+        };
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+};
+
+// --- PIX ---
+export const gerarCodigoPix = async (prestacaoId) => {
+    try {
+        const response = await api.post('/aluguel/generateQrCode', { prestacaoId });
+        return response.data; // { status, base64, payload }
+    } catch (err) {
+        console.error(err);
         return null;
     }
-}
+};
+
+// --- AÇÕES ---
+export const registrarLeitura = async (data, closeModal) => {
+    try {
+        await api.put(`/aluguel/${data.prestacaoId}`, data);
+        alert("Leitura registrada com sucesso!");
+        if (closeModal) closeModal();
+    } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Erro ao registrar leitura");
+    }
+};
+
+export const registrarPagamento = async (data, closeModal) => {
+    try {
+        const formData = new FormData();
+        formData.append('comprovante', data.comprovante);
+
+        await api.put(`/aluguel/pagamento/${data.prestacaoId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        alert("Comprovante enviado com sucesso! Aguarde aprovação.");
+        if (closeModal) closeModal();
+    } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || "Erro ao enviar comprovante");
+    }
+};
+
+export const aprovarPagamento = async (prestacaoId) => {
+    try {
+        await api.put(`/aluguel/aprovar/${prestacaoId}`, { prestacaoId });
+        alert("Pagamento Aprovado!");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao aprovar.");
+    }
+};
+
+export const reprovarPagamento = async (prestacaoId) => {
+    try {
+        await api.put(`/aluguel/reprovar/${prestacaoId}`, { prestacaoId });
+        alert("Pagamento Reprovado.");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao reprovar.");
+    }
+};
+
+export const marcarPago = async (prestacaoId) => {
+    try {
+        await api.put(`/aluguel/marcarPago/${prestacaoId}`, { prestacaoId });
+        alert("Marcado como PAGO manualmente.");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao marcar como pago.");
+    }
+};
+
+export const marcarPendente = async (prestacaoId) => {
+    try {
+        await api.put(`/aluguel/marcarPendente/${prestacaoId}`, { prestacaoId });
+        alert("Retornado para PENDENTE.");
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao alterar status.");
+    }
+};
+
+// --- COMPROVANTE ---
+export const getComprovante = async (parcelaId) => {
+    try {
+        const response = await api.get(`/linkAluguel/${parcelaId}`, {
+            responseType: "blob"
+        });
+        return URL.createObjectURL(response.data);
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+};

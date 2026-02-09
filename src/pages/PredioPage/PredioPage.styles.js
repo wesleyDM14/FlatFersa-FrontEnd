@@ -374,3 +374,56 @@ export const LimitadorAlt = styled.div`
     max-width: 100%;
 }
 `;
+
+// ... seus estilos atuais ...
+
+// --- ESTILOS NOVOS PARA DETALHES ---
+
+export const DetailsContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+`;
+
+export const DetailCard = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background-color: #f8fafc; /* Cinza bem claro */
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+`;
+
+export const DetailLabel = styled.span`
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+`;
+
+export const DetailValue = styled.span`
+    font-size: 1.1rem;
+    color: #1e293b;
+    font-weight: 500;
+`;
+
+export const Divider = styled.hr`
+    border: 0;
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 20px 0;
+`;
+
+export const SectionTitle = styled.h3`
+    font-size: 1.2rem;
+    color: #334155;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`;

@@ -1,10 +1,16 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
+import { ThreeDots } from "react-loader-spinner";
+import { FaCheck, FaCoins, FaHourglassHalf, FaSearch, FaTimes, FaMoneyBillWave } from "react-icons/fa";
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
 import SearchBar from "../../components/SearchBar";
+import ParcelaList from "./ParcelaList";
+
+import { logoutUser } from '../../services/userService';
+import { getParcelas } from "../../services/financeiroService";
 
 import {
     MainFinanceiroContainer,
@@ -20,374 +26,205 @@ import {
     Card,
     CardTitle,
     CardIconContainer,
-    CardsContainerAdmin,
     ContentFinanceiroHeader,
     SearcherContainer,
 } from './FinanceiroPage.styles';
 
-import { logoutUser } from '../../services/userService';
-import { ThreeDots } from "react-loader-spinner";
-import { FaMoneyBill1Wave } from "react-icons/fa6";
-import { getParcelas } from "../../services/financeiroService";
-import ParcelaList from "./ParcelaList";
-import { FaCheck, FaCoins, FaHourglassHalf, FaSearch, FaTimes } from "react-icons/fa";
-
-const FianceiroPage = ({ user }) => {
+const FinanceiroPage = ({ user }) => {
     const navigate = useNavigate();
+    const listRef = useRef(null);
+
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [parcelas, setParcelas] = useState([]);
-
-    const [pendentes, setPendentes] = useState(false);
-    const [pagos, setPagos] = useState(false);
-    const [atrasados, setAtrasados] = useState(false);
-    const [aguardando, setAguardando] = useState(false);
-    const [total, setTotal] = useState(false);
-
-    const [parcelasPendentes, setParcelasPendentes] = useState([]);
-    const [parcelasPagos, setParcelasPagos] = useState([]);
-    const [parcelasAtrasados, setParcelasAtrasados] = useState([]);
-    const [parcelasAguardando, setParcelasAguardando] = useState([]);
-
     const [loading, setLoading] = useState(true);
+
+    // Dados brutos
+    const [allParcelas, setAllParcelas] = useState([]);
+
+    // Filtro ativo: 'TOTAL', 'PAGO', 'PENDENTE', 'ATRASADO', 'AGUARDANDO'
+    const [filterType, setFilterType] = useState('TOTAL');
 
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
-    const openSidebar = () => {
-        setSidebarOpen(true);
-    }
+    const handleLogout = () => logoutUser(navigate);
 
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    }
+    // Carrega dados
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const isAdmin = user.role === 'ADMIN' || user.isAdmin === true;
+            const data = await getParcelas(isAdmin);
+            setAllParcelas(data || []);
+        } catch (error) {
+            console.error("Erro ao carregar parcelas", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (loading && user.accessToken) {
-            getParcelas(user, setParcelas, setLoading, setParcelasAtrasados, setParcelasPagos, setParcelasPendentes, setParcelasAguardando);
+        if (user && user.id) {
+            fetchData();
         }
-    }, [user, loading]);
+    }, [user]);
+
+    // Calcular contadores (Memoizado para performance)
+    const counts = React.useMemo(() => {
+        return {
+            total: allParcelas.length,
+            pagos: allParcelas.filter(p => p.statusPagamento === 'PAGO').length,
+            pendentes: allParcelas.filter(p => p.statusPagamento === 'PENDENTE').length,
+            atrasados: allParcelas.filter(p => p.statusPagamento === 'ATRASADO').length,
+            aguardando: allParcelas.filter(p => p.statusPagamento === 'AGUARDANDO').length,
+        };
+    }, [allParcelas]);
+
+    // Filtrar lista baseada no card + busca
+    const filteredList = React.useMemo(() => {
+        let list = allParcelas;
+
+        // 1. Filtro do Card
+        if (filterType !== 'TOTAL') {
+            list = list.filter(p => p.statusPagamento === filterType);
+        }
+
+        // 2. Filtro de Busca
+        if (search) {
+            const term = search.toLowerCase();
+            list = list.filter(p =>
+                p.Contract?.cliente?.name?.toLowerCase().includes(term) || // Nome Cliente
+                p.dataVencimento?.toLowerCase().includes(term) ||          // Data
+                p.statusPagamento?.toLowerCase().includes(term)            // Status
+            );
+        }
+
+        return list;
+    }, [allParcelas, filterType, search]);
+
+    // Handle clique no card (com scroll)
+    const handleCardClick = (type) => {
+        setFilterType(type);
+        setPage(1);
+        setTimeout(() => {
+            if (listRef.current) {
+                listRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    };
+
+    if (!user) return <LoadingContainer><ThreeDots color="#4e4e4e" /></LoadingContainer>;
+
+    const isAdmin = user.role === 'ADMIN' || user.isAdmin === true;
 
     return (
         <div className="container">
-            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} navigate={navigate} logoutUser={logoutUser} financeiroActive={true} />
-            {
-                loading ? (
-                    <LoadingContainer>
-                        <ThreeDots
-                            color={'#4e4e4e'}
-                            height={49}
-                            width={100}
-                        />
-                    </LoadingContainer>
-                ) : (
-                    <MainFinanceiroContainer>
-                        {
-                            user.isAdmin ? (
-                                <div>
-                                    <HeaderFinanceiroContainer>
-                                        <HeaderTitle>Parcelas de Aluguel</HeaderTitle>
-                                        <CardsContainerAdmin>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(!pagos);
-                                                    setPendentes(false);
-                                                    setTotal(false);
-                                                    setAguardando(false);
-                                                }}
+            <Sidebar sidebarOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} logoutUser={handleLogout} />
 
-                                                className={pagos && 'active'}
-                                            >
-                                                <CardTitle>Pagos</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaCheck />
-                                                    <FinanceiroCounter>Alugueis Pagos ({parcelasPagos.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(false);
-                                                    setPendentes(!pendentes);
-                                                    setTotal(false);
-                                                    setAguardando(false);
-                                                }}
+            {loading ? (
+                <LoadingContainer><ThreeDots color={'#4e4e4e'} height={49} width={100} /></LoadingContainer>
+            ) : (
+                <MainFinanceiroContainer>
+                    <HeaderFinanceiroContainer>
+                        <HeaderTitle>Financeiro / Alugueis</HeaderTitle>
 
-                                                className={pendentes && 'active'}
-                                            >
-                                                <CardTitle>Pendentes</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaHourglassHalf />
-                                                    <FinanceiroCounter>Alugueis Pendente ({parcelasPendentes.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(!atrasados);
-                                                    setPagos(false);
-                                                    setPendentes(false);
-                                                    setTotal(false);
-                                                    setAguardando(false);
-                                                }}
+                        {/* Cards de Filtro */}
+                        <CardsContainer>
+                            <Card
+                                onClick={() => handleCardClick('PAGO')}
+                                className={filterType === 'PAGO' ? 'active' : ''}
+                            >
+                                <CardTitle>Pagos</CardTitle>
+                                <CardIconContainer>
+                                    <FaCheck />
+                                    <FinanceiroCounter>{counts.pagos}</FinanceiroCounter>
+                                </CardIconContainer>
+                            </Card>
 
-                                                className={atrasados && 'active'}
-                                            >
-                                                <CardTitle>Atrasados</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaTimes />
-                                                    <FinanceiroCounter>Alugueis Atrasados ({parcelasAtrasados.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(false);
-                                                    setPendentes(false);
-                                                    setTotal(false);
-                                                    setAguardando(!aguardando);
-                                                }}
+                            <Card
+                                onClick={() => handleCardClick('PENDENTE')}
+                                className={filterType === 'PENDENTE' ? 'active' : ''}
+                            >
+                                <CardTitle>Pendentes</CardTitle>
+                                <CardIconContainer>
+                                    <FaHourglassHalf />
+                                    <FinanceiroCounter>{counts.pendentes}</FinanceiroCounter>
+                                </CardIconContainer>
+                            </Card>
 
-                                                className={aguardando && 'active'}
-                                            >
-                                                <CardTitle>Aguardando</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaSearch />
-                                                    <FinanceiroCounter>Alugueis Aguardando ({parcelasAguardando.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(false);
-                                                    setPendentes(false);
-                                                    setTotal(!total);
-                                                    setAguardando(false);
-                                                }}
+                            <Card
+                                onClick={() => handleCardClick('ATRASADO')}
+                                className={filterType === 'ATRASADO' ? 'active' : ''}
+                            >
+                                <CardTitle>Atrasados</CardTitle>
+                                <CardIconContainer>
+                                    <FaTimes />
+                                    <FinanceiroCounter>{counts.atrasados}</FinanceiroCounter>
+                                </CardIconContainer>
+                            </Card>
 
-                                                className={total && 'active'}
-                                            >
-                                                <CardTitle>Total</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaCoins />
-                                                    <FinanceiroCounter>Alugueis Total ({parcelas.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                        </CardsContainerAdmin>
-                                    </HeaderFinanceiroContainer>
-                                    <ContentFinanceiroContainer>
-                                        <ContentFinanceiroHeader>
-                                            <SearcherContainer>
-                                                <SearchBar search={search} setSearch={setSearch} />
-                                            </SearcherContainer>
-                                        </ContentFinanceiroHeader>
-                                        {
-                                            parcelas.length === 0 ? (
-                                                <NoContentContainer>
-                                                    <FaMoneyBill1Wave color='#6c757d' fontSize={150} className='icon-responsive' />
-                                                    <NoContentAvisoContainer>
-                                                        <TextContent>Nenhuma parcela encontrada.</TextContent>
-                                                    </NoContentAvisoContainer>
-                                                </NoContentContainer>
-                                            ) : (
-                                                pagos ? (
-                                                    <ParcelaList
-                                                        parcelas={parcelasPagos}
-                                                        user={user}
-                                                        navigate={navigate}
-                                                        setLoading={setLoading}
-                                                        search={search}
-                                                        page={page}
-                                                        setPage={setPage}
-                                                        itemsPerPage={itemsPerPage}
-                                                    />
-                                                ) :
-                                                    atrasados ? (
-                                                        <ParcelaList
-                                                            parcelas={parcelasAtrasados}
-                                                            user={user}
-                                                            navigate={navigate}
-                                                            setLoading={setLoading}
-                                                            search={search}
-                                                            page={page}
-                                                            setPage={setPage}
-                                                            itemsPerPage={itemsPerPage}
-                                                        />
-                                                    ) :
-                                                        pendentes ? (
-                                                            <ParcelaList
-                                                                parcelas={parcelasPendentes}
-                                                                user={user}
-                                                                navigate={navigate}
-                                                                setLoading={setLoading}
-                                                                search={search}
-                                                                page={page}
-                                                                setPage={setPage}
-                                                                itemsPerPage={itemsPerPage}
-                                                            />
-                                                        ) :
-                                                            total ? (
-                                                                <ParcelaList
-                                                                    parcelas={parcelas}
-                                                                    user={user}
-                                                                    navigate={navigate}
-                                                                    setLoading={setLoading}
-                                                                    search={search}
-                                                                    page={page}
-                                                                    setPage={setPage}
-                                                                    itemsPerPage={itemsPerPage}
-                                                                />
-                                                            ) :
-                                                                aguardando ? (
-                                                                    <ParcelaList
-                                                                        parcelas={parcelasAguardando}
-                                                                        user={user}
-                                                                        navigate={navigate}
-                                                                        setLoading={setLoading}
-                                                                        search={search}
-                                                                        page={page}
-                                                                        setPage={setPage}
-                                                                        itemsPerPage={itemsPerPage}
-                                                                    />
-                                                                ) : (
-                                                                    <></>
-                                                                )
-                                            )
-                                        }
-                                    </ContentFinanceiroContainer>
-                                </div>
-                            ) : (
-                                <>
-                                    <HeaderFinanceiroContainer>
-                                        <HeaderTitle>Parcelas de Aluguel</HeaderTitle>
-                                        <CardsContainer>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(!pagos);
-                                                    setPendentes(false);
-                                                    setTotal(false);
-                                                }}
+                            {isAdmin && (
+                                <Card
+                                    onClick={() => handleCardClick('AGUARDANDO')}
+                                    className={filterType === 'AGUARDANDO' ? 'active' : ''}
+                                >
+                                    <CardTitle>Aguardando</CardTitle>
+                                    <CardIconContainer>
+                                        <FaSearch />
+                                        <FinanceiroCounter>{counts.aguardando}</FinanceiroCounter>
+                                    </CardIconContainer>
+                                </Card>
+                            )}
 
-                                                className={pagos && 'active'}
-                                            >
-                                                <CardTitle>Pagos</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaCheck />
-                                                    <FinanceiroCounter>Alugueis Pagos ({parcelasPagos.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(false);
-                                                    setPendentes(!pendentes);
-                                                    setTotal(false);
-                                                }}
+                            <Card
+                                onClick={() => handleCardClick('TOTAL')}
+                                className={filterType === 'TOTAL' ? 'active' : ''}
+                            >
+                                <CardTitle>Total</CardTitle>
+                                <CardIconContainer>
+                                    <FaCoins />
+                                    <FinanceiroCounter>{counts.total}</FinanceiroCounter>
+                                </CardIconContainer>
+                            </Card>
+                        </CardsContainer>
+                    </HeaderFinanceiroContainer>
 
-                                                className={pendentes && 'active'}
-                                            >
-                                                <CardTitle>Pendentes</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaHourglassHalf />
-                                                    <FinanceiroCounter>Alugueis Pendente ({parcelasPendentes.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(!atrasados);
-                                                    setPagos(false);
-                                                    setPendentes(false);
-                                                    setTotal(false);
-                                                }}
+                    {/* Âncora de Scroll */}
+                    <div ref={listRef}></div>
 
-                                                className={atrasados && 'active'}
-                                            >
-                                                <CardTitle>Atrasados</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaTimes />
-                                                    <FinanceiroCounter>Alugueis Atrasados ({parcelasAtrasados.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                            <Card
-                                                onClick={() => {
-                                                    setAtrasados(false);
-                                                    setPagos(false);
-                                                    setPendentes(false);
-                                                    setTotal(!total);
-                                                }}
+                    <ContentFinanceiroContainer>
+                        <ContentFinanceiroHeader>
+                            <FinanceiroCounter>
+                                {filterType === 'TOTAL' ? 'Todas as Faturas' : `Faturas ${filterType}`}
+                            </FinanceiroCounter>
+                            <SearcherContainer>
+                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar por cliente ou vencimento..." />
+                            </SearcherContainer>
+                        </ContentFinanceiroHeader>
 
-                                                className={total && 'active'}
-                                            >
-                                                <CardTitle>Total</CardTitle>
-                                                <CardIconContainer>
-                                                    <FaCoins />
-                                                    <FinanceiroCounter>Alugueis Total ({parcelas.length})</FinanceiroCounter>
-                                                </CardIconContainer>
-                                            </Card>
-                                        </CardsContainer>
-                                    </HeaderFinanceiroContainer>
-                                    <ContentFinanceiroContainer>
-                                        {
-                                            pagos ? (
-                                                <ParcelaList
-                                                    parcelas={parcelasPagos}
-                                                    user={user}
-                                                    navigate={navigate}
-                                                    setLoading={setLoading}
-                                                    search={search}
-                                                    page={page}
-                                                    setPage={setPage}
-                                                    itemsPerPage={itemsPerPage}
-                                                />
-                                            ) :
-                                                atrasados ? (
-                                                    <ParcelaList
-                                                        parcelas={parcelasAtrasados}
-                                                        user={user}
-                                                        navigate={navigate}
-                                                        setLoading={setLoading}
-                                                        search={search}
-                                                        page={page}
-                                                        setPage={setPage}
-                                                        itemsPerPage={itemsPerPage}
-                                                    />
-                                                ) :
-                                                    pendentes ? (
-                                                        <ParcelaList
-                                                            parcelas={parcelasPendentes}
-                                                            user={user}
-                                                            navigate={navigate}
-                                                            setLoading={setLoading}
-                                                            search={search}
-                                                            page={page}
-                                                            setPage={setPage}
-                                                            itemsPerPage={itemsPerPage}
-                                                        />
-                                                    ) :
-                                                        total ? (
-                                                            <ParcelaList
-                                                                parcelas={parcelas}
-                                                                user={user}
-                                                                navigate={navigate}
-                                                                setLoading={setLoading}
-                                                                search={search}
-                                                                page={page}
-                                                                setPage={setPage}
-                                                                itemsPerPage={itemsPerPage}
-                                                            />
-                                                        ) :
-                                                            <></>
-                                        }
-                                    </ContentFinanceiroContainer>
-                                </>
-                            )
-                        }
-                    </MainFinanceiroContainer>
-                )
-            }
-            <Navbar openSidebar={openSidebar} logout={logoutUser} navigate={navigate} />
-        </div >
+                        {filteredList.length === 0 ? (
+                            <NoContentContainer>
+                                <FaMoneyBillWave color='#6c757d' fontSize={80} style={{ marginBottom: 20 }} />
+                                <NoContentAvisoContainer>
+                                    <TextContent>Nenhuma fatura encontrada.</TextContent>
+                                </NoContentAvisoContainer>
+                            </NoContentContainer>
+                        ) : (
+                            <ParcelaList
+                                parcelas={filteredList}
+                                isAdmin={isAdmin}
+                                navigate={navigate}
+                                page={page}
+                                setPage={setPage}
+                                itemsPerPage={itemsPerPage}
+                            />
+                        )}
+                    </ContentFinanceiroContainer>
+                </MainFinanceiroContainer>
+            )}
+
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 
@@ -395,4 +232,4 @@ const mapStateToProps = ({ session }) => ({
     user: session.user
 });
 
-export default connect(mapStateToProps)(FianceiroPage);
+export default connect(mapStateToProps)(FinanceiroPage);

@@ -1,36 +1,32 @@
 import styled from "styled-components";
 
-export const LoadingContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-area: main;
-
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
-    }
-`;
-
-export const MainFinanceiroContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
+// Layout Principal
+export const MainFinanceiroContainer = styled.main`
+    padding: 20px 30px;
     margin-top: 15px;
     margin-bottom: 28px;
     grid-area: main;
 
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
+    @media (max-width: 768px){
+        padding: 15px;
     }
+`;
+
+export const LoadingContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    width: 100%;
 `;
 
 export const HeaderFinanceiroContainer = styled.div`
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    padding: 20px 35px;
+    align-items: center;
+    padding: 20px 0;
+    flex-wrap: wrap;
+    gap: 15px;
 `;
 
 export const HeaderTitle = styled.h2`
@@ -39,415 +35,321 @@ export const HeaderTitle = styled.h2`
     font-weight: 700;
 `;
 
-export const ContentFinanceiroContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin-top: 15px;
-`;
-
-export const ContentFinanceiroHeader = styled.div`
-    padding: 20px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    color: ${props => props.theme.colors.titleColor};
-    font-weight: 700;
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-    display: flex;
-    flex-direction: column;
-`;
-
-export const FinanceiroCounter = styled.h3`
-    font-size: 16px;
-    color: ${props => props.theme.colors.titleColor};
-`;
-
-export const SearcherContainer = styled.div``;
-
-export const NoContentContainer = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    padding: 50px 35px;
-    background-color: ${props => props.theme.colors.primary};
-    border-radius: 5px;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-
-    @media only screen and (max-width: 978px){
-        padding: 30px 10px;
-    }
-`;
-
-export const NoContentAvisoContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-`;
-
-export const TextContent = styled.p`
-    color: ${props => props.theme.colors.secondary};
-    font-size: 1.3rem;
-
-    @media only screen and (max-width: 978px){
-        font-size: 0.9rem;
-    }
-`;
-
-export const PredioListContainer = styled.div`
-    display: flex;
-    margin-top: 10px;
-    flex-direction: column;
-    padding-right: 30px;
-    margin-bottom: 28px;
-`;
-
-export const PredioListHeader = styled.div`
-    display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
-    height: 40px;
-    width: 100%;
-    align-items: center;
-    padding: 15px;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
-    background-color: ${props => props.theme.colors.primary};
-    box-shadow: 5px 5px 13px #EDEDED, -5px -5px 13px #FFF;
-`;
-
-export const ListLabel = styled.h5`
-    font-size: 14px;
-    color: #2e4a66;
-    margin-right: 10px;
-`;
-
-export const SinglePredio = styled.div`
-    display: grid;
-    grid-template-columns: 5fr 2fr 2fr 1fr;
-    height: 50px;
-    width: 100%;
-    align-items: center;
-    padding: 15px;
-    background-color: #fff;
-    cursor: pointer;
-`;
-
-export const PredioSingleContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-`;
-
-export const StyledLabel = styled.h1`
-    font-size: 18px;
-    color: ${props => props.theme.colors.lightblue};
-    margin-right: 10px;
-
-    @media (max-width: 978px) {
-        display: none;
-    }
-`;
-
-export const PredioValue = styled.a`
-    font-size: 14px;
-    font-weight: 700;
-    margin-right: 30px;
-    text-decoration: none;
-    color: ${props => props.theme.colors.dark1};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    @media (max-width: 1380px) {
-        font-weight: 300;
-    }
-`;
-
-export const AdminPredioContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-export const EditIcon = styled.div`
-    font-size: 18px;
-    margin-left: 10px;
-    color: ${props => props.theme.colors.lightblue};
-`;
-
-export const DeleteIcon = styled.div`
-    font-size: 18px;
-    margin-left: 10px;
-    color: ${props => props.theme.colors.red};
-`;
-
+// Cards
 export const CardsContainer = styled.div`
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-    margin-top: 15px;
-
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-`;
-
-export const CardsContainerAdmin = styled.div`
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    margin-top: 15px;
-
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
+    margin-bottom: 30px;
+    width: 100%;
 `;
 
 export const Card = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 150px;
     padding: 25px;
-    border-radius: 5px;
+    border-radius: 12px;
     background-color: #fff;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: 0.5s ease;
+    transition: all 0.2s ease;
 
-    &:hover{
-        -webkit-transform: scale(1.1);
-        -ms-transform: scale(1.1);
-        transform: scale(1.1);
-        transition: 0.5s ease;
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    @media only screen and (max-width: 978px){
-        width: 80%;
+    &.active {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
     }
 `;
 
-export const CardTitle = styled.h1`
-    font-size: 25px;
-    font-weight: bold;
-    color: ${props => props.theme.colors.titleColor};
+export const CardTitle = styled.h3`
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 15px;
 `;
 
 export const CardIconContainer = styled.div`
-    font-size: 35px;
-    color: ${props => props.theme.colors.dark1};
-    text-align: center;
-    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 2rem;
+    color: #3b82f6;
 `;
 
-export const CardContent = styled.p``;
+export const FinanceiroCounter = styled.span`
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+`;
 
-export const PrestacaoDetailMainContainer = styled.div`
+// Conteúdo e Tabela
+export const ContentFinanceiroContainer = styled.div`
     display: flex;
     flex-direction: column;
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-top: 15px;
-    display: flex;
-    grid-area: main;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    min-height: 400px;
+`;
 
-    @media only screen and (max-width: 978px){
-        padding: 0 10px;
+export const ContentFinanceiroHeader = styled.div`
+    margin-bottom: 20px;
+`;
+
+export const SearcherContainer = styled.div`
+    width: 100%;
+`;
+
+export const PredioListContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const PredioListHeader = styled.div`
+    display: grid;
+    /* Ajuste de colunas: Cliente(se admin) | Vencimento | Valor | Status */
+    grid-template-columns: ${props => props.$isAdmin ? '2fr 1.5fr 1fr 1fr' : '1.5fr 1fr 1fr'};
+    padding: 15px;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 8px 8px 0 0;
+    
+    @media (max-width: 768px){
+        display: none;
     }
 `;
 
-export const PrestacaoDetailHeaderContainer = styled.div`
+export const ListLabel = styled.h5`
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+`;
+
+export const SinglePredio = styled.div`
+    display: grid;
+    grid-template-columns: ${props => props.$isAdmin ? '2fr 1.5fr 1fr 1fr' : '1.5fr 1fr 1fr'};
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover { background-color: #f8fafc; }
+
+    @media (max-width: 768px){
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+`;
+
+export const PredioSingleContainer = styled.div`
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    @media (max-width: 768px){
+        width: 100%;
+        justify-content: space-between;
+    }
+`;
+
+export const StyledLabel = styled.span`
+    display: none;
+    @media (max-width: 768px){
+        display: inline-block;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+`;
+
+export const PredioValue = styled.span`
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+`;
+
+// Detalhes da Parcela (ParcelaInfo)
+export const PrestacaoDetailMainContainer = styled.div`
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+`;
+
+export const PrestacaoDetailHeaderContainer = styled.div`
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 `;
 
 export const PrestacaoDetailHeaderTitle = styled.h2`
-    font-size: 25px;
-    font-weight: bold;
-    color: ${props => props.theme.colors.titleColor};
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0;
 `;
 
 export const PrestcaoDetailContentContainer = styled.div`
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 35px;
-    padding: 25px;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 5px 5px 13px #ededed, -5px -5px 13px #fff;
-    transition: 0.5s ease;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
 
-    @media only screen and (max-width: 978px){
-        display: flex;
-        flex-direction: column;
+    @media (max-width: 900px){
+        grid-template-columns: 1fr;
     }
 `;
 
 export const PrestacaoDetailLeftColumn = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-right: 15px;
-    flex: 1;
-`;
-
-export const PrestacaoDetailValueContainer = styled.div`
-    display: flex;
-`;
-
-export const PrestacaoDetailLabel = styled.span`
-    font-weight: bold;
-    margin-right: 5px;
-`;
-
-export const PrestacaoDetailValue = styled.p`
-    color: ${props => props.theme.colors.dark1};
+    gap: 20px;
 `;
 
 export const PrestacaoDetailRightColumn = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    flex: 1;
+    gap: 20px;
+`;
 
-    @media only screen and (max-width: 978px){
-        margin-top: 15px;
-    }
+export const PrestacaoDetailValueContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 10px 0;
+`;
+
+export const PrestacaoDetailLabel = styled.span`
+    font-weight: 600;
+    color: #64748b;
+`;
+
+export const PrestacaoDetailValue = styled.span`
+    font-weight: 700;
+    color: #0f172a;
 `;
 
 export const PrestacaoDetailPagamentoContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
 `;
 
 export const QrCodePagamento = styled.img`
-    width: 250px;
-    margin-top: 15px;
+    max-width: 200px;
+    margin: 15px 0;
 `;
 
 export const QrCodeCopiaEColaContainer = styled.div`
-    width: 80%; /* ou qualquer valor que você preferir */
-    max-width: 600px; /* limite máximo de largura */
-    height: 100px;
-    margin: auto; /* centraliza horizontalmente */
-    border: 1px solid #ccc; /* apenas para visualização */
-    overflow: hidden; /* esconde o conteúdo que excede a área */
-    position: relative; /* necessário para o posicionamento absoluto */
+    background: #e2e8f0;
+    padding: 10px;
+    border-radius: 4px;
+    word-break: break-all;
+    font-size: 0.8rem;
+    font-family: monospace;
+    max-height: 100px;
+    overflow-y: auto;
 `;
 
-export const QrCodeCopiaECola = styled.p`
-    position: absolute; /* permite o posicionamento dentro do contêiner */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-    max-width: 100%;
-    max-height: 100%;
-    word-wrap: break-word;
-`;
+export const QrCodeCopiaECola = styled.p``;
 
+// Botões Detalhes
 export const PrestacaoDetailButtonContainer = styled.div`
     display: flex;
-    flex-direction: row;
     justify-content: flex-end;
-    padding: 0px 35px;
-    margin-top: 15px;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
 
-    @media only screen and (max-width: 978px){
+    @media (max-width: 768px){
         justify-content: center;
-        padding: 30px 10px;
     }
 `;
 
 export const BackButton = styled.button`
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     cursor: pointer;
-    margin-right: 15px;
     font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: transparent;
-    color: ${props => props.theme.colors.secondary};
-
-    &:hover{
-        background-color: ${props => props.theme.colors.light2};
-    }
-
-    @media only screen and (max-width: 978px){
-        //min-width: 45%;
-    }
+    transition: background 0.2s;
+    &:hover { background: #f1f5f9; }
 `;
 
 export const SubmitButton = styled.button`
+    padding: 10px 20px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    border: 1px solid ${props => props.theme.colors.secondary};
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-    min-width: 80px;
-    transition: all .2s ease-out;
-    background-color: #000;;
-    color: ${props => props.theme.colors.primary};
-    margin-right: 15px;
-    &:hover{
-        background-color: #000A;
-    }
-
-    @media only screen and (max-width: 978px){
-        //min-width: 45%;
-    }
+    transition: background 0.2s;
+    &:hover { background: #059669; }
 `;
 
-export const WaitingContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+export const RejectButton = styled.button`
+    padding: 10px 20px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+    &:hover { background: #dc2626; }
 `;
 
-export const WaitingIcon = styled.div`
-    margin-top: 5px;
-    font-size: 150px;
-    color: ${props => props.theme.colors.dark2};
-`;
-
-export const WaitingTitle = styled.h2`
-    font-size: 20px;
-`;
-
+// Comprovante
 export const ComprovanteContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    text-align: center;
 `;
-
-export const ComprovanteTitle = styled.h2``;
-
+export const ComprovanteTitle = styled.h3`
+    margin-bottom: 10px;
+    color: #334155;
+`;
 export const ComprovanteImg = styled.img`
-    width: 150px;
+    max-width: 100%;
+    max-height: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
 `;
-
 export const ComprovanteIconContainer = styled.div`
-    font-size: 150px;
-    color: ${props => props.theme.colors.dark2};
+    font-size: 3rem;
+    color: #10b981;
+    margin-bottom: 10px;
 `;
+export const WaitingContainer = styled.div`
+    text-align: center;
+    padding: 30px;
+    color: #94a3b8;
+`;
+export const WaitingIcon = styled.div` font-size: 3rem; margin-top: 10px; `;
+export const WaitingTitle = styled.h3``;
 
-export const PdfPreview = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: red;
-`;
+export const PdfPreview = styled.div` font-size: 40px; color: red; text-align: center; `;
+
+// Estados Vazios
+export const NoContentContainer = styled.div` display: flex; flex-direction: column; align-items: center; padding: 50px; color: #94a3b8; `;
+export const NoContentAvisoContainer = styled.div` margin-top: 20px; `;
+export const TextContent = styled.p` font-size: 1.2rem; `;

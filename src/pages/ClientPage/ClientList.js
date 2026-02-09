@@ -1,531 +1,218 @@
-import { useState, useMemo, useEffect } from "react";
-import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { ThreeDots } from "react-loader-spinner";
+import { FaDatabase, FaPlus, FaUserCheck, FaUserEdit, FaUsers } from "react-icons/fa";
+
+// Componentes
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import SearchBar from "../../components/SearchBar";
+import ClientList from "./ClientList";
+
+// Serviços
+import { logoutUser } from "../../services/userService";
+import { getClientes } from "../../services/clientService";
+
+// Estilos
 import {
-    AdminPredioContainer,
-    BackButton,
-    ButtonGroup,
+    AddButtonText,
+    AddClientHeaderButton,
+    AdicionarClientButton,
+    Card,
+    CardIconContainer,
+    CardTitle,
     ClientCounter,
-    ContentIconContainer,
-    DeleteButtonContainer,
-    DeleteContainer,
-    DeleteIcon,
-    DeleteTitle,
-    DocumentImage,
-    EditIcon,
-    FormColum,
-    FormContent,
-    FormInputArea,
-    FormInputLabel,
-    FormInputLabelRequired,
-    Image,
-    ImgContainer,
-    Limitador,
-    LinkImgContainer,
-    ListLabel,
-    PredioListContainer,
-    PredioListHeader,
-    PredioSingleContainer,
-    PredioValue,
-    SinglePredio,
-    StyledFileArea,
-    StyledFileIconContainer,
-    StyledFileInput,
-    StyledFileInputTitle,
-    StyledFileLegend,
-    StyledFormArea,
-    StyledLabel,
-    SubItensContainer,
-    SubmitButton
+    ClienteCardsContainer,
+    ContentClientContainer,
+    ContentClientHeader,
+    HeaderClientContainer,
+    HeaderTitle,
+    LoadingContainer,
+    MainClientContainer,
+    NoContentAvisoContainer,
+    NoContentContainer,
+    SearcherContainer,
+    TextContent,
 } from "./ClientPage.styles";
 
-import Modal from "react-modal";
-import { Formik, Form } from "formik";
-import * as Yup from 'yup';
-import { modalStyles } from "../../styles/ModalStyles";
-import { ThreeDots } from "react-loader-spinner";
-import { FormInput, StyledDatePicker } from "../../components/FormLib";
-import { aproveClient, deleteClientById, getDocumentoFrente, getDocumentoVerso, reproveClient, updateClientById } from "../../services/clientService";
-import Pagination from "../../components/Pagination";
-import {
-    DataColumn,
-    DataContainer,
-    RejectButton,
-    SolicitacaoModalContainer,
-    SolicitacaoModalContent,
-    SolicitacaoModalContentLabel,
-    SolicitacaoModalContentValue,
-    SolicitacaoModalTitle,
-    SolicitacaoTitleContainer
-} from "../ContractPage/ContractPage.styles";
+const ClientPage = ({ user }) => {
+    const navigate = useNavigate();
+    const listRef = useRef(null); // Ref para o container da lista
 
-const ClientList = ({ clientes, user, refreshData, navigate, search, page, setPage, itemsPerPage, setLoading }) => {
-    Modal.setAppElement(document.getElementById('root'));
-    const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
-    const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
-    const [modalSolicitacaoIsOpen, setModalSolicitacaoIsOpen] = useState(false);
-    const [selectedClient, setSelectedClient] = useState({});
-    const [startDate, setStartDate] = useState(new Date());
-    const [selectedBackImage, setSelectedBackImage] = useState();
-    const [selectedFrontImage, setSelectedFrontImage] = useState();
-    const [deletting, setDeletting] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [clientes, setClientes] = useState([]);
 
-    const openEditModal = () => {
-        setModalEditIsOpen(true);
-    }
+    // Filtros de visualização (Cards)
+    const [filterType, setFilterType] = useState('TOTAL'); // 'TOTAL', 'ATIVOS', 'SOLICITACOES'
 
-    const closeEditModal = () => {
-        setModalEditIsOpen(false);
-        setSelectedFrontImage();
-        setSelectedBackImage();
-    }
+    const [clientesAtivos, setClientesAtivos] = useState([]);
+    const [clientesSolicitacao, setClientesSolicitacao] = useState([]);
 
-    const openDeleteModal = () => {
-        setModalDeleteIsOpen(true);
-    }
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10;
 
-    const closeDeleteModal = () => {
-        setModalDeleteIsOpen(false);
-    }
+    const handleLogout = () => {
+        logoutUser(navigate);
+    };
 
-    const openSolicitacaoModal = () => {
-        setModalSolicitacaoIsOpen(true);
-    }
-
-    const closeSolicitacaoModal = () => {
-        setModalSolicitacaoIsOpen(false);
-    }
-
-    const filteredClients = useMemo(() =>
-        clientes.filter(client =>
-            client.name.toLowerCase().includes(search.toLowerCase()) ||
-            client.phone.toLowerCase().includes(search.toLowerCase())
-        ), [clientes, search]);
-
-    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
-    const currentPageItems = filteredClients.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // V2: Não passa user, interceptor resolve token
+            await getClientes(setClientes, setClientesSolicitacao, setClientesAtivos);
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchDocumentos = async () => {
-            if (modalEditIsOpen && selectedClient?.id) {
-                const frente = await getDocumentoFrente(user, selectedClient.id);
-                const verso = await getDocumentoVerso(user, selectedClient.id);
+        if (user && user.role === 'ADMIN') {
+            fetchData();
+        }
+    }, [user]);
 
-                setSelectedFrontImage(frente || undefined);
-                setSelectedBackImage(verso || undefined);
-            }
-        };
+    // Função para alterar filtro e rolar até a lista (UX Mobile)
+    const handleCardClick = (type) => {
+        setFilterType(type);
+        setPage(1); // Reseta paginação
 
-        fetchDocumentos();
-    }, [modalEditIsOpen, selectedClient, user]);
+        // Scroll suave até a lista no mobile
+        if (listRef.current) {
+            listRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    // Determina qual lista mostrar baseada no filtro
+    const getCurrentList = () => {
+        switch (filterType) {
+            case 'ATIVOS': return clientesAtivos;
+            case 'SOLICITACOES': return clientesSolicitacao;
+            default: return clientes;
+        }
+    };
+
+    const currentList = getCurrentList();
+
+    if (!user || user.role !== 'ADMIN') return null;
 
     return (
-        <PredioListContainer>
-            <PredioListHeader>
-                <ListLabel>Nome</ListLabel>
-                <ListLabel className="hidden-responsive">Telefone</ListLabel>
-                <ListLabel>Status</ListLabel>
-                <ListLabel>Opções</ListLabel>
-            </PredioListHeader>
-            {
-                currentPageItems.map((cliente) => (
-                    <SinglePredio
-                        key={cliente.id}
-                        onClick={() => {
-                            if (cliente.statusClient === 'AGUARDANDO') {
-                                setSelectedClient(cliente);
-                                openSolicitacaoModal();
-                            } else {
-                                //navigate(`/clientes/${cliente.id}`);
-                            }
-                        }}
-                    >
-                        <PredioSingleContainer>
-                            <StyledLabel>Nome: </StyledLabel>
-                            <PredioValue>{cliente.name}</PredioValue>
-                        </PredioSingleContainer>
-                        <PredioSingleContainer className="hidden-responsive">
-                            <StyledLabel><FaWhatsapp /> </StyledLabel>
-                            <PredioValue
-                                href={`https://whatsa.me/55${cliente.phone}`}
-                                target='_blank'
-                                onClick={(event) => event.stopPropagation()}
-                            >
-                                {cliente.phone}
-                            </PredioValue>
-                        </PredioSingleContainer>
-                        <PredioSingleContainer>
-                            <StyledLabel> Status: </StyledLabel>
-                            <PredioValue>{cliente.statusClient}</PredioValue>
-                        </PredioSingleContainer>
-                        <AdminPredioContainer>
-                            <EditIcon onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedClient(cliente);
-                                setStartDate(new Date(cliente.dateBirth));
-                                openEditModal();
-                            }}>
-                                <FaEdit />
-                            </EditIcon>
-                            <DeleteIcon onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedClient(cliente);
-                                openDeleteModal();
-                            }}>
-                                <FaTrash />
-                            </DeleteIcon>
-                        </AdminPredioContainer>
-                    </SinglePredio >
-                ))
-            }
-            <Modal
-                isOpen={modalDeleteIsOpen}
-                onRequestClose={closeDeleteModal}
-                style={modalStyles}
-            >
-                <DeleteContainer>
-                    <DeleteTitle>Deseja excluir o Cliente {selectedClient.name}?</DeleteTitle>
-                    {
-                        deletting ? (
-                            <ThreeDots />
+        <div className="container">
+            <Sidebar
+                sidebarOpen={sidebarOpen}
+                closeSidebar={() => setSidebarOpen(false)}
+                logoutUser={handleLogout}
+            />
+
+            {loading ? (
+                <LoadingContainer>
+                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                </LoadingContainer>
+            ) : (
+                <MainClientContainer>
+                    <HeaderClientContainer>
+                        <HeaderTitle>Gestão de Clientes</HeaderTitle>
+                        <AddClientHeaderButton onClick={() => navigate('/clientes/novo')}>
+                            <FaPlus color='green' />
+                            <AddButtonText>Adicionar Novo</AddButtonText>
+                        </AddClientHeaderButton>
+                    </HeaderClientContainer>
+
+                    {/* CARDS COM SCROLL AUTOMÁTICO AO CLICAR */}
+                    <ClienteCardsContainer>
+                        <Card
+                            onClick={() => handleCardClick('ATIVOS')}
+                            className={filterType === 'ATIVOS' ? 'active' : ''}
+                        >
+                            <CardTitle>Clientes Ativos</CardTitle>
+                            <CardIconContainer>
+                                <FaUserCheck />
+                                <ClientCounter>{clientesAtivos.length}</ClientCounter>
+                            </CardIconContainer>
+                        </Card>
+
+                        <Card
+                            onClick={() => handleCardClick('SOLICITACOES')}
+                            className={filterType === 'SOLICITACOES' ? 'active' : ''}
+                        >
+                            <CardTitle>Solicitações Pendentes</CardTitle>
+                            <CardIconContainer>
+                                <FaUserEdit color={clientesSolicitacao.length > 0 ? '#f59e0b' : '#3b82f6'} />
+                                <ClientCounter>{clientesSolicitacao.length}</ClientCounter>
+                            </CardIconContainer>
+                        </Card>
+
+                        <Card
+                            onClick={() => handleCardClick('TOTAL')}
+                            className={filterType === 'TOTAL' ? 'active' : ''}
+                        >
+                            <CardTitle>Total Cadastrados</CardTitle>
+                            <CardIconContainer>
+                                <FaDatabase />
+                                <ClientCounter>{clientes.length}</ClientCounter>
+                            </CardIconContainer>
+                        </Card>
+                    </ClienteCardsContainer>
+
+                    {/* ÂNCORA PARA O SCROLL */}
+                    <div ref={listRef}></div>
+
+                    <ContentClientContainer>
+                        <ContentClientHeader>
+                            <div style={{ marginBottom: '15px' }}>
+                                <h3 style={{ fontSize: '1.1rem', color: '#334155' }}>
+                                    {filterType === 'ATIVOS' && 'Lista de Clientes Ativos'}
+                                    {filterType === 'SOLICITACOES' && 'Solicitações de Acesso'}
+                                    {filterType === 'TOTAL' && 'Todos os Clientes'}
+                                </h3>
+                            </div>
+                            <SearcherContainer>
+                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar por nome ou telefone..." />
+                            </SearcherContainer>
+                        </ContentClientHeader>
+
+                        {currentList.length === 0 ? (
+                            <NoContentContainer>
+                                <FaUsers color='#cbd5e1' fontSize={80} style={{ marginBottom: 20 }} />
+                                <NoContentAvisoContainer>
+                                    <TextContent>Nenhum cliente encontrado nesta categoria.</TextContent>
+                                    {filterType === 'TOTAL' && (
+                                        <AdicionarClientButton onClick={() => navigate('/clientes/novo')}>
+                                            <FaPlus color='#fff' style={{ marginRight: 5 }} /> Novo Cliente
+                                        </AdicionarClientButton>
+                                    )}
+                                </NoContentAvisoContainer>
+                            </NoContentContainer>
                         ) : (
-                            <DeleteButtonContainer>
-                                <BackButton onClick={() => {
-                                    setSelectedClient({});
-                                    closeDeleteModal();
-                                }}>
-                                    Cancelar
-                                </BackButton>
-                                <SubmitButton onClick={async () => {
-                                    setDeletting(true);
-                                    await deleteClientById(user, selectedClient.id, setDeletting);
-                                    refreshData();
-                                    closeDeleteModal();
-                                }}>
-                                    Excluir
-                                </SubmitButton>
-                            </DeleteButtonContainer>
-                        )
-                    }
-                </DeleteContainer>
-            </Modal>
-            <Modal
-                isOpen={modalEditIsOpen}
-                onRequestClose={closeEditModal}
-                style={modalStyles}
-            >
-                <StyledFormArea>
-                    <div style={{ display: 'flex', marginBottom: '30px' }}>
-                        <ContentIconContainer>
-                            <FaFileInvoice />
-                        </ContentIconContainer>
-                        <ClientCounter>Editar Cliente</ClientCounter>
-                    </div>
-                    <Formik
-                        initialValues={{
-                            id: selectedClient.id,
-                            name: selectedClient.name,
-                            cpf: selectedClient.cpf,
-                            rg: selectedClient.rg,
-                            phone: selectedClient.phone,
-                            address: selectedClient.address,
-                            dateBirth: selectedClient.dateBirth,
-                            documentoFrente: selectedClient.documentoFrente,
-                            documentoVerso: selectedClient.documentoVerso,
-                            newPassword: '',
-                            confirmPassword: '',
-                        }}
-                        validationSchema={
-                            Yup.object({
-                                name: Yup.string().required('Obrigatório'),
-                                phone: Yup.string().required('Obrigatório'),
-                                address: Yup.string().required('Endereço é Obrigatório'),
-                                dateBirth: Yup.date().required('Data de Nascimento é Obrigatório'),
-                                newPassword: Yup.string(),
-                                confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir'),
-                            })
-                        }
-                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            values.dateBirth = startDate;
-                            await updateClientById(user, values, setSubmitting, setFieldError, closeEditModal);
-                            refreshData();
-                            closeEditModal();
-                        }}
-                    >
-                        {
-                            ({ isSubmitting, setFieldValue }) => (
-                                <Form>
-                                    <FormContent>
-                                        <FormColum>
-                                            <FormInputArea>
-                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                <FormInput
-                                                    type='text'
-                                                    name='name'
-                                                    placeholder='Nome do cliente'
-                                                />
-                                            </FormInputArea>
-                                            <SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>CPF</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            name='cpf'
-                                                            type='text'
-                                                            placeholder='CPF do cliente'
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>RG</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            name='rg'
-                                                            type='text'
-                                                            placeholder='RG do cliente'
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                            </SubItensContainer>
-                                            <SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Nova Senha</FormInputLabel>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            name='newPassword'
-                                                            type='password'
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Confirmar Nova Senha</FormInputLabel>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            name='confirmPassword'
-                                                            type='password'
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                            </SubItensContainer>
-                                        </FormColum>
-                                        <FormColum>
-                                            <FormInputArea>
-                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                <FormInput
-                                                    type='text'
-                                                    name='address'
-                                                    placeholder='Endereço do cliente'
-                                                />
-                                            </FormInputArea>
-                                            <SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Telefone</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <FormInput
-                                                            name='phone'
-                                                            type='text'
-                                                            placeholder='Telefone'
-                                                        />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                            </SubItensContainer>
-                                            <FormInputArea>
-                                                <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
-                                                <StyledFileArea>
-                                                    {
-                                                        selectedFrontImage ? (
-                                                            <Image
-                                                                src={selectedFrontImage}
-                                                            />
-                                                        ) : (
-                                                            selectedClient.documentoFrente ? (
-                                                                <Image
-                                                                    src={selectedFrontImage}
-                                                                />
-                                                            ) :
-                                                                (
-                                                                    <div>
-                                                                        <StyledFileIconContainer>
-                                                                            <FaCloudUploadAlt />
-                                                                        </StyledFileIconContainer>
-                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                    </div>
-                                                                )
-                                                        )
-                                                    }
+                            <ClientList
+                                clientes={currentList}
+                                refreshData={fetchData}
+                                navigate={navigate}
+                                search={search}
+                                page={page}
+                                setPage={setPage}
+                                itemsPerPage={itemsPerPage}
+                            />
+                        )}
+                    </ContentClientContainer>
+                </MainClientContainer>
+            )}
 
-                                                    <StyledFileInput
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={(event) => {
-                                                            const file = event.target.files[0];
-                                                            setFieldValue('documentFront', file);
-                                                            setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
-                                                        }}
-                                                    />
-                                                </StyledFileArea>
-                                            </FormInputArea>
-                                            <FormInputArea>
-                                                <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
-                                                <StyledFileArea>
-                                                    {
-                                                        selectedBackImage ? (
-                                                            <Image
-                                                                src={selectedBackImage}
-                                                            />
-                                                        ) : (
-                                                            selectedClient.documentoVerso ? (
-                                                                <Image
-                                                                    src={selectedClient.documentoVerso}
-                                                                />
-                                                            ) :
-                                                                (
-                                                                    <div>
-                                                                        <StyledFileIconContainer>
-                                                                            <FaCloudUploadAlt />
-                                                                        </StyledFileIconContainer>
-                                                                        <StyledFileInputTitle>Clique para enivar o arquivo</StyledFileInputTitle>
-                                                                        <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
-                                                                    </div>
-                                                                )
-                                                        )
-                                                    }
-                                                    <StyledFileInput
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={(event) => {
-                                                            const file = event.target.files[0];
-                                                            setFieldValue('documentBack', file);
-                                                            setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
-                                                        }}
-                                                    />
-                                                </StyledFileArea>
-                                            </FormInputArea>
-                                        </FormColum>
-                                    </FormContent>
-                                    <ButtonGroup>
-                                        <BackButton type='button' onClick={() => closeEditModal()}>Voltar</BackButton>
-                                        {
-                                            !isSubmitting && (
-                                                <SubmitButton type="submit">Salvar</SubmitButton>
-                                            )
-                                        }
-                                        {
-                                            isSubmitting && (
-                                                <ThreeDots
-                                                    color={'#4e4e4e'}
-                                                    height={49}
-                                                    width={100}
-                                                />
-                                            )
-                                        }
-                                    </ButtonGroup>
-                                </Form>
-                            )
-                        }
-                    </Formik>
-                </StyledFormArea>
-            </Modal>
-            <Modal
-                isOpen={modalSolicitacaoIsOpen}
-                onRequestClose={closeSolicitacaoModal}
-                style={modalStyles}
-            >
-                <>
-                    <SolicitacaoModalContainer>
-                        <SolicitacaoTitleContainer>
-                            <SolicitacaoModalTitle>Solicitação de Acesso</SolicitacaoModalTitle>
-                        </SolicitacaoTitleContainer>
-                        <SolicitacaoModalContent>
-                            <DataColumn>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>Nome:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{selectedClient.name}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>CPF:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{selectedClient.cpf}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>RG:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{selectedClient.rg}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>Telefone:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{selectedClient.phone}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>Data Nascimento:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{new Date(selectedClient.dateBirth).toLocaleDateString()}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                                <DataContainer>
-                                    <SolicitacaoModalContentLabel>Endereço:</SolicitacaoModalContentLabel>
-                                    <SolicitacaoModalContentValue>{selectedClient.address}</SolicitacaoModalContentValue>
-                                </DataContainer>
-                            </DataColumn>
-                            <DataColumn>
-                                <LinkImgContainer href={selectedClient.documentoFrente} target="_blank">
-                                    <ImgContainer>
-                                        <SolicitacaoModalContentLabel>Documento de Identificação (Frente): </SolicitacaoModalContentLabel>
-                                        <DocumentImage src={selectedClient.documentoFrente} />
-                                    </ImgContainer>
-                                </LinkImgContainer>
-
-                                <LinkImgContainer href={selectedClient.documentoVerso} target="_blank">
-                                    <ImgContainer>
-                                        <SolicitacaoModalContentLabel>Documento de Identificação (Verso): </SolicitacaoModalContentLabel>
-                                        <DocumentImage src={selectedClient.documentoVerso} />
-                                    </ImgContainer>
-                                </LinkImgContainer>
-
-                            </DataColumn>
-                        </SolicitacaoModalContent>
-                        <ButtonGroup>
-                            <BackButton
-                                type='button'
-                                onClick={() => {
-                                    setSelectedClient({});
-                                    closeSolicitacaoModal();
-                                }}
-                            >
-                                Fechar
-                            </BackButton>
-                            <RejectButton
-                                type='button'
-                                onClick={async () => {
-                                    if (window.confirm("Tem certeza?")) {
-                                        let message = window.prompt("Por favor informe o motivo: ");
-                                        if (message === null || message === "") {
-                                            window.alert("Por favor informe um motivo.");
-                                        } else {
-                                            await reproveClient(user, selectedClient.id, message, setLoading, closeSolicitacaoModal);
-                                        }
-                                    }
-                                }}
-                            >
-                                Rejeitar
-                            </RejectButton>
-                            <SubmitButton
-                                type="button"
-                                onClick={async () => {
-                                    await aproveClient(user, selectedClient.id, setLoading, closeSolicitacaoModal);
-                                }}
-                            >
-                                Aprovar
-                            </SubmitButton>
-                        </ButtonGroup>
-                    </SolicitacaoModalContainer>
-                </>
-            </Modal>
-            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
-        </PredioListContainer >
+            <Navbar
+                openSidebar={() => setSidebarOpen(true)}
+                user={user}
+                logout={handleLogout}
+            />
+        </div>
     );
 }
 
-export default ClientList;
+const mapStateToProps = ({ session }) => ({
+    user: session.user
+});
+
+export default connect(mapStateToProps)(ClientPage);
