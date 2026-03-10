@@ -1,218 +1,507 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useState, useMemo, useEffect } from "react";
+import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
+import Modal from "react-modal";
+import { Formik, Form } from "formik";
+import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
-import { FaDatabase, FaPlus, FaUserCheck, FaUserEdit, FaUsers } from "react-icons/fa";
 
 // Componentes
-import Navbar from "../../components/Navbar";
-import Sidebar from "../../components/Sidebar";
-import SearchBar from "../../components/SearchBar";
-import ClientList from "./ClientList";
-
-// Serviços
-import { logoutUser } from "../../services/userService";
-import { getClientes } from "../../services/clientService";
+import { FormInput, StyledDatePicker } from "../../components/FormLib";
+import Pagination from "../../components/Pagination";
 
 // Estilos
 import {
-    AddButtonText,
-    AddClientHeaderButton,
-    AdicionarClientButton,
-    Card,
-    CardIconContainer,
-    CardTitle,
+    AdminPredioContainer,
+    BackButton,
+    ButtonGroup,
     ClientCounter,
-    ClienteCardsContainer,
-    ContentClientContainer,
-    ContentClientHeader,
-    HeaderClientContainer,
-    HeaderTitle,
-    LoadingContainer,
-    MainClientContainer,
-    NoContentAvisoContainer,
-    NoContentContainer,
-    SearcherContainer,
-    TextContent,
+    ContentIconContainer,
+    DeleteButtonContainer,
+    DeleteContainer,
+    DeleteIcon,
+    DeleteTitle,
+    DocumentImage,
+    EditIcon,
+    FormColum,
+    FormContent,
+    FormInputArea,
+    FormInputLabel,
+    FormInputLabelRequired,
+    Image,
+    ImgContainer,
+    Limitador,
+    LinkImgContainer,
+    ListLabel,
+    PredioListContainer,
+    PredioListHeader,
+    PredioSingleContainer,
+    PredioValue,
+    SinglePredio,
+    StyledFileArea,
+    StyledFileIconContainer,
+    StyledFileInput,
+    StyledFileInputTitle,
+    StyledFileLegend,
+    StyledFormArea,
+    StyledLabel,
+    SubItensContainer,
+    SubmitButton
 } from "./ClientPage.styles";
+import { modalStyles } from "../../styles/ModalStyles";
+import {
+    DataColumn,
+    DataContainer,
+    RejectButton,
+    SolicitacaoModalContainer,
+    SolicitacaoModalContent,
+    SolicitacaoModalContentLabel,
+    SolicitacaoModalContentValue,
+    SolicitacaoModalTitle,
+    SolicitacaoTitleContainer
+} from "../ContractPage/ContractPage.styles";
 
-const ClientPage = ({ user }) => {
-    const navigate = useNavigate();
-    const listRef = useRef(null); // Ref para o container da lista
+// Serviços
+import {
+    aproveClient,
+    deleteClientById,
+    getDocumentoImagem, 
+    reproveClient,
+    updateClientById
+} from "../../services/clientService";
 
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [clientes, setClientes] = useState([]);
 
-    // Filtros de visualização (Cards)
-    const [filterType, setFilterType] = useState('TOTAL'); // 'TOTAL', 'ATIVOS', 'SOLICITACOES'
+const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
+    Modal.setAppElement(document.getElementById('root'));
 
-    const [clientesAtivos, setClientesAtivos] = useState([]);
-    const [clientesSolicitacao, setClientesSolicitacao] = useState([]);
+    // Modais
+    const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
+    const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
+    const [modalSolicitacaoIsOpen, setModalSolicitacaoIsOpen] = useState(false);
 
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 10;
+    const [selectedClient, setSelectedClient] = useState({});
+    const [startDate, setStartDate] = useState(new Date());
+    const [selectedBackImage, setSelectedBackImage] = useState();
+    const [selectedFrontImage, setSelectedFrontImage] = useState();
 
-    const handleLogout = () => {
-        logoutUser(navigate);
-    };
+    // Loadings
+    const [deletting, setDeletting] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            // V2: Não passa user, interceptor resolve token
-            await getClientes(setClientes, setClientesSolicitacao, setClientesAtivos);
-        } catch (error) {
-            console.error("Error loading data", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const openEditModal = () => setModalEditIsOpen(true);
 
+    const closeEditModal = () => {
+        setModalEditIsOpen(false);
+        setSelectedFrontImage(undefined);
+        setSelectedBackImage(undefined);
+    }
+
+    const openDeleteModal = () => setModalDeleteIsOpen(true);
+    const closeDeleteModal = () => setModalDeleteIsOpen(false);
+
+    const openSolicitacaoModal = () => setModalSolicitacaoIsOpen(true);
+    const closeSolicitacaoModal = () => setModalSolicitacaoIsOpen(false);
+
+    // Paginação e Filtro (Ajustado com os nomes do Prisma e proteção contra nulos)
+    const filteredClients = useMemo(() => {
+        const safeSearch = (search || '').toLowerCase();
+        
+        return clientes.filter(client => {
+            const safeName = (client.nome || '').toLowerCase();
+            const safePhone = (client.telefone || '').toLowerCase();
+            
+            return safeName.includes(safeSearch) || safePhone.includes(safeSearch);
+        });
+    }, [clientes, search]);
+
+    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+    const currentPageItems = filteredClients.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    // Busca de Documentos
     useEffect(() => {
-        if (user && user.role === 'ADMIN') {
-            fetchData();
-        }
-    }, [user]);
+        const fetchDocumentos = async () => {
+            if (modalEditIsOpen && selectedClient?.id) {
+                const frente = await getDocumentoImagem(selectedClient.id, 'Frente');
+                const verso = await getDocumentoImagem(selectedClient.id, 'Verso');
 
-    // Função para alterar filtro e rolar até a lista (UX Mobile)
-    const handleCardClick = (type) => {
-        setFilterType(type);
-        setPage(1); // Reseta paginação
+                setSelectedFrontImage(frente || undefined);
+                setSelectedBackImage(verso || undefined);
+            }
+        };
 
-        // Scroll suave até a lista no mobile
-        if (listRef.current) {
-            listRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    };
-
-    // Determina qual lista mostrar baseada no filtro
-    const getCurrentList = () => {
-        switch (filterType) {
-            case 'ATIVOS': return clientesAtivos;
-            case 'SOLICITACOES': return clientesSolicitacao;
-            default: return clientes;
-        }
-    };
-
-    const currentList = getCurrentList();
-
-    if (!user || user.role !== 'ADMIN') return null;
+        fetchDocumentos();
+    }, [modalEditIsOpen, selectedClient]);
 
     return (
-        <div className="container">
-            <Sidebar
-                sidebarOpen={sidebarOpen}
-                closeSidebar={() => setSidebarOpen(false)}
-                logoutUser={handleLogout}
-            />
+        <PredioListContainer>
+            <PredioListHeader>
+                <ListLabel>Nome</ListLabel>
+                <ListLabel className="hidden-responsive">Telefone</ListLabel>
+                <ListLabel>Status</ListLabel>
+                <ListLabel>Opções</ListLabel>
+            </PredioListHeader>
+            {
+                currentPageItems.map((cliente) => (
+                    <SinglePredio
+                        key={cliente.id}
+                        onClick={() => {
+                            if (cliente.statusCadastro === 'PENDENTE_APROVACAO') {
+                                setSelectedClient(cliente);
+                                openSolicitacaoModal();
+                            } else {
+                                // navigate(`/clientes/${cliente.id}`); // Futura visualização de perfil
+                            }
+                        }}
+                    >
+                        <PredioSingleContainer>
+                            <StyledLabel>Nome: </StyledLabel>
+                            <PredioValue>{cliente.nome}</PredioValue>
+                        </PredioSingleContainer>
+                        <PredioSingleContainer className="hidden-responsive">
+                            <StyledLabel><FaWhatsapp /> </StyledLabel>
+                            <PredioValue
+                                href={`https://wa.me/55${cliente.telefone ? cliente.telefone.replace(/\D/g, '') : ''}`}
+                                target='_blank'
+                                onClick={(event) => event.stopPropagation()}
+                            >
+                                {cliente.telefone || 'N/A'}
+                            </PredioValue>
+                        </PredioSingleContainer>
+                        <PredioSingleContainer>
+                            <StyledLabel> Status: </StyledLabel>
+                            <PredioValue>{cliente.statusCadastro}</PredioValue>
+                        </PredioSingleContainer>
+                        <AdminPredioContainer>
+                            <EditIcon onClick={(event) => {
+                                event.stopPropagation();
+                                setSelectedClient(cliente);
+                                setStartDate(cliente.dataNascimento ? new Date(cliente.dataNascimento) : new Date());
+                                openEditModal();
+                            }}>
+                                <FaEdit />
+                            </EditIcon>
+                            <DeleteIcon onClick={(event) => {
+                                event.stopPropagation();
+                                setSelectedClient(cliente);
+                                openDeleteModal();
+                            }}>
+                                <FaTrash />
+                            </DeleteIcon>
+                        </AdminPredioContainer>
+                    </SinglePredio >
+                ))
+            }
 
-            {loading ? (
-                <LoadingContainer>
-                    <ThreeDots color={'#4e4e4e'} height={49} width={100} />
-                </LoadingContainer>
-            ) : (
-                <MainClientContainer>
-                    <HeaderClientContainer>
-                        <HeaderTitle>Gestão de Clientes</HeaderTitle>
-                        <AddClientHeaderButton onClick={() => navigate('/clientes/novo')}>
-                            <FaPlus color='green' />
-                            <AddButtonText>Adicionar Novo</AddButtonText>
-                        </AddClientHeaderButton>
-                    </HeaderClientContainer>
-
-                    {/* CARDS COM SCROLL AUTOMÁTICO AO CLICAR */}
-                    <ClienteCardsContainer>
-                        <Card
-                            onClick={() => handleCardClick('ATIVOS')}
-                            className={filterType === 'ATIVOS' ? 'active' : ''}
-                        >
-                            <CardTitle>Clientes Ativos</CardTitle>
-                            <CardIconContainer>
-                                <FaUserCheck />
-                                <ClientCounter>{clientesAtivos.length}</ClientCounter>
-                            </CardIconContainer>
-                        </Card>
-
-                        <Card
-                            onClick={() => handleCardClick('SOLICITACOES')}
-                            className={filterType === 'SOLICITACOES' ? 'active' : ''}
-                        >
-                            <CardTitle>Solicitações Pendentes</CardTitle>
-                            <CardIconContainer>
-                                <FaUserEdit color={clientesSolicitacao.length > 0 ? '#f59e0b' : '#3b82f6'} />
-                                <ClientCounter>{clientesSolicitacao.length}</ClientCounter>
-                            </CardIconContainer>
-                        </Card>
-
-                        <Card
-                            onClick={() => handleCardClick('TOTAL')}
-                            className={filterType === 'TOTAL' ? 'active' : ''}
-                        >
-                            <CardTitle>Total Cadastrados</CardTitle>
-                            <CardIconContainer>
-                                <FaDatabase />
-                                <ClientCounter>{clientes.length}</ClientCounter>
-                            </CardIconContainer>
-                        </Card>
-                    </ClienteCardsContainer>
-
-                    {/* ÂNCORA PARA O SCROLL */}
-                    <div ref={listRef}></div>
-
-                    <ContentClientContainer>
-                        <ContentClientHeader>
-                            <div style={{ marginBottom: '15px' }}>
-                                <h3 style={{ fontSize: '1.1rem', color: '#334155' }}>
-                                    {filterType === 'ATIVOS' && 'Lista de Clientes Ativos'}
-                                    {filterType === 'SOLICITACOES' && 'Solicitações de Acesso'}
-                                    {filterType === 'TOTAL' && 'Todos os Clientes'}
-                                </h3>
-                            </div>
-                            <SearcherContainer>
-                                <SearchBar search={search} setSearch={setSearch} placeholder="Buscar por nome ou telefone..." />
-                            </SearcherContainer>
-                        </ContentClientHeader>
-
-                        {currentList.length === 0 ? (
-                            <NoContentContainer>
-                                <FaUsers color='#cbd5e1' fontSize={80} style={{ marginBottom: 20 }} />
-                                <NoContentAvisoContainer>
-                                    <TextContent>Nenhum cliente encontrado nesta categoria.</TextContent>
-                                    {filterType === 'TOTAL' && (
-                                        <AdicionarClientButton onClick={() => navigate('/clientes/novo')}>
-                                            <FaPlus color='#fff' style={{ marginRight: 5 }} /> Novo Cliente
-                                        </AdicionarClientButton>
-                                    )}
-                                </NoContentAvisoContainer>
-                            </NoContentContainer>
+            {/* MODAL DE DELETAR */}
+            <Modal
+                isOpen={modalDeleteIsOpen}
+                onRequestClose={closeDeleteModal}
+                style={modalStyles}
+            >
+                <DeleteContainer>
+                    <DeleteTitle>Deseja excluir o Cliente {selectedClient.nome}?</DeleteTitle>
+                    {
+                        deletting ? (
+                            <ThreeDots color={'#4e4e4e'} height={49} width={100} />
                         ) : (
-                            <ClientList
-                                clientes={currentList}
-                                refreshData={fetchData}
-                                navigate={navigate}
-                                search={search}
-                                page={page}
-                                setPage={setPage}
-                                itemsPerPage={itemsPerPage}
-                            />
-                        )}
-                    </ContentClientContainer>
-                </MainClientContainer>
-            )}
+                            <DeleteButtonContainer>
+                                <BackButton onClick={() => {
+                                    setSelectedClient({});
+                                    closeDeleteModal();
+                                }}>
+                                    Cancelar
+                                </BackButton>
+                                <SubmitButton onClick={async () => {
+                                    setDeletting(true);
+                                    await deleteClientById(selectedClient.id, setDeletting);
+                                    refreshData();
+                                    closeDeleteModal();
+                                }}>
+                                    Excluir
+                                </SubmitButton>
+                            </DeleteButtonContainer>
+                        )
+                    }
+                </DeleteContainer>
+            </Modal>
 
-            <Navbar
-                openSidebar={() => setSidebarOpen(true)}
-                user={user}
-                logout={handleLogout}
-            />
-        </div>
+            {/* MODAL DE EDITAR */}
+            <Modal
+                isOpen={modalEditIsOpen}
+                onRequestClose={closeEditModal}
+                style={modalStyles}
+            >
+                <StyledFormArea>
+                    <div style={{ display: 'flex', marginBottom: '30px' }}>
+                        <ContentIconContainer>
+                            <FaFileInvoice />
+                        </ContentIconContainer>
+                        <ClientCounter>Editar Cliente</ClientCounter>
+                    </div>
+                    <Formik
+                        initialValues={{
+                            id: selectedClient.id,
+                            nome: selectedClient.nome || '',
+                            cpf: selectedClient.cpf || '',
+                            rg: selectedClient.rg || '',
+                            telefone: selectedClient.telefone || '',
+                            enderecoAtual: selectedClient.enderecoAtual || '',
+                            docFrenteUrl: selectedClient.docFrenteUrl || '',
+                            docVersoUrl: selectedClient.docVersoUrl || '',
+                            newPassword: '',
+                            confirmPassword: '',
+                        }}
+                        validationSchema={
+                            Yup.object({
+                                nome: Yup.string().required('Obrigatório'),
+                                telefone: Yup.string().required('Obrigatório'),
+                                enderecoAtual: Yup.string().required('Endereço é Obrigatório'),
+                                newPassword: Yup.string(),
+                                confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir'),
+                            })
+                        }
+                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                            values.dataNascimento = startDate;
+                            await updateClientById(values, setSubmitting, setFieldError, closeEditModal);
+                            refreshData();
+                            closeEditModal();
+                        }}
+                    >
+                        {
+                            ({ isSubmitting, setFieldValue }) => (
+                                <Form>
+                                    <FormContent>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Nome</FormInputLabelRequired>
+                                                <FormInput type='text' name='nome' placeholder='Nome do cliente' />
+                                            </FormInputArea>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>CPF</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput name='cpf' type='text' placeholder='CPF do cliente' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>RG</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput name='rg' type='text' placeholder='RG do cliente' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Nova Senha</FormInputLabel>
+                                                    <Limitador>
+                                                        <FormInput name='newPassword' type='password' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabel>Confirmar Nova Senha</FormInputLabel>
+                                                    <Limitador>
+                                                        <FormInput name='confirmPassword' type='password' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+                                        </FormColum>
+                                        <FormColum>
+                                            <FormInputArea>
+                                                <FormInputLabelRequired>Endereço</FormInputLabelRequired>
+                                                <FormInput type='text' name='enderecoAtual' placeholder='Endereço do cliente' />
+                                            </FormInputArea>
+                                            <SubItensContainer>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Data de Nascimento</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <StyledDatePicker selectedDate={startDate} setSelectedDate={setStartDate} />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                                <FormInputArea>
+                                                    <FormInputLabelRequired>Telefone</FormInputLabelRequired>
+                                                    <Limitador>
+                                                        <FormInput name='telefone' type='text' placeholder='Telefone' />
+                                                    </Limitador>
+                                                </FormInputArea>
+                                            </SubItensContainer>
+
+                                            {/* UPLOAD FRENTE */}
+                                            <FormInputArea>
+                                                <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
+                                                <StyledFileArea>
+                                                    {selectedFrontImage || selectedClient.docFrenteUrl ? (
+                                                        <Image src={selectedFrontImage || selectedClient.docFrenteUrl} />
+                                                    ) : (
+                                                        <div>
+                                                            <StyledFileIconContainer>
+                                                                <FaCloudUploadAlt />
+                                                            </StyledFileIconContainer>
+                                                            <StyledFileInputTitle>Clique para enviar o arquivo</StyledFileInputTitle>
+                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                        </div>
+                                                    )}
+                                                    <StyledFileInput
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(event) => {
+                                                            const file = event.target.files[0];
+                                                            setFieldValue('docFrenteUrl', file);
+                                                            setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
+                                                        }}
+                                                    />
+                                                </StyledFileArea>
+                                            </FormInputArea>
+
+                                            {/* UPLOAD VERSO */}
+                                            <FormInputArea>
+                                                <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
+                                                <StyledFileArea>
+                                                    {selectedBackImage || selectedClient.docVersoUrl ? (
+                                                        <Image src={selectedBackImage || selectedClient.docVersoUrl} />
+                                                    ) : (
+                                                        <div>
+                                                            <StyledFileIconContainer>
+                                                                <FaCloudUploadAlt />
+                                                            </StyledFileIconContainer>
+                                                            <StyledFileInputTitle>Clique para enviar o arquivo</StyledFileInputTitle>
+                                                            <StyledFileLegend>Tamanho máximo 10MB</StyledFileLegend>
+                                                        </div>
+                                                    )}
+                                                    <StyledFileInput
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(event) => {
+                                                            const file = event.target.files[0];
+                                                            setFieldValue('docVersoUrl', file);
+                                                            setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
+                                                        }}
+                                                    />
+                                                </StyledFileArea>
+                                            </FormInputArea>
+                                        </FormColum>
+                                    </FormContent>
+
+                                    <ButtonGroup>
+                                        <BackButton type='button' onClick={() => closeEditModal()}>Voltar</BackButton>
+                                        {!isSubmitting ? (
+                                            <SubmitButton type="submit">Salvar</SubmitButton>
+                                        ) : (
+                                            <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                                        )}
+                                    </ButtonGroup>
+                                </Form>
+                            )
+                        }
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
+
+            {/* MODAL DE APROVAÇÃO / SOLICITAÇÃO */}
+            <Modal
+                isOpen={modalSolicitacaoIsOpen}
+                onRequestClose={closeSolicitacaoModal}
+                style={modalStyles}
+            >
+                <>
+                    <SolicitacaoModalContainer>
+                        <SolicitacaoTitleContainer>
+                            <SolicitacaoModalTitle>Solicitação de Acesso</SolicitacaoModalTitle>
+                        </SolicitacaoTitleContainer>
+                        <SolicitacaoModalContent>
+                            <DataColumn>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Nome:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.nome}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>CPF:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.cpf}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>RG:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.rg}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Telefone:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.telefone}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Data Nascimento:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>
+                                        {selectedClient.dataNascimento ? new Date(selectedClient.dataNascimento).toLocaleDateString() : 'N/A'}
+                                    </SolicitacaoModalContentValue>
+                                </DataContainer>
+                                <DataContainer>
+                                    <SolicitacaoModalContentLabel>Endereço:</SolicitacaoModalContentLabel>
+                                    <SolicitacaoModalContentValue>{selectedClient.enderecoAtual}</SolicitacaoModalContentValue>
+                                </DataContainer>
+                            </DataColumn>
+
+                            <DataColumn>
+                                <LinkImgContainer href={selectedClient.docFrenteUrl} target="_blank">
+                                    <ImgContainer>
+                                        <SolicitacaoModalContentLabel>Documento (Frente): </SolicitacaoModalContentLabel>
+                                        <DocumentImage src={selectedClient.docFrenteUrl} />
+                                    </ImgContainer>
+                                </LinkImgContainer>
+
+                                <LinkImgContainer href={selectedClient.docVersoUrl} target="_blank">
+                                    <ImgContainer>
+                                        <SolicitacaoModalContentLabel>Documento (Verso): </SolicitacaoModalContentLabel>
+                                        <DocumentImage src={selectedClient.docVersoUrl} />
+                                    </ImgContainer>
+                                </LinkImgContainer>
+                            </DataColumn>
+                        </SolicitacaoModalContent>
+
+                        {isProcessing ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                            </div>
+                        ) : (
+                            <ButtonGroup>
+                                <BackButton
+                                    type='button'
+                                    onClick={() => {
+                                        setSelectedClient({});
+                                        closeSolicitacaoModal();
+                                    }}
+                                >
+                                    Fechar
+                                </BackButton>
+                                <RejectButton
+                                    type='button'
+                                    onClick={async () => {
+                                        if (window.confirm("Tem certeza que deseja rejeitar?")) {
+                                            let message = window.prompt("Por favor informe o motivo da rejeição: ");
+                                            if (!message) {
+                                                window.alert("Por favor informe um motivo.");
+                                            } else {
+                                                await reproveClient(selectedClient.id, message, setIsProcessing, closeSolicitacaoModal);
+                                                refreshData();
+                                            }
+                                        }
+                                    }}
+                                >
+                                    Rejeitar
+                                </RejectButton>
+                                <SubmitButton
+                                    type="button"
+                                    onClick={async () => {
+                                        await aproveClient(selectedClient.id, setIsProcessing, closeSolicitacaoModal);
+                                        refreshData();
+                                    }}
+                                >
+                                    Aprovar
+                                </SubmitButton>
+                            </ButtonGroup>
+                        )}
+                    </SolicitacaoModalContainer>
+                </>
+            </Modal>
+
+            <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
+        </PredioListContainer >
     );
 }
 
-const mapStateToProps = ({ session }) => ({
-    user: session.user
-});
-
-export default connect(mapStateToProps)(ClientPage);
+export default ClientList;

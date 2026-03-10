@@ -24,8 +24,8 @@ export const getClientes = async (setClients, setSolicitacoes, setAtivos, setLoa
         const response = await api.get('/clients');
         const clientes = response.data;
 
-        const ativos = clientes.filter(c => c.statusClient === 'ATIVO');
-        const solicitacoes = clientes.filter(c => c.statusClient === 'AGUARDANDO');
+        const ativos = clientes.filter(c => c.statusCadastro === 'APROVADO');
+        const solicitacoes = clientes.filter(c => c.statusCadastro === 'PENDENTE_APROVACAO');
 
         if (setSolicitacoes) setSolicitacoes(solicitacoes);
         if (setAtivos) setAtivos(ativos);

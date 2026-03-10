@@ -10,7 +10,7 @@ import Navbar from "../../components/Navbar";
 
 // Serviços
 import { logoutUser } from "../../services/userService";
-import { getPredioById, getApartamentosByPredio } from "../../services/predioService"; // Importe a nova função
+import { getPredioById } from "../../services/predioService"; // Removemos getApartamentosByPredio
 
 // Estilos
 import {
@@ -34,25 +34,19 @@ const PredioInfos = ({ user }) => {
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [predio, setPredio] = useState(null);
-    const [apartamentos, setApartamentos] = useState([]); // Novo estado para apartamentos
     const [loading, setLoading] = useState(true);
 
     const handleLogout = () => {
         logoutUser(navigate);
     };
 
-    // MOVIDO PARA CIMA DO RETURN (Correção do Erro)
     useEffect(() => {
         const fetchAllData = async () => {
-            // Só busca se tiver user admin
             if (user && user.role === 'ADMIN') {
                 setLoading(true);
                 try {
-                    // Busca Prédio E Apartamentos em paralelo
-                    await Promise.all([
-                        getPredioById(predioId, setPredio),
-                        getApartamentosByPredio(predioId, setApartamentos)
-                    ]);
+                    // O backend já traz o prédio com os apartamentos aninhados!
+                    await getPredioById(predioId, setPredio);
                 } catch (error) {
                     console.error("Erro ao carregar dados", error);
                 } finally {
@@ -64,12 +58,14 @@ const PredioInfos = ({ user }) => {
         if (predioId) {
             fetchAllData();
         }
-    }, [predioId, user]); // Adicionado user nas dependências
+    }, [predioId, user]);
 
-    // AGORA SIM PODEMOS FAZER O RETURN CONDICIONAL
     if (!user || user.role !== 'ADMIN') {
         return null;
     }
+
+    // Criamos uma variável de apoio para facilitar a leitura no JSX
+    const apartamentos = predio?.apartamentos || [];
 
     return (
         <div className="container">
@@ -113,12 +109,12 @@ const PredioInfos = ({ user }) => {
                             <DetailCard>
                                 <DetailLabel>Preço kWh</DetailLabel>
                                 <DetailValue style={{ color: '#10b981' }}>
-                                    R$ {predio.kwhPrice ? Number(predio.kwhPrice).toFixed(2) : '0.00'}
+                                    R$ {predio.precoKwhAtual ? Number(predio.precoKwhAtual).toFixed(2) : '0.00'}
                                 </DetailValue>
                             </DetailCard>
                             <DetailCard>
                                 <DetailLabel>Apt. Cadastrados</DetailLabel>
-                                <DetailValue>{apartamentos.length} / {predio.numApt}</DetailValue>
+                                <DetailValue>{apartamentos.length}</DetailValue>
                             </DetailCard>
                         </DetailsContainer>
 
@@ -169,7 +165,12 @@ const PredioInfos = ({ user }) => {
                                         </div>
                                         <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
                                             <FaUser size={12} style={{ marginRight: '5px' }} />
-                                            {apt.inquilino ? apt.inquilino.nome.split(' ')[0] : <span style={{ color: '#10b981' }}>Vago</span>}
+                                            {/* Adaptado para checar apenas o status, já que o inquilino não vem nesse JSON */}
+                                            {apt.status === 'VAGO' ? (
+                                                <span style={{ color: '#10b981', fontWeight: 'bold' }}>Vago</span>
+                                            ) : (
+                                                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>Ocupado</span>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
