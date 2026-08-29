@@ -39,6 +39,15 @@ const STATUS_LABELS = {
     CONTESTADO: 'Contestado'
 };
 
+const STATUS_BADGE_COLORS = {
+    PAGO: { bg: '#d1fae5', color: '#059669' },
+    PENDENTE: { bg: '#eff6ff', color: '#2563eb' },
+    EM_ANALISE: { bg: '#fef3c7', color: '#d97706' },
+    ATRASADO: { bg: '#fee2e2', color: '#dc2626' },
+    CANCELADO: { bg: '#f3f4f6', color: '#6b7280' },
+    CONTESTADO: { bg: '#fee2e2', color: '#dc2626' }
+};
+
 const ParcelaInfo = ({ user }) => {
     Modal.setAppElement('#root');
     const navigate = useNavigate();
@@ -96,6 +105,38 @@ const ParcelaInfo = ({ user }) => {
         }
     };
 
+    const handleMarcarPago = async () => {
+        const temMulta = (fatura.valorMulta || 0) > 0;
+
+        if (temMulta) {
+            const perdoar = window.confirm(
+                `Esta fatura tem multa/juros de R$ ${fatura.valorMulta.toFixed(2)} aplicada.\n\n` +
+                `OK = marcar como paga SEM cobrar a multa (perdoar)\n` +
+                `Cancelar = marcar como paga cobrando a multa normalmente`
+            );
+            setLoadingAction(true);
+            try {
+                if (perdoar) {
+                    await editarValoresFatura(fatura.id, {
+                        multa: 0,
+                        acrescimo: fatura.acrescimoAplicado || 0,
+                        desconto: fatura.descontoAplicado || 0,
+                        observacao: fatura.observacao || ''
+                    });
+                }
+                await aprovarPagamento(fatura.id);
+                await fetchAll();
+            } catch (error) {
+                alert(error.response?.data?.message || "Erro ao marcar como pago.");
+            } finally {
+                setLoadingAction(false);
+            }
+        } else {
+            if (!window.confirm("Marcar esta fatura como PAGA?")) return;
+            await handleAction(aprovarPagamento, fatura.id);
+        }
+    };
+
     if (!user) return null;
 
     return (
@@ -112,8 +153,8 @@ const ParcelaInfo = ({ user }) => {
                                 Fatura {new Date(fatura.mesReferencia).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                             </PrestacaoDetailHeaderTitle>
                             <span style={{
-                                backgroundColor: fatura.status === 'PAGO' ? '#d1fae5' : '#fee2e2',
-                                color: fatura.status === 'PAGO' ? '#059669' : '#dc2626',
+                                backgroundColor: (STATUS_BADGE_COLORS[fatura.status] || STATUS_BADGE_COLORS.PENDENTE).bg,
+                                color: (STATUS_BADGE_COLORS[fatura.status] || STATUS_BADGE_COLORS.PENDENTE).color,
                                 padding: '5px 10px', borderRadius: '15px', fontWeight: 'bold', fontSize: '0.9rem'
                             }}>
                                 {STATUS_LABELS[fatura.status] || fatura.status}
@@ -131,13 +172,26 @@ const ParcelaInfo = ({ user }) => {
                             <ComprovanteContainer>
                                 <ComprovanteTitle>Pagamento / Comprovante</ComprovanteTitle>
                                 {fatura.comprovanteUrl ? (
-                                    <a href={fatura.comprovanteUrl} target="_blank" rel="noreferrer">
-                                        <ComprovanteImg src={fatura.comprovanteUrl} alt="Comprovante" />
-                                    </a>
+                                    <>
+                                        <a href={fatura.comprovanteUrl} target="_blank" rel="noreferrer">
+                                            <ComprovanteImg src={fatura.comprovanteUrl} alt="Comprovante" />
+                                        </a>
+                                        {fatura.status === 'EM_ANALISE' && (
+                                            <p style={{ color: '#d97706', fontWeight: 'bold', textAlign: 'center', marginTop: 10 }}>
+                                                Aguardando aprovação do comprovante
+                                            </p>
+                                        )}
+                                    </>
                                 ) : fatura.status === 'PAGO' ? (
                                     <div style={{ textAlign: 'center', marginTop: 20 }}>
                                         <FaCheck size={50} color="#10b981" />
                                         <p style={{ color: '#10b981', fontWeight: 'bold' }}>Pago com Sucesso</p>
+                                    </div>
+                                ) : fatura.status === 'CANCELADO' || fatura.status === 'CONTESTADO' ? (
+                                    <div style={{ textAlign: 'center', marginTop: 20, color: '#6b7280' }}>
+                                        <p style={{ fontWeight: 'bold' }}>
+                                            {fatura.status === 'CANCELADO' ? 'Fatura cancelada' : 'Pagamento contestado'}
+                                        </p>
                                     </div>
                                 ) : (
                                     <PrestacaoDetailPagamentoContainer>
@@ -227,9 +281,9 @@ const ParcelaInfo = ({ user }) => {
                                         )}
 
                                         {fatura.status !== 'PAGO' && fatura.status !== 'CANCELADO' && (
-                                            <SubmitButton onClick={() => {
-                                                if (window.confirm("Marcar esta fatura como PAGA?")) handleAction(aprovarPagamento, fatura.id);
-                                            }}>Marcar Pago</SubmitButton>
+                                            <SubmitButton onClick={handleMarcarPago}>
+                                                Marcar Pago{(fatura.valorMulta || 0) > 0 ? ' (tem multa)' : ''}
+                                            </SubmitButton>
                                         )}
 
                                         {fatura.status === 'PAGO' && (

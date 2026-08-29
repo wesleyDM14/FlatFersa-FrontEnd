@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
 
 import {
-    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFilePdf, FaTimes
+    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFilePdf, FaTimes, FaSearch, FaBan, FaExclamationTriangle
 } from "react-icons/fa";
 
 import {
@@ -45,6 +45,24 @@ const STATUS_COLORS = {
     ENCERRADO: '#6b7280',
     RENOVADO: '#6b7280',
     TRANSFERIDO: '#6b7280'
+};
+
+const FATURA_STATUS_LABELS = {
+    PAGO: 'Pago',
+    PENDENTE: 'Pendente',
+    ATRASADO: 'Atrasado',
+    EM_ANALISE: 'Em Análise',
+    CANCELADO: 'Cancelado',
+    CONTESTADO: 'Contestado'
+};
+
+const FATURA_STATUS_ICONS = {
+    PAGO: <FaCheck color="#10b981" />,
+    PENDENTE: <FaClock color="#f59e0b" />,
+    ATRASADO: <FaTimes color="#ef4444" />,
+    EM_ANALISE: <FaSearch color="#3b82f6" />,
+    CANCELADO: <FaBan color="#6b7280" />,
+    CONTESTADO: <FaExclamationTriangle color="#dc2626" />
 };
 
 const ContractList = ({ contratos, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
@@ -236,10 +254,9 @@ const ContractList = ({ contratos, user, refreshData, navigate, search, page, se
                                                     <FinanceiroListValue>
                                                         {new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')} - R$ {parseFloat(fatura.valorTotal || 0).toFixed(2)}
                                                     </FinanceiroListValue>
-                                                    <FinanceiroListIconContainer>
-                                                        {fatura.status === 'PAGO' && <FaCheck color="#10b981" />}
-                                                        {fatura.status === 'PENDENTE' && <FaClock color="#f59e0b" />}
-                                                        {fatura.status === 'ATRASADO' && <FaTimes color="#ef4444" />}
+                                                    <FinanceiroListIconContainer title={FATURA_STATUS_LABELS[fatura.status] || fatura.status} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                        {FATURA_STATUS_ICONS[fatura.status]}
+                                                        <span style={{ fontSize: '0.8rem' }}>{FATURA_STATUS_LABELS[fatura.status] || fatura.status}</span>
                                                     </FinanceiroListIconContainer>
                                                 </FinanceiroListElement>
                                             </FinanceiroListElementContainer>
