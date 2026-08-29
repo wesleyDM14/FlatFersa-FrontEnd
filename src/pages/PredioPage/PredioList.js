@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { FaEdit, FaFileInvoice, FaTrash } from "react-icons/fa";
+import { FaBuilding, FaEdit, FaFileInvoice, FaTrash } from "react-icons/fa";
 import Modal from "react-modal";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
@@ -10,10 +10,10 @@ import { FinalidadeSelected, FormInput } from "../../components/FormLib";
 import { deletePredioById, updatePredio } from "../../services/predioService";
 import Pagination from "../../components/Pagination";
 import { modalStyles } from "../../styles/ModalStyles";
+import { ListRow } from "../../components/ListRow";
 
 // Estilos
 import {
-    AdminPredioContainer,
     BackButton,
     ButtonGroup,
     DeleteButtonContainer,
@@ -27,15 +27,9 @@ import {
     FormInputLabelRequired,
     Limitador,
     LimitadorAlt,
-    ListLabel,
     PredioCounter,
     PredioListContainer,
-    PredioListHeader,
-    PredioSingleContainer,
-    PredioValue,
-    SinglePredio,
     StyledFormArea,
-    StyledLabel,
     SubItensContainer,
     SubmitButton
 } from "./PredioPage.styles";
@@ -86,35 +80,26 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
 
     return (
         <PredioListContainer>
-            {/* CABEÇALHO DA LISTA */}
-            <PredioListHeader>
-                <ListLabel>Nome</ListLabel>
-                <ListLabel>Cidade</ListLabel>
-                <ListLabel>Opções</ListLabel>
-            </PredioListHeader>
-
             {/* LISTA DE ITENS */}
             {currentPageItems.map((predio) => (
-                <SinglePredio key={predio.id} onClick={() => navigate(`/predios/${predio.id}`)}>
-                    <PredioSingleContainer>
-                        <StyledLabel>Prédio: </StyledLabel>
-                        <PredioValue>{predio.nome}</PredioValue>
-                    </PredioSingleContainer>
-
-                    <PredioSingleContainer>
-                        <StyledLabel>Cidade: </StyledLabel>
-                        <PredioValue>{predio.cidade}</PredioValue>
-                    </PredioSingleContainer>
-
-                    <AdminPredioContainer>
-                        <EditIcon onClick={(e) => { e.stopPropagation(); openEditModal(predio); }}>
-                            <FaEdit />
-                        </EditIcon>
-                        <DeleteIcon onClick={(e) => { e.stopPropagation(); openDeleteModal(predio); }}>
-                            <FaTrash />
-                        </DeleteIcon>
-                    </AdminPredioContainer>
-                </SinglePredio>
+                <ListRow
+                    key={predio.id}
+                    onClick={() => navigate(`/predios/${predio.id}`)}
+                    icon={<FaBuilding />}
+                    iconColor="#3b82f6"
+                    title={predio.nome}
+                    subtitle={`${predio.cidade} - ${predio.estado || ''}`.trim()}
+                    actions={
+                        <>
+                            <EditIcon onClick={() => openEditModal(predio)}>
+                                <FaEdit />
+                            </EditIcon>
+                            <DeleteIcon onClick={() => openDeleteModal(predio)}>
+                                <FaTrash />
+                            </DeleteIcon>
+                        </>
+                    }
+                />
             ))}
 
             {/* --- MODAL DE EDIÇÃO --- */}

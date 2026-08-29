@@ -5,11 +5,11 @@ import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
 
 import {
-    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFilePdf, FaTimes, FaSearch, FaBan, FaExclamationTriangle
+    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFileContract, FaFilePdf, FaTimes, FaSearch, FaBan, FaExclamationTriangle
 } from "react-icons/fa";
 
 import {
-    AdminPredioContainer, BackButton, ButtonGroup, ContratoCounter,
+    BackButton, ButtonGroup, ContratoCounter,
     DetailContractBackButton, DetailContractButtonGroup, DetailContractContainer,
     DetailContractDataColumnLeft, DetailContractDataColumnRight, DetailContractDataContainer,
     DetailContractDataLabel, DetailContractDataSectionContainer, DetailContractDataSectionTitle,
@@ -17,10 +17,10 @@ import {
     DetailContractHeaderSubTitle, DetailContractHeaderTitle, DetailContractValueContainer,
     EditIcon, FinanceiroList, FinanceiroListElement, FinanceiroListElementContainer,
     FinanceiroListIconContainer, FinanceiroListValue, FormContent,
-    FormInputArea, FormInputLabel, FormInputLabelRequired, Limitador, ListLabel,
-    PredioListContainer, PredioListHeader, PredioSingleContainer, PredioValue,
-    RejectButton, SinglePredio, SolicitacaoModalContainer,
-    SolicitacaoModalTitle, SolicitacaoTitleContainer, StyledFormArea, StyledLabel,
+    FormInputArea, FormInputLabel, FormInputLabelRequired, Limitador,
+    PredioListContainer,
+    RejectButton, SolicitacaoModalContainer,
+    SolicitacaoModalTitle, SolicitacaoTitleContainer, StyledFormArea,
     SubItensContainer, SubmitButton, PdfPreview
 } from "./ContractPage.styles";
 
@@ -33,6 +33,7 @@ import { getApartamentosVagos } from "../../services/apartamentoService";
 import { modalStyles } from "../../styles/ModalStyles";
 import { FormInput, ApartamentoSelect } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
+import { ListRow } from "../../components/ListRow";
 import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle } from "../ClientPage/ClientPage.styles";
 
 const STATUS_COLORS = {
@@ -45,6 +46,18 @@ const STATUS_COLORS = {
     ENCERRADO: '#6b7280',
     RENOVADO: '#6b7280',
     TRANSFERIDO: '#6b7280'
+};
+
+const STATUS_STYLE = {
+    ATIVO: { icon: '#10b981', pillColor: '#059669', pillBg: '#d1fae5', label: 'Ativo' },
+    SOLICITADO: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Solicitado' },
+    AGUARDANDO_ASSINATURA: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Aguardando Assinatura' },
+    AGUARDANDO_DADOS_DONO: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Aguardando Dados' },
+    CANCELADO: { icon: '#ef4444', pillColor: '#dc2626', pillBg: '#fee2e2', label: 'Cancelado' },
+    DESPEJO: { icon: '#ef4444', pillColor: '#dc2626', pillBg: '#fee2e2', label: 'Despejo' },
+    ENCERRADO: { icon: '#6b7280', pillColor: '#374151', pillBg: '#f3f4f6', label: 'Encerrado' },
+    RENOVADO: { icon: '#6b7280', pillColor: '#374151', pillBg: '#f3f4f6', label: 'Renovado' },
+    TRANSFERIDO: { icon: '#6b7280', pillColor: '#374151', pillBg: '#f3f4f6', label: 'Transferido' },
 };
 
 const FATURA_STATUS_LABELS = {
@@ -128,40 +141,22 @@ const ContractList = ({ contratos, user, refreshData, navigate, search, page, se
 
     return (
         <PredioListContainer>
-            <PredioListHeader $isadmin={isAdmin.toString()}>
-                {isAdmin && <ListLabel>Cliente</ListLabel>}
-                <ListLabel>Apartamento</ListLabel>
-                <ListLabel>Status</ListLabel>
-                {isAdmin && <ListLabel>Opções</ListLabel>}
-            </PredioListHeader>
-
-            {currentPageItems.map((contract) => (
-                <SinglePredio
-                    key={contract.id}
-                    $isadmin={isAdmin.toString()}
-                    onClick={() => openContractModal(contract)}
-                >
-                    {isAdmin && (
-                        <PredioSingleContainer>
-                            <StyledLabel>Cliente: </StyledLabel>
-                            <PredioValue>{contract.cliente?.nome}</PredioValue>
-                        </PredioSingleContainer>
-                    )}
-
-                    <PredioSingleContainer>
-                        <StyledLabel>Apt: </StyledLabel>
-                        <PredioValue>{contract.apartamento?.numero}</PredioValue>
-                    </PredioSingleContainer>
-
-                    <PredioSingleContainer>
-                        <StyledLabel>Status: </StyledLabel>
-                        <span style={{ fontWeight: 700, color: STATUS_COLORS[contract.status] || '#374151' }}>
-                            {contract.status}
-                        </span>
-                    </PredioSingleContainer>
-
-                    {isAdmin && (
-                        <AdminPredioContainer>
+            {currentPageItems.map((contract) => {
+                const st = STATUS_STYLE[contract.status] || STATUS_STYLE.ATIVO;
+                return (
+                    <ListRow
+                        key={contract.id}
+                        onClick={() => openContractModal(contract)}
+                        icon={<FaFileContract />}
+                        iconColor={st.icon}
+                        title={isAdmin ? contract.cliente?.nome : `Apartamento ${contract.apartamento?.numero}`}
+                        subtitle={isAdmin
+                            ? `${contract.apartamento?.predio?.nome || ''} - Apto ${contract.apartamento?.numero}`.trim()
+                            : (contract.apartamento?.predio?.nome || '')}
+                        statusLabel={st.label}
+                        statusColor={st.pillColor}
+                        statusBg={st.pillBg}
+                        actions={isAdmin ? (
                             <EditIcon onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedContrato(contract);
@@ -170,10 +165,10 @@ const ContractList = ({ contratos, user, refreshData, navigate, search, page, se
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                        </AdminPredioContainer>
-                    )}
-                </SinglePredio>
-            ))}
+                        ) : null}
+                    />
+                );
+            })}
 
             {/* --- MODAL DETALHES (Visão Geral e Financeiro) --- */}
             <Modal

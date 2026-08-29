@@ -40,18 +40,19 @@ const GlobalStyle = createGlobalStyle`
     .container {
         display: grid;
         min-height: 100vh;
-        grid-template-columns: 0.8fr repeat(3, 1fr);
+        grid-template-columns: 260px 1fr;
         grid-template-rows: auto 1fr;
-        grid-template-areas: 
-        'sidebar nav nav nav'
-        'sidebar main main main';
+        grid-template-areas:
+        'sidebar nav'
+        'sidebar main';
     }
 
     #sidebar {
-        background: #020509;
+        background: #0b0f19;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
         grid-area: sidebar;
         overflow-y: auto;
-        padding: 20px;
+        padding: 20px 16px;
         -webkit-transition: all 0.5s;
         transition: all 0.5s;
     }
@@ -69,13 +70,16 @@ const GlobalStyle = createGlobalStyle`
         position: fixed;
         top: 0;
         left: 0;
+        width: 260px;
+        max-width: 80vw;
         height: 100%;
-        background: #020509;
-        padding: 20px;
+        background: #0b0f19;
+        padding: 20px 16px;
         z-index: 9999 !important;
         overflow-y: auto;
         display: flex !important;
         flex-direction: column;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
     }
 
     .icon-responsive{

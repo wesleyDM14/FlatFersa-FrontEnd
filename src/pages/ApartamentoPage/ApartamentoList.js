@@ -3,17 +3,17 @@ import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { Formik, Form, Field } from "formik";
 import * as Yup from 'yup';
-import { FaEdit, FaTrash, FaList, FaMap, FaFileInvoice } from "react-icons/fa";
+import { FaEdit, FaTrash, FaList, FaMap, FaFileInvoice, FaDoorOpen } from "react-icons/fa";
 import { ThreeDots } from "react-loader-spinner";
 
 import { FormInput } from "../../components/FormLib";
 import { deleteApartamentoById, updateApartamento } from "../../services/apartamentoService";
 import Pagination from "../../components/Pagination";
 import { modalStyles } from "../../styles/ModalStyles";
+import { ListRow } from "../../components/ListRow";
 import LayoutPlanta from "./LayoutPlanta";
 
 import {
-    AdminPredioContainer,
     ApartamentoCounter,
     BackButton,
     ButtonGroup,
@@ -27,20 +27,20 @@ import {
     FormInputArea,
     FormInputLabelRequired,
     Limitador,
-    ListLabel,
     PredioListContainer,
-    PredioListHeader,
-    PredioSingleContainer,
-    PredioValue,
     RadioContainer,
     RadioItemContainer,
     RadioLabel,
-    SinglePredio,
     StyledFormArea,
-    StyledLabel,
     SubItensContainer,
     SubmitButton
 } from "./ApartamentoPage.styles";
+
+const STATUS_STYLE = {
+    VAGO: { icon: '#10b981', pillColor: '#059669', pillBg: '#d1fae5', label: 'Vago' },
+    OCUPADO: { icon: '#ef4444', pillColor: '#dc2626', pillBg: '#fee2e2', label: 'Ocupado' },
+    MANUTENCAO: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Manutenção' },
+};
 
 const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement('#root');
@@ -116,41 +116,32 @@ const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, ite
                 />
             ) : (
                 <>
-                    <PredioListHeader>
-                        <ListLabel>Número</ListLabel>
-                        <ListLabel>Prédio</ListLabel>
-                        <ListLabel>Status</ListLabel>
-                        <ListLabel>Opções</ListLabel>
-                    </PredioListHeader>
-
-                    {currentPageItems.map((apartamento) => (
-                        <SinglePredio key={apartamento.id} onClick={() => navigate(`/apartamentos/${apartamento.id}`)}>
-                            <PredioSingleContainer>
-                                <StyledLabel>Número: </StyledLabel>
-                                <PredioValue>{apartamento.numero}</PredioValue>
-                            </PredioSingleContainer>
-                            <PredioSingleContainer>
-                                <StyledLabel>Prédio: </StyledLabel>
-                                <PredioValue>{apartamento.predio?.nome}</PredioValue>
-                            </PredioSingleContainer>
-                            <PredioSingleContainer>
-                                <StyledLabel>Status: </StyledLabel>
-                                <PredioValue
-                                    style={{ color: apartamento.status === 'OCUPADO' ? '#ef4444' : '#10b981', fontWeight: 700 }}
-                                >
-                                    {apartamento.status}
-                                </PredioValue>
-                            </PredioSingleContainer>
-                            <AdminPredioContainer>
-                                <EditIcon onClick={(e) => { e.stopPropagation(); openEditModal(apartamento); }}>
-                                    <FaEdit />
-                                </EditIcon>
-                                <DeleteIcon onClick={(e) => { e.stopPropagation(); openDeleteModal(apartamento); }}>
-                                    <FaTrash />
-                                </DeleteIcon>
-                            </AdminPredioContainer>
-                        </SinglePredio>
-                    ))}
+                    {currentPageItems.map((apartamento) => {
+                        const st = STATUS_STYLE[apartamento.status] || STATUS_STYLE.VAGO;
+                        return (
+                            <ListRow
+                                key={apartamento.id}
+                                onClick={() => navigate(`/apartamentos/${apartamento.id}`)}
+                                icon={<FaDoorOpen />}
+                                iconColor={st.icon}
+                                title={`Apto ${apartamento.numero}`}
+                                subtitle={apartamento.predio?.nome}
+                                statusLabel={st.label}
+                                statusColor={st.pillColor}
+                                statusBg={st.pillBg}
+                                actions={
+                                    <>
+                                        <EditIcon onClick={() => openEditModal(apartamento)}>
+                                            <FaEdit />
+                                        </EditIcon>
+                                        <DeleteIcon onClick={() => openDeleteModal(apartamento)}>
+                                            <FaTrash />
+                                        </DeleteIcon>
+                                    </>
+                                }
+                            />
+                        );
+                    })}
 
                     <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />
                 </>

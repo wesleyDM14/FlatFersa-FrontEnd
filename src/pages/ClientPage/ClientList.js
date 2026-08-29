@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaWhatsapp } from "react-icons/fa";
+import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaUser, FaWhatsapp } from "react-icons/fa";
 import Modal from "react-modal";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
@@ -8,10 +8,10 @@ import { ThreeDots } from "react-loader-spinner";
 // Componentes
 import { FormInput, StyledDatePicker } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
+import { ListRow } from "../../components/ListRow";
 
 // Estilos
 import {
-    AdminPredioContainer,
     BackButton,
     ButtonGroup,
     ClientCounter,
@@ -31,19 +31,13 @@ import {
     ImgContainer,
     Limitador,
     LinkImgContainer,
-    ListLabel,
     PredioListContainer,
-    PredioListHeader,
-    PredioSingleContainer,
-    PredioValue,
-    SinglePredio,
     StyledFileArea,
     StyledFileIconContainer,
     StyledFileInput,
     StyledFileInputTitle,
     StyledFileLegend,
     StyledFormArea,
-    StyledLabel,
     SubItensContainer,
     SubmitButton
 } from "./ClientPage.styles";
@@ -69,6 +63,12 @@ import {
     updateClientById
 } from "../../services/clientService";
 
+const CLIENTE_STATUS_STYLE = {
+    APROVADO: { icon: '#10b981', pillColor: '#059669', pillBg: '#d1fae5', label: 'Aprovado' },
+    PENDENTE_APROVACAO: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Pendente' },
+    REPROVADO: { icon: '#ef4444', pillColor: '#dc2626', pillBg: '#fee2e2', label: 'Reprovado' },
+    BLOQUEADO: { icon: '#6b7280', pillColor: '#374151', pillBg: '#f3f4f6', label: 'Bloqueado' },
+};
 
 const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement(document.getElementById('root'));
@@ -133,62 +133,58 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
 
     return (
         <PredioListContainer>
-            <PredioListHeader>
-                <ListLabel>Nome</ListLabel>
-                <ListLabel className="hidden-responsive">Telefone</ListLabel>
-                <ListLabel>Status</ListLabel>
-                <ListLabel>Opções</ListLabel>
-            </PredioListHeader>
             {
-                currentPageItems.map((cliente) => (
-                    <SinglePredio
-                        key={cliente.id}
-                        onClick={() => {
-                            if (cliente.statusCadastro === 'PENDENTE_APROVACAO') {
-                                setSelectedClient(cliente);
-                                openSolicitacaoModal();
-                            } else {
-                                // navigate(`/clientes/${cliente.id}`); // Futura visualização de perfil
+                currentPageItems.map((cliente) => {
+                    const st = CLIENTE_STATUS_STYLE[cliente.statusCadastro] || CLIENTE_STATUS_STYLE.PENDENTE_APROVACAO;
+                    return (
+                        <ListRow
+                            key={cliente.id}
+                            onClick={() => {
+                                if (cliente.statusCadastro === 'PENDENTE_APROVACAO') {
+                                    setSelectedClient(cliente);
+                                    openSolicitacaoModal();
+                                } else {
+                                    navigate(`/clientes/${cliente.id}`);
+                                }
+                            }}
+                            icon={<FaUser />}
+                            iconColor={st.icon}
+                            title={cliente.nome}
+                            subtitle={cliente.telefone || 'Sem telefone cadastrado'}
+                            statusLabel={st.label}
+                            statusColor={st.pillColor}
+                            statusBg={st.pillBg}
+                            actions={
+                                <>
+                                    {cliente.telefone && (
+                                        <a
+                                            href={`https://wa.me/55${cliente.telefone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{ color: '#25D366', display: 'flex' }}
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
+                                            <FaWhatsapp />
+                                        </a>
+                                    )}
+                                    <EditIcon onClick={() => {
+                                        setSelectedClient(cliente);
+                                        setStartDate(cliente.dataNascimento ? new Date(cliente.dataNascimento) : new Date());
+                                        openEditModal();
+                                    }}>
+                                        <FaEdit />
+                                    </EditIcon>
+                                    <DeleteIcon onClick={() => {
+                                        setSelectedClient(cliente);
+                                        openDeleteModal();
+                                    }}>
+                                        <FaTrash />
+                                    </DeleteIcon>
+                                </>
                             }
-                        }}
-                    >
-                        <PredioSingleContainer>
-                            <StyledLabel>Nome: </StyledLabel>
-                            <PredioValue>{cliente.nome}</PredioValue>
-                        </PredioSingleContainer>
-                        <PredioSingleContainer className="hidden-responsive">
-                            <StyledLabel><FaWhatsapp /> </StyledLabel>
-                            <PredioValue
-                                href={`https://wa.me/55${cliente.telefone ? cliente.telefone.replace(/\D/g, '') : ''}`}
-                                target='_blank'
-                                onClick={(event) => event.stopPropagation()}
-                            >
-                                {cliente.telefone || 'N/A'}
-                            </PredioValue>
-                        </PredioSingleContainer>
-                        <PredioSingleContainer>
-                            <StyledLabel> Status: </StyledLabel>
-                            <PredioValue>{cliente.statusCadastro}</PredioValue>
-                        </PredioSingleContainer>
-                        <AdminPredioContainer>
-                            <EditIcon onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedClient(cliente);
-                                setStartDate(cliente.dataNascimento ? new Date(cliente.dataNascimento) : new Date());
-                                openEditModal();
-                            }}>
-                                <FaEdit />
-                            </EditIcon>
-                            <DeleteIcon onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedClient(cliente);
-                                openDeleteModal();
-                            }}>
-                                <FaTrash />
-                            </DeleteIcon>
-                        </AdminPredioContainer>
-                    </SinglePredio >
-                ))
+                        />
+                    );
+                })
             }
 
             {/* MODAL DE DELETAR */}

@@ -15,7 +15,8 @@ export const LoadingContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 300px;
+    width: 100%;
+    min-height: 70vh;
 `;
 
 export const HeaderPerfilContainer = styled.div`

@@ -247,13 +247,12 @@ export const Limitador = styled.div`
 `;
 
 export const LoadingContainer = styled.div`
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-top: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     grid-area: main;
+    width: 100%;
+    min-height: 70vh;
 
     @media only screen and (max-width: 978px){
         padding: 0 10px;
