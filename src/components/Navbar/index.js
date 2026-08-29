@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaHome, FaPowerOff, FaUserCog, FaBell } from 'react-icons/fa';
+import { FaBars, FaHome, FaPowerOff, FaUserCog, FaBell, FaBellSlash, FaFileInvoiceDollar, FaTools, FaCog } from 'react-icons/fa';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
     NavbarContainer,
     NavbarShowIcon,
@@ -17,13 +19,25 @@ import {
     NotificationDropdown,
     NotificationHeader,
     NotificationItem,
+    NotificationIconBox,
+    NotificationTextColumn,
+    NotificationTitleRow,
     NotificationTitle,
+    UnreadDot,
     NotificationContent,
+    NotificationTime,
     NotificationEmpty,
 } from './Navbar.styles';
 
 import defaultAvatar from '../../assets/user.png';
 import { getMeusAvisos, marcarAvisoComoLido } from '../../services/avisoService';
+
+const AVISO_TIPO_STYLE = {
+    GERAL: { icon: <FaBell />, color: '#3b82f6' },
+    COBRANCA: { icon: <FaFileInvoiceDollar />, color: '#f59e0b' },
+    MANUTENCAO: { icon: <FaTools />, color: '#10b981' },
+    SISTEMA: { icon: <FaCog />, color: '#6b7280' },
+};
 
 const Navbar = ({ openSidebar, logout, user }) => {
     const navigate = useNavigate();
@@ -90,18 +104,35 @@ const Navbar = ({ openSidebar, logout, user }) => {
                             </NotificationHeader>
 
                             {avisos.length === 0 ? (
-                                <NotificationEmpty>Nenhuma notificação por aqui.</NotificationEmpty>
+                                <NotificationEmpty>
+                                    <FaBellSlash />
+                                    Nenhuma notificação por aqui.
+                                </NotificationEmpty>
                             ) : (
-                                avisos.slice(0, 15).map(aviso => (
-                                    <NotificationItem
-                                        key={aviso.id}
-                                        $unread={!aviso.lido}
-                                        onClick={() => handleReadAviso(aviso)}
-                                    >
-                                        <NotificationTitle>{aviso.titulo}</NotificationTitle>
-                                        <NotificationContent>{aviso.conteudo}</NotificationContent>
-                                    </NotificationItem>
-                                ))
+                                avisos.slice(0, 15).map(aviso => {
+                                    const st = AVISO_TIPO_STYLE[aviso.tipo] || AVISO_TIPO_STYLE.GERAL;
+                                    return (
+                                        <NotificationItem
+                                            key={aviso.id}
+                                            $unread={!aviso.lido}
+                                            onClick={() => handleReadAviso(aviso)}
+                                        >
+                                            <NotificationIconBox $color={st.color}>{st.icon}</NotificationIconBox>
+                                            <NotificationTextColumn>
+                                                <NotificationTitleRow>
+                                                    <NotificationTitle>{aviso.titulo}</NotificationTitle>
+                                                    {!aviso.lido && <UnreadDot />}
+                                                </NotificationTitleRow>
+                                                <NotificationContent>{aviso.conteudo}</NotificationContent>
+                                                {aviso.createdAt && (
+                                                    <NotificationTime>
+                                                        {formatDistanceToNow(new Date(aviso.createdAt), { addSuffix: true, locale: ptBR })}
+                                                    </NotificationTime>
+                                                )}
+                                            </NotificationTextColumn>
+                                        </NotificationItem>
+                                    );
+                                })
                             )}
                         </NotificationDropdown>
                     )}
