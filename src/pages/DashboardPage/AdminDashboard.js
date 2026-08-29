@@ -15,6 +15,7 @@ import {
     StatNumber,
     StatBadge,
     RecentActivityTable,
+    StatusPill,
     LoadingContainer,
 } from "./DashboardPage.styles";
 
@@ -119,6 +120,15 @@ const AdminDashboard = () => {
 
     const formatMoney = (value) => (value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
+    const FATURA_STATUS_LABELS = {
+        PAGO: 'Pago',
+        PENDENTE: 'Pendente',
+        ATRASADO: 'Atrasado',
+        EM_ANALISE: 'Em Análise',
+        CANCELADO: 'Cancelado',
+        CONTESTADO: 'Contestado',
+    };
+
     return (
         <>
             <StatsGrid>
@@ -194,28 +204,36 @@ const AdminDashboard = () => {
             </ChartsGrid>
 
             <ChartCard style={{ minHeight: 'auto' }}>
-                <h3>Contratos Vencendo nos Próximos 30 Dias</h3>
+                <h3>Faturas Vencendo / Atrasadas</h3>
                 <RecentActivityTable>
                     <thead>
                         <tr>
                             <th>Cliente</th>
                             <th>Apartamento</th>
-                            <th>Término</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.alerts?.contratosVencendo?.length > 0 ? (
-                            data.alerts.contratosVencendo.map((item) => (
-                                <tr key={item.id} style={{ cursor: 'pointer' }} onClick={() => navigate('/contratos')}>
+                        {data.alerts?.faturasVencendo?.length > 0 ? (
+                            data.alerts.faturasVencendo.map((item) => (
+                                <tr key={item.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/faturas/${item.id}`)}>
                                     <td style={{ fontWeight: 500 }}>{item.cliente}</td>
                                     <td>{item.apartamento}</td>
                                     <td>{new Date(item.vencimento).toLocaleDateString('pt-BR')}</td>
+                                    <td>R$ {formatMoney(item.valor)}</td>
+                                    <td>
+                                        <StatusPill status={item.status}>
+                                            {FATURA_STATUS_LABELS[item.status] || item.status}
+                                        </StatusPill>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="3" style={{ textAlign: "center", padding: "2rem", color: "#9ca3af" }}>
-                                    Nenhum contrato vencendo nos próximos 30 dias.
+                                <td colSpan="5" style={{ textAlign: "center", padding: "2rem", color: "#9ca3af" }}>
+                                    Nenhuma fatura vencendo ou atrasada no momento.
                                 </td>
                             </tr>
                         )}
