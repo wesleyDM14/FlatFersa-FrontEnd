@@ -12,7 +12,6 @@ import { logoutUser } from "../../services/userService";
 
 // Estilos
 import {
-    Container,
     MainContent,
     DashboardHeader,
     LoadingContainer
@@ -39,7 +38,7 @@ const DashboardPage = ({ user }) => {
     };
 
     return (
-        <Container>
+        <div className="container">
             <Sidebar
                 sidebarOpen={sidebarOpen}
                 closeSidebar={() => setSidebarOpen(false)}
@@ -48,12 +47,6 @@ const DashboardPage = ({ user }) => {
             />
 
             <MainContent>
-                <Navbar
-                    openSidebar={() => setSidebarOpen(true)}
-                    user={user}
-                    logout={handleLogout}
-                />
-
                 <DashboardHeader>
                     <div>
                         <h1>Olá, {user.name?.split(' ')[0] || 'Usuário'} 👋</h1>
@@ -72,7 +65,9 @@ const DashboardPage = ({ user }) => {
                 )}
 
             </MainContent>
-        </Container>
+
+            <Navbar openSidebar={() => setSidebarOpen(true)} user={user} logout={handleLogout} />
+        </div>
     );
 }
 

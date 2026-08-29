@@ -1,21 +1,14 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
-    display: flex;
-    min-height: 100vh;
-    background-color: #f3f4f6;
-    font-family: 'Inter', sans-serif;
-`;
-
 export const MainContent = styled.main`
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    height: 100vh;
+    grid-area: main;
+    padding: 20px 30px;
+    margin-top: 15px;
+    margin-bottom: 28px;
     box-sizing: border-box;
 
     @media (max-width: 768px) {
-        padding: 1rem;
+        padding: 15px;
         padding-bottom: 80px;
     }
 `;
