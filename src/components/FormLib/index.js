@@ -126,7 +126,6 @@ export const PredioSelect = ({ predios, setSelectedPredio, setLoading }) => {
 
     return (
         <StyledSelectArea>
-            <StyledSelectLabel>Prédio</StyledSelectLabel>
             <Select
                 options={options}
                 placeholder={'Selecione o Prédio do Apartamento'}
@@ -185,7 +184,6 @@ export const ClientSelect = ({ clientes, setSelectedClient }) => {
 
     return (
         <StyledSelectArea>
-            <StyledSelectLabel>Cliente</StyledSelectLabel>
             <Select
                 options={options}
                 placeholder={'Selecione o Cliente'}
@@ -244,7 +242,6 @@ export const ApartamentoSelect = ({ apartamentos, setSelectedApartamento }) => {
 
     return (
         <StyledSelectArea>
-            <StyledSelectLabel>Apartamento</StyledSelectLabel>
             <Select
                 options={options}
                 placeholder={'Selecione o Número do Apartamento'}
@@ -331,7 +328,7 @@ export const FinalidadeSelected = ({ handleChange, initialValue, ...props }) => 
     const options = useMemo(() => [
         { label: 'Comercial', value: 'COMERCIAL' },
         { label: 'Residencial', value: 'RESIDENCIAL' },
-        { label: 'Rural', value: 'RURAL' },
+        { label: 'Misto', value: 'MISTO' },
     ], []);
 
     useEffect(() => {
@@ -347,7 +344,6 @@ export const FinalidadeSelected = ({ handleChange, initialValue, ...props }) => 
 
     return (
         <StyledSelectArea>
-            <StyledSelectLabel>Finalidade do Imóvel</StyledSelectLabel>
             <Select
                 options={options}
                 placeholder={'Selecionar opção desejada'}
