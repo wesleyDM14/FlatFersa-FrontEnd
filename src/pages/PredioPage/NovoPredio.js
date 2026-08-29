@@ -34,7 +34,6 @@ import {
     SubItensContainer,
     Limitador,
     LimitadorAlt,
-    LoadingContainer // Caso precise
 } from './PredioPage.styles';
 
 const NovoPredio = ({ user }) => {
@@ -83,8 +82,8 @@ const NovoPredio = ({ user }) => {
                                 cidade: '',
                                 estado: '',
                                 bairro: '',
-                                numApt: 0,
-                                kwhPrice: 0,
+                                diaVencimentoPadrao: 5,
+                                precoKwhAtual: 0,
                                 finalidade: '',
                             }}
                             validationSchema={
@@ -94,8 +93,8 @@ const NovoPredio = ({ user }) => {
                                     cidade: Yup.string().required("Obrigatório"),
                                     estado: Yup.string().required("Obrigatório").min(2, 'Min 2 letras').max(2, 'Use a sigla (ex: SP)'),
                                     bairro: Yup.string().required('Obrigatório'),
-                                    numApt: Yup.number().required('Obrigatório').min(1, 'Mínimo 1'),
-                                    kwhPrice: Yup.number().required('Obrigatório'),
+                                    diaVencimentoPadrao: Yup.number().required('Obrigatório').min(1).max(31),
+                                    precoKwhAtual: Yup.number().required('Obrigatório'),
                                 })
                             }
                             onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -151,9 +150,9 @@ const NovoPredio = ({ user }) => {
                                             {/* Linha 1: Qnt Apts e Estado */}
                                             <SubItensContainer>
                                                 <FormInputArea>
-                                                    <FormInputLabelRequired>Qtd. Apts</FormInputLabelRequired>
+                                                    <FormInputLabelRequired>Dia Vencimento Padrão</FormInputLabelRequired>
                                                     <Limitador>
-                                                        <FormInput type="number" name='numApt' min='0' />
+                                                        <FormInput type="number" name='diaVencimentoPadrao' min='1' max='31' />
                                                     </Limitador>
                                                 </FormInputArea>
 
@@ -170,7 +169,7 @@ const NovoPredio = ({ user }) => {
                                                 <FormInputArea>
                                                     <FormInputLabelRequired>Valor kWh (R$)</FormInputLabelRequired>
                                                     <LimitadorAlt>
-                                                        <FormInput type="number" name='kwhPrice' step='0.01' min='0' />
+                                                        <FormInput type="number" name='precoKwhAtual' step='0.01' min='0' />
                                                     </LimitadorAlt>
                                                 </FormInputArea>
 

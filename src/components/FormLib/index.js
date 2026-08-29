@@ -175,10 +175,8 @@ export const ClientSelect = ({ clientes, setSelectedClient }) => {
             let optionsTmp = [];
             for (let index = 0; index < clientes.length; index++) {
                 const element = clientes[index];
-                if (element.statusClient === 'ATIVO') {
-                    let temp = { label: element.name, value: element.id };
-                    optionsTmp.push(temp);
-                }
+                let temp = { label: element.nome, value: element.id };
+                optionsTmp.push(temp);
             }
             setOptions(optionsTmp);
         }

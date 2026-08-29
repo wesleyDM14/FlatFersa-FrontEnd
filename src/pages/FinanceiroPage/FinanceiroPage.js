@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
 import { ThreeDots } from "react-loader-spinner";
@@ -10,7 +10,7 @@ import SearchBar from "../../components/SearchBar";
 import ParcelaList from "./ParcelaList";
 
 import { logoutUser } from '../../services/userService';
-import { getParcelas } from "../../services/financeiroService";
+import { getFaturas } from "../../services/financeiroService";
 
 import {
     MainFinanceiroContainer,
@@ -50,33 +50,34 @@ const FinanceiroPage = ({ user }) => {
     const handleLogout = () => logoutUser(navigate);
 
     // Carrega dados
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const isAdmin = user.role === 'ADMIN' || user.isAdmin === true;
-            const data = await getParcelas(isAdmin);
+            const isAdmin = user.role === 'ADMIN';
+            const data = await getFaturas(isAdmin);
             setAllParcelas(data || []);
         } catch (error) {
-            console.error("Erro ao carregar parcelas", error);
+            console.error("Erro ao carregar faturas", error);
         } finally {
             setLoading(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     useEffect(() => {
         if (user && user.id) {
             fetchData();
         }
-    }, [user]);
+    }, [user, fetchData]);
 
     // Calcular contadores (Memoizado para performance)
     const counts = React.useMemo(() => {
         return {
             total: allParcelas.length,
-            pagos: allParcelas.filter(p => p.statusPagamento === 'PAGO').length,
-            pendentes: allParcelas.filter(p => p.statusPagamento === 'PENDENTE').length,
-            atrasados: allParcelas.filter(p => p.statusPagamento === 'ATRASADO').length,
-            aguardando: allParcelas.filter(p => p.statusPagamento === 'AGUARDANDO').length,
+            pagos: allParcelas.filter(p => p.status === 'PAGO').length,
+            pendentes: allParcelas.filter(p => p.status === 'PENDENTE').length,
+            atrasados: allParcelas.filter(p => p.status === 'ATRASADO').length,
+            emAnalise: allParcelas.filter(p => p.status === 'EM_ANALISE').length,
         };
     }, [allParcelas]);
 
@@ -86,16 +87,16 @@ const FinanceiroPage = ({ user }) => {
 
         // 1. Filtro do Card
         if (filterType !== 'TOTAL') {
-            list = list.filter(p => p.statusPagamento === filterType);
+            list = list.filter(p => p.status === filterType);
         }
 
         // 2. Filtro de Busca
         if (search) {
             const term = search.toLowerCase();
             list = list.filter(p =>
-                p.Contract?.cliente?.name?.toLowerCase().includes(term) || // Nome Cliente
-                p.dataVencimento?.toLowerCase().includes(term) ||          // Data
-                p.statusPagamento?.toLowerCase().includes(term)            // Status
+                p.contrato?.cliente?.nome?.toLowerCase().includes(term) ||
+                new Date(p.dataVencimento).toLocaleDateString('pt-BR').includes(term) ||
+                p.status?.toLowerCase().includes(term)
             );
         }
 
@@ -115,7 +116,7 @@ const FinanceiroPage = ({ user }) => {
 
     if (!user) return <LoadingContainer><ThreeDots color="#4e4e4e" /></LoadingContainer>;
 
-    const isAdmin = user.role === 'ADMIN' || user.isAdmin === true;
+    const isAdmin = user.role === 'ADMIN';
 
     return (
         <div className="container">
@@ -165,13 +166,13 @@ const FinanceiroPage = ({ user }) => {
 
                             {isAdmin && (
                                 <Card
-                                    onClick={() => handleCardClick('AGUARDANDO')}
-                                    className={filterType === 'AGUARDANDO' ? 'active' : ''}
+                                    onClick={() => handleCardClick('EM_ANALISE')}
+                                    className={filterType === 'EM_ANALISE' ? 'active' : ''}
                                 >
-                                    <CardTitle>Aguardando</CardTitle>
+                                    <CardTitle>Em Análise</CardTitle>
                                     <CardIconContainer>
                                         <FaSearch />
-                                        <FinanceiroCounter>{counts.aguardando}</FinanceiroCounter>
+                                        <FinanceiroCounter>{counts.emAnalise}</FinanceiroCounter>
                                     </CardIconContainer>
                                 </Card>
                             )}

@@ -1,155 +1,78 @@
-import axios from "axios";
-import { sessionService } from "redux-react-session";
-
-// Importe suas imagens de assets aqui se precisar usar no frontend, 
-// mas geralmente imagens estáticas ficam no componente.
-// Vou retornar strings de status para o componente decidir qual imagem mostrar.
-
-const api = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
-});
-
-// Interceptor
-api.interceptors.request.use(async (config) => {
-    try {
-        const session = await sessionService.loadSession();
-        if (session && session.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-        }
-    } catch (err) {
-        console.error("Erro sessão", err);
-    }
-    return config;
-});
+import api from "./api";
+import { getMeusContratos } from "./contratoService";
 
 // --- LISTAGEM ---
-export const getParcelas = async (isAdmin) => {
-    try {
-        const endpoint = isAdmin ? '/aluguel' : '/aluguel-cliente';
-        const response = await api.get(endpoint);
-
-        // Retorna os dados puros (array de parcelas).
-        // Se for cliente, a API antiga retornava array dentro de array? 
-        // Vou tratar para garantir que retorne sempre um array plano.
-        const data = response.data;
-        if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
-            return data[0]; // Correção para estrutura aninhada antiga
-        }
-        return data;
-
-    } catch (err) {
-        console.error(err);
-        throw err; // Lança erro para o componente tratar
+// Admin vê todas as faturas do sistema. Cliente vê as faturas dos seus próprios contratos
+// (o backend não expõe uma listagem de faturas para o cliente, elas já vêm dentro de /me/contratos).
+export const getFaturas = async (isAdmin) => {
+    if (isAdmin) {
+        const response = await api.get('/faturas');
+        return response.data;
     }
+
+    const contratos = await getMeusContratos();
+    const faturas = [];
+    contratos.forEach(contrato => {
+        (contrato.faturas || []).forEach(fatura => {
+            faturas.push({ ...fatura, contrato });
+        });
+    });
+    return faturas;
 };
 
 // --- DETALHES ---
-export const getParcelaById = async (prestacaoId) => {
-    try {
-        // Busca dados da parcela
-        const resParcela = await api.get(`/aluguel/${prestacaoId}`);
-        // Busca infos extras (contrato, etc)
-        const resInfos = await api.get(`/aluguel/infos/${prestacaoId}`);
-
-        return {
-            parcela: resParcela.data,
-            infos: resInfos.data
-        };
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
+export const getFaturaById = async (faturaId) => {
+    const response = await api.get(`/faturas/${faturaId}`);
+    return response.data;
 };
 
 // --- PIX ---
-export const gerarCodigoPix = async (prestacaoId) => {
+export const gerarCodigoPix = async (faturaId) => {
     try {
-        const response = await api.post('/aluguel/generateQrCode', { prestacaoId });
-        return response.data; // { status, base64, payload }
+        const response = await api.get(`/faturas/${faturaId}/pix`);
+        return response.data; // { payload, base64 }
     } catch (err) {
         console.error(err);
         return null;
     }
 };
 
-// --- AÇÕES ---
-export const registrarLeitura = async (data, closeModal) => {
-    try {
-        await api.put(`/aluguel/${data.prestacaoId}`, data);
-        alert("Leitura registrada com sucesso!");
-        if (closeModal) closeModal();
-    } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Erro ao registrar leitura");
-    }
+// --- LEITURA DE ENERGIA (ADMIN) ---
+export const registrarLeitura = async (faturaId, leituraAtual, arquivo) => {
+    const formData = new FormData();
+    formData.append('leituraAtual', leituraAtual);
+    if (arquivo) formData.append('file', arquivo);
+
+    const response = await api.put(`/faturas/${faturaId}/leitura`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
 };
 
-export const registrarPagamento = async (data, closeModal) => {
-    try {
-        const formData = new FormData();
-        formData.append('comprovante', data.comprovante);
-
-        await api.put(`/aluguel/pagamento/${data.prestacaoId}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-
-        alert("Comprovante enviado com sucesso! Aguarde aprovação.");
-        if (closeModal) closeModal();
-    } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Erro ao enviar comprovante");
-    }
+// --- EDIÇÃO MANUAL DE VALORES (ADMIN) ---
+export const editarValoresFatura = async (faturaId, { multa, acrescimo, desconto, observacao }) => {
+    const response = await api.put(`/faturas/${faturaId}/valores`, { multa, acrescimo, desconto, observacao });
+    return response.data;
 };
 
-export const aprovarPagamento = async (prestacaoId) => {
-    try {
-        await api.put(`/aluguel/aprovar/${prestacaoId}`, { prestacaoId });
-        alert("Pagamento Aprovado!");
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao aprovar.");
-    }
+// --- COMPROVANTE (CLIENTE) ---
+export const enviarComprovante = async (faturaId, arquivo) => {
+    const formData = new FormData();
+    formData.append('file', arquivo);
+
+    const response = await api.post(`/faturas/${faturaId}/comprovante`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
 };
 
-export const reprovarPagamento = async (prestacaoId) => {
-    try {
-        await api.put(`/aluguel/reprovar/${prestacaoId}`, { prestacaoId });
-        alert("Pagamento Reprovado.");
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao reprovar.");
-    }
+// --- APROVAÇÃO DE PAGAMENTO (ADMIN) ---
+export const aprovarPagamento = async (faturaId) => {
+    const response = await api.put(`/faturas/${faturaId}/aprovar`);
+    return response.data;
 };
 
-export const marcarPago = async (prestacaoId) => {
-    try {
-        await api.put(`/aluguel/marcarPago/${prestacaoId}`, { prestacaoId });
-        alert("Marcado como PAGO manualmente.");
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao marcar como pago.");
-    }
-};
-
-export const marcarPendente = async (prestacaoId) => {
-    try {
-        await api.put(`/aluguel/marcarPendente/${prestacaoId}`, { prestacaoId });
-        alert("Retornado para PENDENTE.");
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao alterar status.");
-    }
-};
-
-// --- COMPROVANTE ---
-export const getComprovante = async (parcelaId) => {
-    try {
-        const response = await api.get(`/linkAluguel/${parcelaId}`, {
-            responseType: "blob"
-        });
-        return URL.createObjectURL(response.data);
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
+export const reprovarPagamento = async (faturaId, motivo) => {
+    const response = await api.put(`/faturas/${faturaId}/reprovar`, { motivo });
+    return response.data;
 };

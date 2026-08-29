@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { ThreeDots } from "react-loader-spinner";
-import { FaBuilding, FaMapMarkerAlt, FaCity, FaBolt, FaArrowLeft, FaDoorOpen, FaUser } from "react-icons/fa";
+import { FaBuilding, FaMapMarkerAlt, FaArrowLeft, FaDoorOpen, FaUser } from "react-icons/fa";
 
 // Componentes
 import Sidebar from "../../components/Sidebar";

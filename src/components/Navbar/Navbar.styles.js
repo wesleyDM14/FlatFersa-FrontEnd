@@ -133,6 +133,92 @@ export const Pinguelo = styled.div`
     display: none; 
 `;
 
+export const BellContainer = styled.div`
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #64748b;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+        background-color: #f1f5f9;
+        color: #3b82f6;
+    }
+`;
+
+export const BellBadge = styled.span`
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+`;
+
+export const NotificationDropdown = styled(DropDownMenu)`
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+`;
+
+export const NotificationHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 5px;
+
+    span:last-child {
+        font-size: 0.75rem;
+        color: #3b82f6;
+        cursor: pointer;
+        font-weight: 600;
+    }
+`;
+
+export const NotificationItem = styled.div`
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: ${props => props.$unread ? '#eff6ff' : 'transparent'};
+
+    &:hover {
+        background-color: #f8fafc;
+    }
+`;
+
+export const NotificationTitle = styled.div`
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+`;
+
+export const NotificationContent = styled.div`
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 3px;
+`;
+
+export const NotificationEmpty = styled.div`
+    text-align: center;
+    padding: 30px 10px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+`;
+
 export const DropDownItem = styled.div`
     display: flex;
     align-items: center;

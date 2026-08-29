@@ -10,14 +10,13 @@ import { ThreeDots } from "react-loader-spinner";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
-import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker, StyledSelect } from "../../components/FormLib";
+import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker } from "../../components/FormLib";
 
-// Serviços (Atualizados para V2)
 import { logoutUser } from "../../services/userService";
 import { getPredios } from "../../services/predioService";
-import { getClientesForContract } from "../../services/clientService"; // Agora existe!
+import { getClientesForContract } from "../../services/clientService";
 import { getApartamentosByPredioId } from "../../services/apartamentoService";
-import { createContrato } from "../../services/contratoService";
+import { criarContratoDireto, solicitarContrato } from "../../services/contratoService";
 
 import { modalStyles } from "../../styles/ModalStyles";
 import {
@@ -33,48 +32,35 @@ const NovoContract = ({ user }) => {
     Modal.setAppElement('#root');
     const navigate = useNavigate();
 
-    // Estados
+    const isAdmin = user?.role === 'ADMIN';
+
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [loading2, setLoading2] = useState(true); // Loading específico para clientes
+    const [loadingClientes, setLoadingClientes] = useState(true);
 
-    // Dados para selects
     const [predios, setPredios] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [apartamentos, setApartamentos] = useState([]);
 
-    // Selecionados
     const [selectedPredio, setSelectedPredio] = useState(null);
     const [selectedClient, setSelectedClient] = useState(null);
     const [selectedApartamento, setSelectedApartamento] = useState({});
 
-    // Auxiliares
     const [loadingApartamentos, setLoadingApartamentos] = useState(false);
     const [modalAlertIsOpen, setModalAlertIsOpen] = useState(false);
 
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
-
-    const periocidade = [
-        { label: 'Anualmente', value: 'ANUALMENTE' },
-        { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
-    ];
 
     const handleLogout = () => logoutUser(navigate);
 
-    // Carregar Prédios e Clientes iniciais
     useEffect(() => {
         const fetchData = async () => {
-            if (user && user.accessToken) {
+            if (user && user.id) {
                 setLoading(true);
                 try {
-                    // Busca Prédios
                     await getPredios(setPredios);
-
-                    // Busca Clientes (Só se for Admin)
-                    if (user.isAdmin) {
-                        // V2: Não passa user, e passa setLoading2 para controle fino
-                        await getClientesForContract(setClientes, setLoading2);
+                    if (isAdmin) {
+                        await getClientesForContract(setClientes, setLoadingClientes);
                     }
                 } catch (e) {
                     console.error(e);
@@ -84,19 +70,17 @@ const NovoContract = ({ user }) => {
             }
         };
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
-    // Carregar Apartamentos quando prédio muda
     useEffect(() => {
         if (selectedPredio?.value) {
             setLoadingApartamentos(true);
-            // V2: Não passa user
             getApartamentosByPredioId(selectedPredio.value, setApartamentos)
                 .finally(() => setLoadingApartamentos(false));
         }
     }, [selectedPredio]);
 
-    // Alerta de Ocupado
     useEffect(() => {
         if (selectedApartamento?.status === 'OCUPADO') {
             setModalAlertIsOpen(true);
@@ -114,7 +98,7 @@ const NovoContract = ({ user }) => {
             ) : (
                 <MainContratoContainer>
                     <HeaderContratoContainer>
-                        <HeaderTitle>{user.isAdmin ? 'Adicionar Novo Contrato' : 'Solicitar Contrato'}</HeaderTitle>
+                        <HeaderTitle>{isAdmin ? 'Adicionar Novo Contrato' : 'Solicitar Contrato'}</HeaderTitle>
                     </HeaderContratoContainer>
 
                     <ContentContratoContainer>
@@ -128,22 +112,17 @@ const NovoContract = ({ user }) => {
                         <StyledFormArea>
                             <Formik
                                 initialValues={{
-                                    duracaoContrato: '',
-                                    diaVencimentoAluguel: '',
+                                    duracaoMeses: '',
+                                    diaVencimento: '',
                                     valorAluguel: '',
-                                    limiteKwh: '',
+                                    limiteKwhIsento: '',
                                     leituraInicial: '',
-                                    // Campos ocultos
-                                    dataInicio: new Date(),
-                                    aptId: '',
-                                    clienteId: '',
-                                    periocidade: ''
                                 }}
                                 validationSchema={Yup.object({
-                                    duracaoContrato: Yup.number().required('Obrigatório'),
-                                    diaVencimentoAluguel: Yup.number().required('Obrigatório').max(31),
-                                    // Se for Admin, valor é obrigatório
-                                    valorAluguel: user.isAdmin ? Yup.number().required('Obrigatório') : Yup.number(),
+                                    duracaoMeses: Yup.number().min(6, 'Mínimo de 6 meses').required('Obrigatório'),
+                                    diaVencimento: Yup.number().required('Obrigatório').max(31),
+                                    valorAluguel: isAdmin ? Yup.number().required('Obrigatório') : Yup.number(),
+                                    leituraInicial: isAdmin ? Yup.number().required('Obrigatório') : Yup.number(),
                                 })}
                                 onSubmit={async (values, { setSubmitting, setFieldError }) => {
                                     if (!selectedApartamento.id) {
@@ -152,22 +131,42 @@ const NovoContract = ({ user }) => {
                                         return;
                                     }
 
-                                    values.dataInicio = selectedDate;
-                                    values.aptId = selectedApartamento.id;
+                                    try {
+                                        if (isAdmin) {
+                                            if (!selectedClient?.value) {
+                                                alert("Selecione um cliente");
+                                                setSubmitting(false);
+                                                return;
+                                            }
 
-                                    if (user.isAdmin) {
-                                        if (!selectedClient?.value) {
-                                            alert("Selecione um cliente");
-                                            setSubmitting(false);
-                                            return;
+                                            await criarContratoDireto({
+                                                clienteId: selectedClient.value,
+                                                apartamentoId: selectedApartamento.id,
+                                                dataInicio: selectedDate,
+                                                duracaoMeses: values.duracaoMeses,
+                                                diaVencimento: values.diaVencimento,
+                                                valorAluguel: values.valorAluguel,
+                                                leituraInicial: values.leituraInicial,
+                                                limiteKwhIsento: values.limiteKwhIsento || 0
+                                            });
+                                        } else {
+                                            await solicitarContrato({
+                                                aptId: selectedApartamento.id,
+                                                dataInicio: selectedDate,
+                                                duracaoMeses: values.duracaoMeses,
+                                                diaVencimentoAluguel: values.diaVencimento
+                                            });
                                         }
-                                        values.clienteId = selectedClient.value;
-                                        values.periocidade = selectedPeriocidade.value;
-                                        values.leituraAtual = values.leituraInicial;
-                                    }
 
-                                    // V2: Não passa user
-                                    await createContrato(values, user.isAdmin, navigate, setSubmitting, setFieldError);
+                                        alert("Contrato criado com sucesso!");
+                                        navigate('/contratos');
+                                    } catch (err) {
+                                        const msg = err.response?.data?.message || "Erro ao salvar contrato";
+                                        setFieldError('valorAluguel', msg);
+                                        alert(msg);
+                                    } finally {
+                                        setSubmitting(false);
+                                    }
                                 }}
                             >
                                 {({ isSubmitting }) => (
@@ -182,11 +181,10 @@ const NovoContract = ({ user }) => {
                                                     />
                                                 </FormInputArea>
 
-                                                {/* Seleção de Cliente (Só Admin) */}
-                                                {user.isAdmin && (
+                                                {isAdmin && (
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>Cliente</FormInputLabelRequired>
-                                                        {loading2 ? <ThreeDots height={20} width={40} color="#999" /> : (
+                                                        {loadingClientes ? <ThreeDots height={20} width={40} color="#999" /> : (
                                                             <ClientSelect
                                                                 clientes={clientes}
                                                                 setSelectedClient={setSelectedClient}
@@ -205,7 +203,7 @@ const NovoContract = ({ user }) => {
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>Duração (meses)</FormInputLabelRequired>
                                                         <Limitador>
-                                                            <FormInput type="number" name="duracaoContrato" placeholder="Ex: 12" />
+                                                            <FormInput type="number" name="duracaoMeses" placeholder="Mín. 6" />
                                                         </Limitador>
                                                     </FormInputArea>
                                                 </SubItensContainer>
@@ -216,11 +214,11 @@ const NovoContract = ({ user }) => {
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>Dia Vencimento</FormInputLabelRequired>
                                                         <Limitador>
-                                                            <FormInput type="number" name="diaVencimentoAluguel" max="31" />
+                                                            <FormInput type="number" name="diaVencimento" max="31" />
                                                         </Limitador>
                                                     </FormInputArea>
 
-                                                    {user.isAdmin && (
+                                                    {isAdmin && (
                                                         <FormInputArea>
                                                             <FormInputLabelRequired>Valor Aluguel (R$)</FormInputLabelRequired>
                                                             <Limitador>
@@ -230,37 +228,30 @@ const NovoContract = ({ user }) => {
                                                     )}
                                                 </SubItensContainer>
 
-                                                {user.isAdmin && (
+                                                {isAdmin && (
                                                     <SubItensContainer>
                                                         <FormInputArea>
-                                                            <FormInputLabelRequired>Limite KWh</FormInputLabelRequired>
+                                                            <FormInputLabelRequired>Limite kWh Isento</FormInputLabelRequired>
                                                             <Limitador>
-                                                                <FormInput type="number" name="limiteKwh" />
+                                                                <FormInput type="number" name="limiteKwhIsento" />
                                                             </Limitador>
                                                         </FormInputArea>
                                                         <FormInputArea>
-                                                            <FormInputLabelRequired>Reajuste</FormInputLabelRequired>
-                                                            <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Periocidade' />
+                                                            <FormInputLabelRequired>Leitura Inicial (kWh)</FormInputLabelRequired>
+                                                            <Limitador>
+                                                                <FormInput type="number" name="leituraInicial" />
+                                                            </Limitador>
                                                         </FormInputArea>
                                                     </SubItensContainer>
-                                                )}
-
-                                                {user.isAdmin && (
-                                                    <FormInputArea>
-                                                        <FormInputLabelRequired>Leitura Inicial (KWh)</FormInputLabelRequired>
-                                                        <FormInput type="number" name="leituraInicial" />
-                                                    </FormInputArea>
                                                 )}
                                             </FormColum>
                                         </FormContent>
 
-                                        {/* SELEÇÃO DE APARTAMENTO (Lógica FlatFersa vs Lista) */}
                                         {selectedPredio && (
                                             loadingApartamentos ? (
                                                 <LoadingContainer><ThreeDots color='#4e4e4e' /></LoadingContainer>
                                             ) : (
                                                 selectedPredio.label.toLowerCase().includes('fersa') ? (
-                                                    // Layout Visual para Flat Fersa
                                                     <>
                                                         <SelectedAptTitleContainer>
                                                             <SelectedAptTitle>
@@ -275,12 +266,14 @@ const NovoContract = ({ user }) => {
                                                         />
                                                     </>
                                                 ) : (
-                                                    // Dropdown Padrão para outros prédios
                                                     <FormInputArea>
                                                         <FormInputLabelRequired>Apartamento</FormInputLabelRequired>
                                                         <ApartamentoSelect
                                                             apartamentos={apartamentos}
-                                                            setSelectedApartamento={setSelectedApartamento}
+                                                            setSelectedApartamento={(option) => {
+                                                                const apto = apartamentos.find(a => a.id === option?.value);
+                                                                setSelectedApartamento(apto || {});
+                                                            }}
                                                         />
                                                     </FormInputArea>
                                                 )
@@ -301,7 +294,6 @@ const NovoContract = ({ user }) => {
                 </MainContratoContainer>
             )}
 
-            {/* Modal de Alerta de Ocupado */}
             <Modal isOpen={modalAlertIsOpen} onRequestClose={() => setModalAlertIsOpen(false)} style={modalStyles}>
                 <AlertContainer>
                     <AlertText>Este apartamento já está ocupado!</AlertText>

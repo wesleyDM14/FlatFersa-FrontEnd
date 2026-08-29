@@ -8,7 +8,6 @@ import {
     FaDoorOpen,
     FaSnowflake,
     FaMoneyBillWave,
-    FaUserCheck,
     FaHistory
 } from "react-icons/fa";
 
@@ -172,9 +171,9 @@ const ApartamentoInfos = ({ user }) => {
                                 <StatusBadge $occupied={apartamento.status === 'OCUPADO'}>
                                     {apartamento.status}
                                 </StatusBadge>
-                                {apartamento.status === 'OCUPADO' && apartamento.inquilino && (
+                                {apartamento.status === 'OCUPADO' && apartamento.contratos?.[0]?.cliente && (
                                     <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#555' }}>
-                                        Ocupado por: <strong>{apartamento.inquilino.nome}</strong>
+                                        Ocupado por: <strong>{apartamento.contratos[0].cliente.nome}</strong>
                                     </div>
                                 )}
                             </DetailCard>

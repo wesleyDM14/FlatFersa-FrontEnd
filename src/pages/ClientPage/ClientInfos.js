@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import { ThreeDots } from "react-loader-spinner";
-import { FaUser, FaPhone, FaIdCard, FaMapMarkerAlt, FaArrowLeft, FaCalendar } from "react-icons/fa";
+import { FaUser, FaPhone, FaIdCard, FaArrowLeft } from "react-icons/fa";
 
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
@@ -95,7 +95,7 @@ const ClientInfos = ({ user }) => {
                 <HeaderClientContainer>
                     <div>
                         <HeaderTitle>Detalhes do Cliente</HeaderTitle>
-                        {!loading && client && <span style={{ color: '#666' }}>{client.name}</span>}
+                        {!loading && client && <span style={{ color: '#666' }}>{client.nome}</span>}
                     </div>
                     <AddClientHeaderButton onClick={() => navigate('/clientes')}>
                         <FaArrowLeft color='#555' />
@@ -111,16 +111,16 @@ const ClientInfos = ({ user }) => {
                         <DetailsContainer>
                             <DetailCard>
                                 <Label>Nome Completo</Label>
-                                <Value>{client.name}</Value>
+                                <Value>{client.nome}</Value>
                             </DetailCard>
                             <DetailCard>
                                 <Label>Email</Label>
-                                <Value>{client.email}</Value>
+                                <Value>{client.user?.email}</Value>
                             </DetailCard>
                             <DetailCard>
                                 <Label>Status</Label>
-                                <Value style={{ color: client.statusClient === 'ATIVO' ? 'green' : 'orange' }}>
-                                    {client.statusClient}
+                                <Value style={{ color: client.statusCadastro === 'APROVADO' ? 'green' : 'orange' }}>
+                                    {client.statusCadastro}
                                 </Value>
                             </DetailCard>
                         </DetailsContainer>
@@ -137,7 +137,7 @@ const ClientInfos = ({ user }) => {
                             </DetailCard>
                             <DetailCard>
                                 <Label>Data de Nascimento</Label>
-                                <Value>{new Date(client.dateBirth).toLocaleDateString()}</Value>
+                                <Value>{new Date(client.dataNascimento).toLocaleDateString('pt-BR')}</Value>
                             </DetailCard>
                         </DetailsContainer>
 
@@ -145,11 +145,11 @@ const ClientInfos = ({ user }) => {
                         <DetailsContainer>
                             <DetailCard>
                                 <Label>Telefone</Label>
-                                <Value>{client.phone}</Value>
+                                <Value>{client.telefone}</Value>
                             </DetailCard>
                             <DetailCard>
                                 <Label>Endereço</Label>
-                                <Value>{client.address}</Value>
+                                <Value>{client.enderecoAtual}</Value>
                             </DetailCard>
                         </DetailsContainer>
 

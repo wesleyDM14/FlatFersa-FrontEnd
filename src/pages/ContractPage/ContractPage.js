@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ThreeDots } from "react-loader-spinner";
@@ -10,7 +10,7 @@ import SearchBar from "../../components/SearchBar";
 import ContractList from "./ContractList";
 
 import { logoutUser } from '../../services/userService';
-import { getContratos } from "../../services/contratoService";
+import { getContratos, getMeusContratos } from "../../services/contratoService";
 
 import {
     AddButtonText,
@@ -57,34 +57,34 @@ const ContractPage = ({ user }) => {
     // Helper para verificar se é admin com segurança
     const isAdmin = user && (user.role === 'ADMIN' || user.isAdmin === true);
 
-    const fetchData = async () => {
-        // Não reseta o loading para true aqui para evitar flicker se já estiver carregando
+    const fetchData = useCallback(async () => {
         try {
-            console.log("Buscando contratos...");
-            await getContratos(
-                setContratos,
-                setContratoAtivoUser,
-                setContratosAtivos,
-                setContratosSolicitacao,
-                null, // Não passamos setLoading aqui
-                isAdmin // Passa a flag de admin calculada
-            );
+            const contratosData = isAdmin ? await getContratos() : await getMeusContratos();
+            setContratos(contratosData);
+
+            if (isAdmin) {
+                setContratosAtivos(contratosData.filter(c => c.status === 'ATIVO'));
+                setContratosSolicitacao(contratosData.filter(c => c.status === 'SOLICITADO'));
+            } else {
+                const temAtivo = contratosData.some(c => ['ATIVO', 'AGUARDANDO_ASSINATURA', 'SOLICITADO'].includes(c.status));
+                setContratoAtivoUser(temAtivo);
+            }
         } catch (error) {
             console.error("Erro ao buscar contratos:", error);
         } finally {
             setLoading(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAdmin]);
 
     useEffect(() => {
-        // CORREÇÃO CRÍTICA: 
         // Só tenta buscar se o usuário tiver ID (estiver logado).
         // Se não tiver token ainda, NÃO mata o loading, espera o Redux atualizar.
         if (user && user.id) {
             fetchData();
         }
         // Se o user for null, o loading continua true (renderizado no if abaixo)
-    }, [user]);
+    }, [user, fetchData]);
 
     const handleCardClick = (type) => {
         setFilterType(type);
@@ -210,7 +210,7 @@ const ContractPage = ({ user }) => {
                             <ContractList
                                 contratos={currentList}
                                 user={user}
-                                setLoading={setLoading}
+                                refreshData={fetchData}
                                 navigate={navigate}
                                 search={search}
                                 page={page}

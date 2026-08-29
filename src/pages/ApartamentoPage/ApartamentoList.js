@@ -17,7 +17,6 @@ import {
     ApartamentoCounter,
     BackButton,
     ButtonGroup,
-    ContentIconContainer,
     DeleteButtonContainer,
     DeleteContainer,
     DeleteIcon,

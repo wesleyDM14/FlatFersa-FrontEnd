@@ -1,23 +1,4 @@
-import axios from "axios";
-import { sessionService } from "redux-react-session";
-
-// Criação da instância base do Axios (Mesma configuração do userService e dashboardService)
-const api = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
-});
-
-// Interceptor: Injeta o Token automaticamente
-api.interceptors.request.use(async (config) => {
-    try {
-        const session = await sessionService.loadSession();
-        if (session && session.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-        }
-    } catch (err) {
-        // Se der erro ao carregar sessão, segue sem token
-    }
-    return config;
-});
+import api from "./api";
 
 // ==========================================================
 // LISTAR PRÉDIOS
@@ -28,8 +9,6 @@ export const getPredios = async (setPredios) => {
         setPredios(response.data);
     } catch (err) {
         console.error("Erro ao buscar prédios:", err);
-        const message = err.response?.data?.message || "Erro ao listar prédios.";
-        // alert(message); // Opcional: pode comentar para não ficar pipocando alerta na tela
     }
 };
 
@@ -49,7 +28,6 @@ export const createPredio = async (predioData, navigate, setSubmitting, setField
         const message = err.response?.data?.message || "Erro ao criar prédio.";
         console.error(message);
 
-        // Tenta jogar o erro para o campo 'nome', senão joga um alert geral
         if (setFieldError) {
             setFieldError('nome', message);
         } else {
@@ -81,8 +59,6 @@ export const deletePredioById = async (predioId, setDeleting, refreshData) => {
 
         alert("Prédio removido com sucesso.");
         if (setDeleting) setDeleting(false);
-
-        // Chama a função de recarregar a lista se for passada
         if (refreshData) refreshData();
 
     } catch (err) {
@@ -118,11 +94,10 @@ export const updatePredio = async (predio, setSubmitting, setFieldError) => {
 
 export const getApartamentosByPredio = async (predioId, setApartamentos) => {
     try {
-        const response = await api.get(`/apartamentos/predio/${predioId}`);
+        const response = await api.get(`/predios/${predioId}/apartamentos`);
         setApartamentos(response.data);
     } catch (err) {
         console.error("Erro ao buscar apartamentos do prédio:", err);
-        // Não precisa alertar sempre, as vezes só não tem nenhum mesmo
         setApartamentos([]);
     }
 };

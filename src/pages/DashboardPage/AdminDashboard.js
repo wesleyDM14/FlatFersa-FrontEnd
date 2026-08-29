@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { FiDollarSign, FiHome, FiUserCheck, FiActivity } from "react-icons/fi";
 import { Line, Doughnut } from "react-chartjs-2";
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
 import { getDashboardAdmin } from "../../services/dashboardService";
 import {
     StatsGrid,
@@ -17,7 +16,6 @@ import {
     StatBadge,
     RecentActivityTable,
     LoadingContainer,
-    StatusPill
 } from "./DashboardPage.styles";
 
 import {
@@ -48,6 +46,7 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
 
@@ -64,11 +63,11 @@ const AdminDashboard = () => {
     }
 
     const revenueChartData = {
-        labels: data.graficos?.receitaMensal?.map(item => item.mes) || ['Jan', 'Fev', 'Mar'],
+        labels: data.charts?.monthlyRevenue?.labels || [],
         datasets: [
             {
-                label: 'Faturamento (R$)',
-                data: data.graficos?.receitaMensal?.map(item => item.valor) || [0, 0, 0],
+                label: 'Faturamento Recebido (R$)',
+                data: data.charts?.monthlyRevenue?.data || [],
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 tension: 0.4,
@@ -79,16 +78,12 @@ const AdminDashboard = () => {
         ],
     };
 
-    const distributionChartData = {
-        labels: ['Aluguel', 'Energia', 'Multas/Outros'],
+    const statusFinanceiroData = {
+        labels: data.charts?.statusFinanceiroMes?.labels || ['Recebido', 'A Receber'],
         datasets: [
             {
-                data: [
-                    data.faturamento?.aluguel || 0,
-                    data.faturamento?.energia || 0,
-                    data.faturamento?.outros || 0
-                ],
-                backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444'],
+                data: data.charts?.statusFinanceiroMes?.data || [0, 0],
+                backgroundColor: ['#10b981', '#f59e0b'],
                 borderWidth: 0,
                 hoverOffset: 4
             },
@@ -122,6 +117,8 @@ const AdminDashboard = () => {
         },
     };
 
+    const formatMoney = (value) => (value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
     return (
         <>
             <StatsGrid>
@@ -130,11 +127,9 @@ const AdminDashboard = () => {
                         <FiDollarSign />
                     </IconBox>
                     <CardContent>
-                        <CardTitle>Faturamento Total</CardTitle>
-                        <StatNumber>
-                            R$ {data.faturamento?.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </StatNumber>
-                        <StatBadge $positive={true}>Receita Mensal</StatBadge>
+                        <CardTitle>Recebido no Mês</CardTitle>
+                        <StatNumber>R$ {formatMoney(data.cards?.recebidoMes)}</StatNumber>
+                        <StatBadge $positive={true}>Previsto: R$ {formatMoney(data.cards?.previstoMes)}</StatBadge>
                     </CardContent>
                 </InfoCard>
 
@@ -144,24 +139,22 @@ const AdminDashboard = () => {
                     </IconBox>
                     <CardContent>
                         <CardTitle>Ocupação</CardTitle>
-                        <StatNumber>
-                            {data.ocupacao?.ocupados}/{data.ocupacao?.total}
-                        </StatNumber>
-                        <StatBadge $positive={data.ocupacao?.porcentagem > 50}>
-                            {data.ocupacao?.porcentagem}% Ocupado
+                        <StatNumber>{data.cards?.taxaOcupacao || 0}%</StatNumber>
+                        <StatBadge $positive={data.cards?.taxaOcupacao > 50}>
+                            Apartamentos ocupados
                         </StatBadge>
                     </CardContent>
                 </InfoCard>
 
                 <InfoCard>
-                    <IconBox color="#f59e0b">
+                    <IconBox color="#ef4444">
                         <FiUserCheck />
                     </IconBox>
                     <CardContent>
-                        <CardTitle>Clientes Ativos</CardTitle>
-                        <StatNumber>{data.clientes?.ativos}</StatNumber>
+                        <CardTitle>Inadimplência</CardTitle>
+                        <StatNumber>R$ {formatMoney(data.cards?.atrasadoGeral)}</StatNumber>
                         <span style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '5px' }}>
-                            {data.clientes?.pendentes} pendentes de aprovação
+                            {data.cards?.clientesPendentes} cliente(s) pendente(s) de aprovação
                         </span>
                     </CardContent>
                 </InfoCard>
@@ -172,25 +165,25 @@ const AdminDashboard = () => {
                     </IconBox>
                     <CardContent>
                         <CardTitle>Contratos Vigentes</CardTitle>
-                        <StatNumber>{data.contratosAtivos}</StatNumber>
-                        <StatBadge $positive={true}>Em dia</StatBadge>
+                        <StatNumber>{data.cards?.contratosAtivos}</StatNumber>
+                        <StatBadge $positive={true}>Ativos</StatBadge>
                     </CardContent>
                 </InfoCard>
             </StatsGrid>
 
             <ChartsGrid>
                 <ChartCard>
-                    <h3>Evolução do Faturamento</h3>
+                    <h3>Faturamento Recebido no Ano</h3>
                     <div style={{ flex: 1, minHeight: 0 }}>
                         <Line data={revenueChartData} options={commonOptions} />
                     </div>
                 </ChartCard>
 
                 <ChartCard>
-                    <h3>Composição da Receita</h3>
+                    <h3>Recebido vs. A Receber (mês)</h3>
                     <div style={{ flex: 1, minHeight: 0, padding: '10px' }}>
                         <Doughnut
-                            data={distributionChartData}
+                            data={statusFinanceiroData}
                             options={{
                                 ...commonOptions,
                                 scales: { x: { display: false }, y: { display: false } }
@@ -201,38 +194,28 @@ const AdminDashboard = () => {
             </ChartsGrid>
 
             <ChartCard style={{ minHeight: 'auto' }}>
-                <h3>Transações Recentes</h3>
+                <h3>Contratos Vencendo nos Próximos 30 Dias</h3>
                 <RecentActivityTable>
                     <thead>
                         <tr>
                             <th>Cliente</th>
-                            <th>Valor</th>
-                            <th>Vencimento</th>
-                            <th>Status</th>
+                            <th>Apartamento</th>
+                            <th>Término</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.atividadesRecentes?.length > 0 ? (
-                            data.atividadesRecentes.map((item, index) => (
-                                <tr key={index}>
-                                    <td style={{ fontWeight: 500 }}>{item.clienteNome}</td>
-                                    <td>R$ {item.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                    <td>
-                                        {item.dataVencimento
-                                            ? format(new Date(item.dataVencimento), "dd 'de' MMM", { locale: ptBR })
-                                            : '-'}
-                                    </td>
-                                    <td>
-                                        <StatusPill status={item.status}>
-                                            {item.status}
-                                        </StatusPill>
-                                    </td>
+                        {data.alerts?.contratosVencendo?.length > 0 ? (
+                            data.alerts.contratosVencendo.map((item) => (
+                                <tr key={item.id} style={{ cursor: 'pointer' }} onClick={() => navigate('/contratos')}>
+                                    <td style={{ fontWeight: 500 }}>{item.cliente}</td>
+                                    <td>{item.apartamento}</td>
+                                    <td>{new Date(item.vencimento).toLocaleDateString('pt-BR')}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="4" style={{ textAlign: "center", padding: "2rem", color: "#9ca3af" }}>
-                                    Nenhuma atividade registrada recentemente.
+                                <td colSpan="3" style={{ textAlign: "center", padding: "2rem", color: "#9ca3af" }}>
+                                    Nenhum contrato vencendo nos próximos 30 dias.
                                 </td>
                             </tr>
                         )}

@@ -1,22 +1,4 @@
-import axios from "axios";
-import { sessionService } from "redux-react-session";
-
-const api = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
-});
-
-// Interceptor para injetar o token
-api.interceptors.request.use(async (config) => {
-    try {
-        const session = await sessionService.loadSession();
-        if (session && session.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-        }
-    } catch (err) {
-        console.error("Erro ao carregar sessão", err);
-    }
-    return config;
-});
+import api from "./api";
 
 export const getApartamentos = async (setApartamentos) => {
     try {
@@ -29,12 +11,18 @@ export const getApartamentos = async (setApartamentos) => {
 
 export const getApartamentosByPredioId = async (predioId, setApartamentos) => {
     try {
-        const response = await api.get(`/apartamentos/predio/${predioId}`);
+        const response = await api.get(`/predios/${predioId}/apartamentos`);
         setApartamentos(response.data);
     } catch (error) {
         console.error(error.response?.data?.message || error.message);
-        setApartamentos([]); // Garante array vazio em caso de erro
+        setApartamentos([]);
     }
+};
+
+// Utilitário para telas que precisam escolher um apartamento vago (ex: transferência de contrato)
+export const getApartamentosVagos = async () => {
+    const response = await api.get('/apartamentos');
+    return response.data.filter(a => a.status === 'VAGO');
 };
 
 export const createApartamento = async (apartamentoData, navigate, setSubmitting, setFieldError) => {

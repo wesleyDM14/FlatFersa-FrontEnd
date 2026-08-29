@@ -1,180 +1,74 @@
-import axios from "axios";
+import api from "./api";
 import { saveAs } from "file-saver";
-import { sessionService } from "redux-react-session";
 
-const api = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
-});
-
-// Interceptor
-api.interceptors.request.use(async (config) => {
-    try {
-        const session = await sessionService.loadSession();
-        if (session && session.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-        }
-    } catch (err) {
-        console.error("Erro sessão", err);
-    }
-    return config;
-});
-
-// --- LISTAGEM ---
-export const getContratos = async (setContratos, setContratoAtivo, setContratosAtivos, setContratosSolicitacao, setLoading, isAdmin) => {
-    try {
-        const endpoint = isAdmin ? '/contratos' : '/contratos-cliente';
-        const response = await api.get(endpoint);
-        const contratosData = response.data;
-
-        setContratos(contratosData);
-
-        if (isAdmin) {
-            // Lógica Admin
-            const ativos = contratosData.filter(c => c.statusContrato === 'ATIVO');
-            const solicitacoes = contratosData.filter(c => c.statusContrato === 'AGUARDANDO');
-
-            if (setContratosAtivos) setContratosAtivos(ativos);
-            if (setContratosSolicitacao) setContratosSolicitacao(solicitacoes);
-        } else {
-            // Lógica Cliente
-            const temAtivo = contratosData.some(c => c.statusContrato === 'ATIVO' || c.statusContrato === 'AGUARDANDO');
-            if (setContratoAtivo) setContratoAtivo(temAtivo);
-        }
-
-    } catch (err) {
-        console.error(err);
-        // alert(err.response?.data?.message || "Erro ao buscar contratos");
-    } finally {
-        if (setLoading) setLoading(false);
-    }
+export const getContratos = async () => {
+    const response = await api.get('/contratos');
+    return response.data;
 };
 
-// --- CRIAÇÃO ---
-export const createContrato = async (contratoData, isAdmin, navigate, setSubmitting, setFieldError) => {
-    try {
-        const endpoint = isAdmin ? '/contratos' : '/contratos/solicitar';
-
-        await api.post(endpoint, contratoData);
-
-        alert("Contrato/Solicitação criado com sucesso!");
-        navigate('/contratos');
-
-    } catch (err) {
-        const msg = err.response?.data?.message || "Erro ao criar contrato";
-        console.error(msg);
-
-        if (setFieldError) {
-            // Tenta jogar erro num campo genérico ou específico
-            setFieldError('valorAluguel', msg);
-        } else {
-            alert(msg);
-        }
-    } finally {
-        if (setSubmitting) setSubmitting(false);
-    }
+export const getMeusContratos = async () => {
+    const response = await api.get('/me/contratos');
+    return response.data;
 };
 
-// --- GET BY ID ---
-export const getContratoById = async (contratoId, setContrato) => {
-    try {
-        const response = await api.get(`/contratos/${contratoId}`);
-        setContrato(response.data);
-    } catch (err) {
-        console.error(err);
-    }
+export const getContratoById = async (contratoId) => {
+    const response = await api.get(`/contratos/${contratoId}`);
+    return response.data;
 };
 
-// --- DOWNLOAD PDF ---
-export const downloadContract = async (contratoId, setIsDownloading) => {
-    try {
-        const response = await api.get(`/contratos/download/${contratoId}`, {
-            responseType: 'blob' // Importante para arquivos
-        });
-
-        // Cria o blob e dispara o download
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        saveAs(blob, `contrato_${contratoId}.pdf`);
-
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao baixar o contrato. Verifique se o arquivo existe.");
-    } finally {
-        if (setIsDownloading) setIsDownloading(false);
-    }
+export const solicitarContrato = async (data) => {
+    const response = await api.post('/contratos/solicitar', data);
+    return response.data;
 };
 
-// --- APROVAR ---
-export const approveContract = async (contractData, setSubmitting, setFieldError, setLoading) => {
-    try {
-        await api.post('/contratos/aprovar', contractData);
-        alert("Contrato Aprovado com Sucesso!");
-        if (setLoading) setLoading(true); // Força refresh na lista
-    } catch (err) {
-        console.error(err);
-        const msg = err.response?.data?.message || "Erro ao aprovar";
-        if (setFieldError) setFieldError('limiteKwh', msg);
-        else alert(msg);
-    } finally {
-        if (setSubmitting) setSubmitting(false);
-    }
+export const criarContratoDireto = async (data) => {
+    const response = await api.post('/contratos', data);
+    return response.data;
 };
 
-// --- REPROVAR / CANCELAR ---
-export const desapproveContract = async (contratoId, setLoading) => {
-    try {
-        await api.get(`/contratos/reprovar/${contratoId}`);
-        alert("Contrato Reprovado.");
-        if (setLoading) setLoading(true);
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao reprovar.");
-    }
+export const configurarContrato = async (data) => {
+    const response = await api.put('/contratos/configurar', data);
+    return response.data;
 };
 
-export const cancelContract = async (contratoId, message, setLoading) => {
-    try {
-        await api.post('/contratos/cancelar', { contratoId, message });
-        alert("Contrato Cancelado.");
-        if (setLoading) setLoading(true);
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao cancelar.");
-    }
+export const reprovarContrato = async (contratoId, motivo) => {
+    const response = await api.put(`/contratos/${contratoId}/reprovar`, { motivo });
+    return response.data;
 };
 
-// --- DELETAR ---
-export const deleteContratoById = async (contratoId, closeDeleteModal, setLoading) => {
-    try {
-        await api.delete(`/contratos/${contratoId}`);
-        alert("Contrato excluído.");
-        if (closeDeleteModal) closeDeleteModal();
-        if (setLoading) setLoading(true);
-    } catch (err) {
-        console.error(err);
-        alert("Erro ao excluir.");
-    }
+export const cancelarContrato = async (contratoId, motivo) => {
+    const response = await api.put('/contratos/cancelar', { contratoId, motivo });
+    return response.data;
 };
 
-// --- ASSINAR (UPLOAD) ---
-export const assinarContratoById = async (data, setSubmitting, setFieldError, closeModalAssinatura) => {
-    try {
-        const formData = new FormData();
-        formData.append('contratoId', data.contratoId);
-        formData.append('contrato', data.contrato); // O arquivo PDF
+export const editarContrato = async (contratoId, data) => {
+    const response = await api.put(`/contratos/${contratoId}/editar`, data);
+    return response.data;
+};
 
-        await api.put(`/contratos/assinar/${data.contratoId}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
+export const renovarContrato = async (contratoId, data) => {
+    const response = await api.post(`/contratos/${contratoId}/renovar`, data);
+    return response.data;
+};
 
-        alert("Contrato assinado enviado com sucesso!");
-        if (closeModalAssinatura) closeModalAssinatura();
+export const transferirApartamento = async (contratoId, data) => {
+    const response = await api.post(`/contratos/${contratoId}/transferir`, data);
+    return response.data;
+};
 
-    } catch (err) {
-        console.error(err);
-        const msg = err.response?.data?.message || "Erro ao enviar assinatura";
-        if (setFieldError) setFieldError('contrato', msg);
-        else alert(msg);
-    } finally {
-        if (setSubmitting) setSubmitting(false);
-    }
+export const assinarContrato = async (contratoId, arquivo) => {
+    const formData = new FormData();
+    formData.append('file', arquivo);
+    const response = await api.post(`/contratos/${contratoId}/assinar`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
+};
+
+export const downloadContratoPDF = async (contratoId) => {
+    const response = await api.get(`/contratos/${contratoId}/pdf`, {
+        responseType: 'blob'
+    });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    saveAs(blob, `contrato_${contratoId}.pdf`);
 };

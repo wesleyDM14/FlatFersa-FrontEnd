@@ -5,64 +5,69 @@ import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
 
 import {
-    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFileContract,
-    FaFileInvoice, FaFilePdf, FaTimes, FaTrash, FaUserAlt
+    FaCheck, FaClock, FaCloudUploadAlt, FaEdit, FaFilePdf, FaTimes
 } from "react-icons/fa";
-import { FaHouse } from "react-icons/fa6";
 
 import {
-    AdminPredioContainer, BackButton, ButtonGroup, ClientCounter, ContentIconContainer,
-    ContratoCounter, DataColumn, DataContainer, DataIconContainer, DataSection,
-    DeleteButtonContainer, DeleteContainer, DeleteIcon, DeleteTitle,
+    AdminPredioContainer, BackButton, ButtonGroup, ContratoCounter,
     DetailContractBackButton, DetailContractButtonGroup, DetailContractContainer,
     DetailContractDataColumnLeft, DetailContractDataColumnRight, DetailContractDataContainer,
     DetailContractDataLabel, DetailContractDataSectionContainer, DetailContractDataSectionTitle,
     DetailContractDataValue, DetailContractDownloadButton, DetailContractHeaderContainer,
     DetailContractHeaderSubTitle, DetailContractHeaderTitle, DetailContractValueContainer,
     EditIcon, FinanceiroList, FinanceiroListElement, FinanceiroListElementContainer,
-    FinanceiroListIconContainer, FinanceiroListValue, FormColum, FormContent,
-    FormInputArea, FormInputLabel, FormInputLabelRequired, Limitador, ListLabel,
+    FinanceiroListIconContainer, FinanceiroListValue, FormContent,
+    FormInputArea, FormInputLabelRequired, Limitador, ListLabel,
     PredioListContainer, PredioListHeader, PredioSingleContainer, PredioValue,
-    RejectButton, SinglePredio, SolicitacaoContratoDataContainer, SolicitacaoModalContainer,
-    SolicitacaoModalContent, SolicitacaoModalContentLabel, SolicitacaoModalContentValue,
+    RejectButton, SinglePredio, SolicitacaoModalContainer,
     SolicitacaoModalTitle, SolicitacaoTitleContainer, StyledFormArea, StyledLabel,
-    SubItensContainer, SubTitle, SubmitButton, PdfPreview
+    SubItensContainer, SubmitButton, PdfPreview
 } from "./ContractPage.styles";
 
 import {
-    approveContract, assinarContratoById, cancelContract,
-    deleteContratoById, desapproveContract, downloadContract
+    configurarContrato, cancelarContrato, reprovarContrato, editarContrato,
+    renovarContrato, transferirApartamento, assinarContrato, downloadContratoPDF
 } from "../../services/contratoService";
+import { getApartamentosVagos } from "../../services/apartamentoService";
 
 import { modalStyles } from "../../styles/ModalStyles";
-import { FormInput, StyledSelect } from "../../components/FormLib";
+import { FormInput, ApartamentoSelect } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
-import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFileLegend } from "../ClientPage/ClientPage.styles";
+import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle } from "../ClientPage/ClientPage.styles";
 
-const ContractList = ({ contratos, user, setLoading, navigate, search, page, setPage, itemsPerPage }) => {
+const STATUS_COLORS = {
+    ATIVO: '#10b981',
+    SOLICITADO: '#f59e0b',
+    AGUARDANDO_ASSINATURA: '#f59e0b',
+    AGUARDANDO_DADOS_DONO: '#f59e0b',
+    CANCELADO: '#ef4444',
+    DESPEJO: '#ef4444',
+    ENCERRADO: '#6b7280',
+    RENOVADO: '#6b7280',
+    TRANSFERIDO: '#6b7280'
+};
+
+const ContractList = ({ contratos, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
     Modal.setAppElement('#root');
+    const isAdmin = user.role === 'ADMIN';
 
-    // Estados dos Modais
-    const [modalEditIsOpen, setModalEditIsOpen] = useState(false); // Para Admin aprovar/editar
-    const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
-    const [modalContractIsOpen, setModalContractIsOpen] = useState(false); // Detalhes gerais
-    const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false); // Upload PDF
+    const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
+    const [modalContractIsOpen, setModalContractIsOpen] = useState(false);
+    const [modalAssinaturaIsOpen, setModalAssinaturaIsOpen] = useState(false);
+    const [modalEditarContratoIsOpen, setModalEditarContratoIsOpen] = useState(false);
+    const [modalRenovarIsOpen, setModalRenovarIsOpen] = useState(false);
+    const [modalTransferirIsOpen, setModalTransferirIsOpen] = useState(false);
 
     const [selectedContrato, setSelectedContrato] = useState({});
+    const [apartamentosVagos, setApartamentosVagos] = useState([]);
+    const [selectedNovoApartamento, setSelectedNovoApartamento] = useState(null);
 
-    // Estados de Form/Ação
-    const [selectedPeriocidade, setSelectedPeriocidade] = useState({});
     const [isDownloading, setIsDownloading] = useState(false);
-    const [deletting, setDeletting] = useState(false);
     const [fileType, setFileType] = useState(null);
     const [financeiroPage, setFinanceiroPage] = useState(1);
 
-    const periocidade = [
-        { label: 'Anualmente', value: 'ANUALMENTE' },
-        { label: 'Semestralmente', value: 'SEMESTRALMENTE' },
-    ];
+    const refresh = () => refreshData && refreshData();
 
-    // --- MANIPULAÇÃO DE MODAIS ---
     const openContractModal = (contrato) => {
         setSelectedContrato(contrato);
         setModalContractIsOpen(true);
@@ -74,86 +79,79 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
         setFileType(file?.type);
     };
 
-    // --- FILTRO E PAGINAÇÃO ---
+    const abrirTransferencia = async () => {
+        setModalContractIsOpen(false);
+        const vagos = await getApartamentosVagos();
+        setApartamentosVagos(vagos);
+        setSelectedNovoApartamento(null);
+        setModalTransferirIsOpen(true);
+    };
+
     const filteredContratos = useMemo(() => {
         return contratos.filter(contrato => {
-            const clienteName = contrato.cliente?.name?.toLowerCase() || '';
-            const aptNum = contrato.apt?.numero?.toString() || '';
-            const status = contrato.statusContrato?.toLowerCase() || '';
+            const clienteName = contrato.cliente?.nome?.toLowerCase() || '';
+            const aptNum = contrato.apartamento?.numero?.toString() || '';
+            const status = contrato.status?.toLowerCase() || '';
             const term = search.toLowerCase();
 
-            if (user.isAdmin) {
+            if (isAdmin) {
                 return clienteName.includes(term) || aptNum.includes(term) || status.includes(term);
-            } else {
-                return aptNum.includes(term) || status.includes(term);
             }
+            return aptNum.includes(term) || status.includes(term);
         });
-    }, [contratos, search, user]);
+    }, [contratos, search, isAdmin]);
 
     const totalPages = Math.ceil(filteredContratos.length / itemsPerPage);
     const currentPageItems = filteredContratos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-    // Paginação interna do financeiro (dentro do modal)
-    const financeiroItems = selectedContrato.prestacaoAluguel || [];
+    const financeiroItems = selectedContrato.faturas || [];
     const totalPagesFinanceiro = Math.ceil(financeiroItems.length / itemsPerPage);
     const currentPageItemsFinanceiro = financeiroItems.slice((financeiroPage - 1) * itemsPerPage, financeiroPage * itemsPerPage);
 
     return (
         <PredioListContainer>
-            <PredioListHeader $isadmin={user.isAdmin.toString()}>
-                {user.isAdmin && <ListLabel>Cliente</ListLabel>}
+            <PredioListHeader $isadmin={isAdmin.toString()}>
+                {isAdmin && <ListLabel>Cliente</ListLabel>}
                 <ListLabel>Apartamento</ListLabel>
                 <ListLabel>Status</ListLabel>
-                {user.isAdmin && <ListLabel>Opções</ListLabel>}
+                {isAdmin && <ListLabel>Opções</ListLabel>}
             </PredioListHeader>
 
             {currentPageItems.map((contract) => (
                 <SinglePredio
                     key={contract.id}
-                    $isadmin={user.isAdmin.toString()}
+                    $isadmin={isAdmin.toString()}
                     onClick={() => openContractModal(contract)}
                 >
-                    {user.isAdmin && (
+                    {isAdmin && (
                         <PredioSingleContainer>
                             <StyledLabel>Cliente: </StyledLabel>
-                            <PredioValue>{contract.cliente?.name}</PredioValue>
+                            <PredioValue>{contract.cliente?.nome}</PredioValue>
                         </PredioSingleContainer>
                     )}
 
                     <PredioSingleContainer>
                         <StyledLabel>Apt: </StyledLabel>
-                        <PredioValue>{contract.apt?.numero}</PredioValue>
+                        <PredioValue>{contract.apartamento?.numero}</PredioValue>
                     </PredioSingleContainer>
 
                     <PredioSingleContainer>
                         <StyledLabel>Status: </StyledLabel>
-                        <span style={{
-                            fontWeight: 700,
-                            color: contract.statusContrato === 'ATIVO' ? '#10b981' :
-                                contract.statusContrato === 'CANCELADO' ? '#ef4444' : '#f59e0b'
-                        }}>
-                            {contract.statusContrato}
+                        <span style={{ fontWeight: 700, color: STATUS_COLORS[contract.status] || '#374151' }}>
+                            {contract.status}
                         </span>
                     </PredioSingleContainer>
 
-                    {user.isAdmin && (
+                    {isAdmin && (
                         <AdminPredioContainer>
                             <EditIcon onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedContrato(contract);
-                                // Se estiver aguardando, abre form de aprovação, senão nada por enquanto
-                                if (contract.statusContrato === 'AGUARDANDO') setModalEditIsOpen(true);
+                                if (contract.status === 'SOLICITADO') setModalEditIsOpen(true);
                                 else openContractModal(contract);
                             }}>
                                 <FaEdit />
                             </EditIcon>
-                            <DeleteIcon onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedContrato(contract);
-                                setModalDeleteIsOpen(true);
-                            }}>
-                                <FaTrash />
-                            </DeleteIcon>
                         </AdminPredioContainer>
                     )}
                 </SinglePredio>
@@ -166,33 +164,29 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                 style={modalStyles}
             >
                 {selectedContrato.id && (
-                    selectedContrato.statusContrato === 'AGUARDANDO' && user.isAdmin ? (
-                        /* MODO APROVAÇÃO (AGUARDANDO) - Redireciona para o modal de edição ou mostra dados básicos */
+                    selectedContrato.status === 'SOLICITADO' && isAdmin ? (
                         <SolicitacaoModalContainer>
-                            {/* ... Layout de Solicitação igual ao original, mas simplificado ... */}
                             <SolicitacaoTitleContainer>
                                 <SolicitacaoModalTitle>Solicitação Pendente</SolicitacaoModalTitle>
                             </SolicitacaoTitleContainer>
-                            {/* Botões para abrir modal de edição real para aprovar */}
                             <ButtonGroup>
                                 <BackButton onClick={() => setModalContractIsOpen(false)}>Fechar</BackButton>
                                 <SubmitButton onClick={() => {
                                     setModalContractIsOpen(false);
-                                    setModalEditIsOpen(true); // Abre o form de aprovação
+                                    setModalEditIsOpen(true);
                                 }}>
                                     Analisar para Aprovar
                                 </SubmitButton>
                             </ButtonGroup>
                         </SolicitacaoModalContainer>
                     ) : (
-                        /* MODO DETALHES COMPLETO */
                         <DetailContractContainer>
                             <DetailContractHeaderContainer>
                                 <DetailContractHeaderTitle>Detalhes do Contrato</DetailContractHeaderTitle>
                                 <DetailContractHeaderSubTitle
-                                    style={{ color: selectedContrato.statusContrato === 'ATIVO' ? 'green' : 'red' }}
+                                    style={{ color: STATUS_COLORS[selectedContrato.status] || '#374151' }}
                                 >
-                                    {selectedContrato.statusContrato}
+                                    {selectedContrato.status}
                                 </DetailContractHeaderSubTitle>
                             </DetailContractHeaderContainer>
 
@@ -202,36 +196,50 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                     <DetailContractDataSectionContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Cliente:</DetailContractDataLabel>
-                                            <DetailContractDataValue>{selectedContrato.cliente?.name}</DetailContractDataValue>
+                                            <DetailContractDataValue>{selectedContrato.cliente?.nome}</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Apt:</DetailContractDataLabel>
-                                            <DetailContractDataValue>{selectedContrato.apt?.predio?.nome} - {selectedContrato.apt?.numero}</DetailContractDataValue>
+                                            <DetailContractDataValue>{selectedContrato.apartamento?.predio?.nome} - {selectedContrato.apartamento?.numero}</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Aluguel:</DetailContractDataLabel>
-                                            <DetailContractDataValue>R$ {selectedContrato.valorAluguel}</DetailContractDataValue>
+                                            <DetailContractDataValue>R$ {parseFloat(selectedContrato.valorAluguel || 0).toFixed(2)}</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Vencimento:</DetailContractDataLabel>
-                                            <DetailContractDataValue>Dia {selectedContrato.diaVencimentoPagamento}</DetailContractDataValue>
+                                            <DetailContractDataValue>Dia {selectedContrato.diaVencimento}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Início:</DetailContractDataLabel>
+                                            <DetailContractDataValue>{new Date(selectedContrato.dataInicio).toLocaleDateString('pt-BR')}</DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Término:</DetailContractDataLabel>
+                                            <DetailContractDataValue>
+                                                {selectedContrato.dataFim ? new Date(selectedContrato.dataFim).toLocaleDateString('pt-BR') : '—'}
+                                            </DetailContractDataValue>
+                                        </DetailContractValueContainer>
+                                        <DetailContractValueContainer>
+                                            <DetailContractDataLabel>Limite kWh Isento:</DetailContractDataLabel>
+                                            <DetailContractDataValue>{selectedContrato.limiteKwhIsento} kWh</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                     </DetailContractDataSectionContainer>
                                 </DetailContractDataColumnLeft>
 
                                 <DetailContractDataColumnRight>
-                                    <DetailContractDataSectionTitle>Financeiro (Prestações)</DetailContractDataSectionTitle>
+                                    <DetailContractDataSectionTitle>Financeiro (Faturas)</DetailContractDataSectionTitle>
                                     <FinanceiroList>
-                                        {currentPageItemsFinanceiro.map((parcela, index) => (
-                                            <FinanceiroListElementContainer key={index} onClick={() => navigate(`/faturas/${parcela.id}`)}>
+                                        {currentPageItemsFinanceiro.map((fatura) => (
+                                            <FinanceiroListElementContainer key={fatura.id} onClick={() => navigate(`/faturas/${fatura.id}`)}>
                                                 <FinanceiroListElement>
                                                     <FinanceiroListValue>
-                                                        {new Date(parcela.dataVencimento).toLocaleDateString()} - {parcela.tipo}
+                                                        {new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')} - R$ {parseFloat(fatura.valorTotal || 0).toFixed(2)}
                                                     </FinanceiroListValue>
                                                     <FinanceiroListIconContainer>
-                                                        {parcela.statusPagamento === 'PAGO' && <FaCheck color="#10b981" />}
-                                                        {parcela.statusPagamento === 'PENDENTE' && <FaClock color="#f59e0b" />}
-                                                        {parcela.statusPagamento === 'ATRASADO' && <FaTimes color="#ef4444" />}
+                                                        {fatura.status === 'PAGO' && <FaCheck color="#10b981" />}
+                                                        {fatura.status === 'PENDENTE' && <FaClock color="#f59e0b" />}
+                                                        {fatura.status === 'ATRASADO' && <FaTimes color="#ef4444" />}
                                                     </FinanceiroListIconContainer>
                                                 </FinanceiroListElement>
                                             </FinanceiroListElementContainer>
@@ -244,25 +252,58 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                             <DetailContractButtonGroup>
                                 <DetailContractBackButton onClick={() => setModalContractIsOpen(false)}>Voltar</DetailContractBackButton>
 
-                                {selectedContrato.statusContrato === 'ATIVO' && user.isAdmin && (
+                                {selectedContrato.status === 'SOLICITADO' && isAdmin && (
                                     <RejectButton onClick={() => {
-                                        if (window.confirm("Deseja cancelar este contrato?")) {
-                                            const motivo = prompt("Motivo:");
-                                            if (motivo) cancelContract(selectedContrato.id, motivo, setLoading);
+                                        const motivo = window.prompt("Motivo da reprovação:");
+                                        if (motivo) {
+                                            reprovarContrato(selectedContrato.id, motivo)
+                                                .then(() => { setModalContractIsOpen(false); refresh(); })
+                                                .catch((err) => alert(err.response?.data?.message || "Erro ao reprovar."));
+                                        }
+                                    }}>
+                                        Reprovar Solicitação
+                                    </RejectButton>
+                                )}
+
+                                {selectedContrato.status === 'ATIVO' && isAdmin && (
+                                    <RejectButton onClick={() => {
+                                        const motivo = window.prompt("Motivo do cancelamento:");
+                                        if (motivo) {
+                                            cancelarContrato(selectedContrato.id, motivo)
+                                                .then(() => { setModalContractIsOpen(false); refresh(); })
+                                                .catch((err) => alert(err.response?.data?.message || "Erro ao cancelar."));
                                         }
                                     }}>
                                         Cancelar Contrato
                                     </RejectButton>
                                 )}
 
+                                {selectedContrato.status === 'ATIVO' && isAdmin && (
+                                    <SubmitButton onClick={() => setModalEditarContratoIsOpen(true)}>
+                                        Editar
+                                    </SubmitButton>
+                                )}
+
+                                {selectedContrato.status === 'ATIVO' && isAdmin && (
+                                    <SubmitButton onClick={() => setModalRenovarIsOpen(true)}>
+                                        Renovar
+                                    </SubmitButton>
+                                )}
+
+                                {selectedContrato.status === 'ATIVO' && isAdmin && (
+                                    <SubmitButton onClick={abrirTransferencia}>
+                                        Transferir Apartamento
+                                    </SubmitButton>
+                                )}
+
                                 <DetailContractDownloadButton onClick={() => {
                                     setIsDownloading(true);
-                                    downloadContract(selectedContrato.id, setIsDownloading);
+                                    downloadContratoPDF(selectedContrato.id).finally(() => setIsDownloading(false));
                                 }}>
                                     {isDownloading ? <ThreeDots height={20} width={20} color="#fff" /> : "Download PDF"}
                                 </DetailContractDownloadButton>
 
-                                {!selectedContrato.assinado && (
+                                {selectedContrato.status === 'AGUARDANDO_ASSINATURA' && (
                                     <SubmitButton onClick={() => setModalAssinaturaIsOpen(true)}>
                                         Anexar Assinado
                                     </SubmitButton>
@@ -276,40 +317,49 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
             {/* --- MODAL APROVAR (ADMIN) --- */}
             <Modal isOpen={modalEditIsOpen} onRequestClose={() => setModalEditIsOpen(false)} style={modalStyles}>
                 <StyledFormArea>
-                    <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'center' }}>
                         <FaCheck size={24} color="#10b981" />
                         <ContratoCounter>Aprovar Contrato</ContratoCounter>
                     </div>
                     <Formik
                         initialValues={{
-                            contratoId: selectedContrato.id,
                             valorAluguel: selectedContrato.valorAluguel || '',
-                            periocidade: '',
-                            limiteKwh: '',
+                            diaVencimento: selectedContrato.diaVencimento || '',
+                            limiteKwhIsento: '',
                             leituraInicial: 0
                         }}
                         validationSchema={Yup.object({
                             valorAluguel: Yup.number().required('Obrigatório'),
-                            limiteKwh: Yup.number().required('Obrigatório'),
+                            diaVencimento: Yup.number().required('Obrigatório').max(31),
                             leituraInicial: Yup.number().required('Obrigatório'),
                         })}
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            values.periocidade = selectedPeriocidade.value;
-                            await approveContract(values, setSubmitting, setFieldError, setLoading);
-                            setModalEditIsOpen(false);
+                            try {
+                                await configurarContrato({
+                                    contratoId: selectedContrato.id,
+                                    valorAluguel: values.valorAluguel,
+                                    diaVencimento: values.diaVencimento,
+                                    leituraInicial: values.leituraInicial,
+                                    limiteKwhIsento: values.limiteKwhIsento || 0
+                                });
+                                setModalEditIsOpen(false);
+                                refresh();
+                            } catch (err) {
+                                const msg = err.response?.data?.message || "Erro ao aprovar contrato.";
+                                setFieldError('valorAluguel', msg);
+                            } finally {
+                                setSubmitting(false);
+                            }
                         }}
                     >
                         {({ isSubmitting }) => (
                             <Form>
                                 <FormContent>
-                                    <FormInputArea>
-                                        <StyledSelect options={periocidade} setSelectedOption={setSelectedPeriocidade} label='Reajuste' />
-                                    </FormInputArea>
                                     <SubItensContainer>
                                         <FormInputArea>
-                                            <FormInputLabelRequired>Limite KWh</FormInputLabelRequired>
+                                            <FormInputLabelRequired>Dia Vencimento</FormInputLabelRequired>
                                             <Limitador>
-                                                <FormInput type="number" name="limiteKwh" />
+                                                <FormInput type="number" name="diaVencimento" />
                                             </Limitador>
                                         </FormInputArea>
                                         <FormInputArea>
@@ -319,14 +369,180 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                                             </Limitador>
                                         </FormInputArea>
                                     </SubItensContainer>
-                                    <FormInputArea>
-                                        <FormInputLabelRequired>Leitura Inicial</FormInputLabelRequired>
-                                        <FormInput type="number" name="leituraInicial" />
-                                    </FormInputArea>
+                                    <SubItensContainer>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Limite kWh Isento</FormInputLabelRequired>
+                                            <FormInput type="number" name="limiteKwhIsento" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Leitura Inicial</FormInputLabelRequired>
+                                            <FormInput type="number" name="leituraInicial" />
+                                        </FormInputArea>
+                                    </SubItensContainer>
                                 </FormContent>
                                 <ButtonGroup>
                                     <BackButton type="button" onClick={() => setModalEditIsOpen(false)}>Cancelar</BackButton>
                                     {!isSubmitting ? <SubmitButton type="submit">Aprovar</SubmitButton> : <ThreeDots color="#333" />}
+                                </ButtonGroup>
+                            </Form>
+                        )}
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
+
+            {/* --- MODAL EDITAR CONTRATO ATIVO --- */}
+            <Modal isOpen={modalEditarContratoIsOpen} onRequestClose={() => setModalEditarContratoIsOpen(false)} style={modalStyles}>
+                <StyledFormArea>
+                    <h3>Editar Contrato</h3>
+                    <Formik
+                        initialValues={{
+                            valorAluguel: selectedContrato.valorAluguel || '',
+                            diaVencimento: selectedContrato.diaVencimento || '',
+                            limiteKwhIsento: selectedContrato.limiteKwhIsento || 0,
+                            duracaoMeses: selectedContrato.duracaoMeses || ''
+                        }}
+                        onSubmit={async (values, { setSubmitting }) => {
+                            try {
+                                await editarContrato(selectedContrato.id, values);
+                                setModalEditarContratoIsOpen(false);
+                                setModalContractIsOpen(false);
+                                refresh();
+                            } catch (err) {
+                                alert(err.response?.data?.message || "Erro ao editar contrato.");
+                            } finally {
+                                setSubmitting(false);
+                            }
+                        }}
+                    >
+                        {({ isSubmitting }) => (
+                            <Form>
+                                <FormContent>
+                                    <SubItensContainer>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Valor Aluguel</FormInputLabelRequired>
+                                            <FormInput type="number" step="0.01" name="valorAluguel" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Dia Vencimento</FormInputLabelRequired>
+                                            <FormInput type="number" name="diaVencimento" />
+                                        </FormInputArea>
+                                    </SubItensContainer>
+                                    <SubItensContainer>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Limite kWh Isento</FormInputLabelRequired>
+                                            <FormInput type="number" name="limiteKwhIsento" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Duração Total (meses)</FormInputLabelRequired>
+                                            <FormInput type="number" name="duracaoMeses" />
+                                        </FormInputArea>
+                                    </SubItensContainer>
+                                </FormContent>
+                                <ButtonGroup>
+                                    <BackButton type="button" onClick={() => setModalEditarContratoIsOpen(false)}>Cancelar</BackButton>
+                                    {!isSubmitting ? <SubmitButton type="submit">Salvar</SubmitButton> : <ThreeDots color="#333" />}
+                                </ButtonGroup>
+                            </Form>
+                        )}
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
+
+            {/* --- MODAL RENOVAR CONTRATO --- */}
+            <Modal isOpen={modalRenovarIsOpen} onRequestClose={() => setModalRenovarIsOpen(false)} style={modalStyles}>
+                <StyledFormArea>
+                    <h3>Renovar Contrato</h3>
+                    <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: 15 }}>
+                        O contrato atual será encerrado como "Renovado" e um novo contrato ativo será criado a partir de hoje.
+                    </p>
+                    <Formik
+                        initialValues={{
+                            duracaoMeses: selectedContrato.duracaoMeses || 12,
+                            valorAluguel: selectedContrato.valorAluguel || ''
+                        }}
+                        validationSchema={Yup.object({
+                            duracaoMeses: Yup.number().min(1).required('Obrigatório')
+                        })}
+                        onSubmit={async (values, { setSubmitting }) => {
+                            try {
+                                await renovarContrato(selectedContrato.id, values);
+                                setModalRenovarIsOpen(false);
+                                setModalContractIsOpen(false);
+                                refresh();
+                            } catch (err) {
+                                alert(err.response?.data?.message || "Erro ao renovar contrato.");
+                            } finally {
+                                setSubmitting(false);
+                            }
+                        }}
+                    >
+                        {({ isSubmitting }) => (
+                            <Form>
+                                <FormInputArea>
+                                    <FormInputLabelRequired>Nova Duração (meses)</FormInputLabelRequired>
+                                    <FormInput type="number" name="duracaoMeses" />
+                                </FormInputArea>
+                                <FormInputArea>
+                                    <FormInputLabelRequired>Novo Valor do Aluguel (opcional)</FormInputLabelRequired>
+                                    <FormInput type="number" step="0.01" name="valorAluguel" />
+                                </FormInputArea>
+                                <ButtonGroup>
+                                    <BackButton type="button" onClick={() => setModalRenovarIsOpen(false)}>Cancelar</BackButton>
+                                    {!isSubmitting ? <SubmitButton type="submit">Renovar</SubmitButton> : <ThreeDots color="#333" />}
+                                </ButtonGroup>
+                            </Form>
+                        )}
+                    </Formik>
+                </StyledFormArea>
+            </Modal>
+
+            {/* --- MODAL TRANSFERIR APARTAMENTO --- */}
+            <Modal isOpen={modalTransferirIsOpen} onRequestClose={() => setModalTransferirIsOpen(false)} style={modalStyles}>
+                <StyledFormArea>
+                    <h3>Transferir Apartamento</h3>
+                    <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: 15 }}>
+                        O contrato atual será encerrado e um novo contrato será criado no apartamento de destino,
+                        com o tempo restante do contrato atual.
+                    </p>
+                    <Formik
+                        initialValues={{ leituraInicial: '' }}
+                        validationSchema={Yup.object({ leituraInicial: Yup.number().min(0).required('Obrigatório') })}
+                        onSubmit={async (values, { setSubmitting }) => {
+                            if (!selectedNovoApartamento?.value) {
+                                alert("Selecione o apartamento de destino.");
+                                setSubmitting(false);
+                                return;
+                            }
+                            try {
+                                await transferirApartamento(selectedContrato.id, {
+                                    novoApartamentoId: selectedNovoApartamento.value,
+                                    leituraInicial: values.leituraInicial
+                                });
+                                setModalTransferirIsOpen(false);
+                                refresh();
+                            } catch (err) {
+                                alert(err.response?.data?.message || "Erro ao transferir apartamento.");
+                            } finally {
+                                setSubmitting(false);
+                            }
+                        }}
+                    >
+                        {({ isSubmitting }) => (
+                            <Form>
+                                <FormInputArea>
+                                    <FormInputLabelRequired>Novo Apartamento (vagos)</FormInputLabelRequired>
+                                    <ApartamentoSelect
+                                        apartamentos={apartamentosVagos}
+                                        setSelectedApartamento={setSelectedNovoApartamento}
+                                    />
+                                </FormInputArea>
+                                <FormInputArea>
+                                    <FormInputLabelRequired>Leitura Inicial do Novo Medidor</FormInputLabelRequired>
+                                    <FormInput type="number" name="leituraInicial" />
+                                </FormInputArea>
+                                <ButtonGroup>
+                                    <BackButton type="button" onClick={() => setModalTransferirIsOpen(false)}>Cancelar</BackButton>
+                                    {!isSubmitting ? <SubmitButton type="submit">Transferir</SubmitButton> : <ThreeDots color="#333" />}
                                 </ButtonGroup>
                             </Form>
                         )}
@@ -341,10 +557,21 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                         <h3>Enviar Contrato Assinado</h3>
                     </div>
                     <Formik
-                        initialValues={{ contrato: null, contratoId: selectedContrato.id }}
+                        initialValues={{ contrato: null }}
                         validationSchema={Yup.object({ contrato: Yup.mixed().required() })}
-                        onSubmit={(values, { setSubmitting, setFieldError }) => {
-                            assinarContratoById(values, setSubmitting, setFieldError, () => setModalAssinaturaIsOpen(false));
+                        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+                            try {
+                                await assinarContrato(selectedContrato.id, values.contrato);
+                                alert("Contrato assinado enviado com sucesso!");
+                                setModalAssinaturaIsOpen(false);
+                                setModalContractIsOpen(false);
+                                refresh();
+                            } catch (err) {
+                                const msg = err.response?.data?.message || "Erro ao enviar assinatura";
+                                setFieldError('contrato', msg);
+                            } finally {
+                                setSubmitting(false);
+                            }
                         }}
                     >
                         {({ setFieldValue, isSubmitting }) => (
@@ -366,27 +593,6 @@ const ContractList = ({ contratos, user, setLoading, navigate, search, page, set
                         )}
                     </Formik>
                 </StyledFormArea>
-            </Modal>
-
-            {/* --- MODAL EXCLUIR --- */}
-            <Modal isOpen={modalDeleteIsOpen} onRequestClose={() => setModalDeleteIsOpen(false)} style={modalStyles}>
-                <DeleteContainer>
-                    <DeleteTitle>Excluir Contrato?</DeleteTitle>
-                    {deletting ? <ThreeDots color="red" /> : (
-                        <DeleteButtonContainer>
-                            <BackButton onClick={() => setModalDeleteIsOpen(false)}>Cancelar</BackButton>
-                            <SubmitButton
-                                style={{ backgroundColor: '#ef4444' }}
-                                onClick={async () => {
-                                    setDeletting(true);
-                                    await deleteContratoById(selectedContrato.id, () => setModalDeleteIsOpen(false), setLoading);
-                                }}
-                            >
-                                Excluir
-                            </SubmitButton>
-                        </DeleteButtonContainer>
-                    )}
-                </DeleteContainer>
             </Modal>
 
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />

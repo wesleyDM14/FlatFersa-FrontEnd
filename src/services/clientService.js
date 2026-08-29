@@ -1,22 +1,4 @@
-import axios from "axios";
-import { sessionService } from "redux-react-session";
-
-const api = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3333'
-});
-
-// Interceptor para injetar o token automaticamente
-api.interceptors.request.use(async (config) => {
-    try {
-        const session = await sessionService.loadSession();
-        if (session && session.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-        }
-    } catch (err) {
-        console.error("Erro ao carregar sessão", err);
-    }
-    return config;
-});
+import api from "./api";
 
 // --- LISTAGEM GERAL (Para a tela de Clientes) ---
 export const getClientes = async (setClients, setSolicitacoes, setAtivos, setLoading) => {
@@ -37,14 +19,12 @@ export const getClientes = async (setClients, setSolicitacoes, setAtivos, setLoa
     }
 };
 
-// --- LISTAGEM PARA CONTRATO (Apenas Ativos) ---
-// ADAPTEI AQUI: Esta função busca todos e filtra apenas os ativos para o Select do contrato
+// --- LISTAGEM PARA CONTRATO (Apenas cadastros aprovados) ---
 export const getClientesForContract = async (setClients, setLoading) => {
     try {
         const response = await api.get('/clients');
-        // Filtra apenas clientes que podem fazer contrato
-        const clientesAtivos = response.data.filter(c => c.statusClient === 'ATIVO');
-        setClients(clientesAtivos);
+        const clientesAprovados = response.data.filter(c => c.statusCadastro === 'APROVADO');
+        setClients(clientesAprovados);
     } catch (err) {
         console.error("Erro ao buscar clientes para contrato", err);
         alert("Erro ao carregar lista de clientes.");
@@ -95,6 +75,7 @@ export const getClienteById = async (clientId, setClient, setLoading) => {
 };
 
 // --- ATUALIZAR ---
+// clientData deve usar os mesmos nomes de campo do createCliente (name, cpf, rg, dateBirth, phone, address)
 export const updateClientById = async (clientData, setSubmitting, setFieldError, closeEditModal) => {
     try {
         const formData = new FormData();
@@ -130,7 +111,7 @@ export const deleteClientById = async (clientId, setDeletting) => {
         await api.delete(`/clients/${clientId}`);
         alert("Cliente removido com sucesso.");
     } catch (err) {
-        alert("Erro ao remover cliente.");
+        alert(err.response?.data?.message || "Erro ao remover cliente.");
     } finally {
         if (setDeletting) setDeletting(false);
     }
@@ -139,23 +120,23 @@ export const deleteClientById = async (clientId, setDeletting) => {
 // --- APROVAÇÃO ---
 export const aproveClient = async (clientId, setLoading, closeModal) => {
     try {
-        await api.post('/requestAccess/aprove', { clientId });
+        await api.post('/users/approve', { clientId });
         alert("Cliente Aprovado!");
         if (closeModal) closeModal();
     } catch (err) {
-        alert("Erro ao aprovar.");
+        alert(err.response?.data?.message || "Erro ao aprovar.");
     } finally {
         if (setLoading) setLoading(false);
     }
 };
 
-export const reproveClient = async (clientId, message, setLoading, closeModal) => {
+export const reproveClient = async (clientId, motivo, setLoading, closeModal) => {
     try {
-        await api.post('/requestAccess/reprove', { clientId, message });
+        await api.post('/users/reprove', { clientId, motivo });
         alert("Cliente Reprovado.");
         if (closeModal) closeModal();
     } catch (err) {
-        alert("Erro ao reprovar.");
+        alert(err.response?.data?.message || "Erro ao reprovar.");
     } finally {
         if (setLoading) setLoading(false);
     }
@@ -164,8 +145,8 @@ export const reproveClient = async (clientId, message, setLoading, closeModal) =
 // --- IMAGENS ---
 export const getDocumentoImagem = async (clientId, tipo) => {
     try {
-        const endpoint = tipo === 'Frente' ? 'documentoFrente' : 'documentoVerso';
-        const response = await api.get(`/cliente/${endpoint}/${clientId}`, {
+        const endpoint = tipo === 'Frente' ? 'doc-frente' : 'doc-verso';
+        const response = await api.get(`/clients/${clientId}/${endpoint}`, {
             responseType: "blob"
         });
         return URL.createObjectURL(response.data);

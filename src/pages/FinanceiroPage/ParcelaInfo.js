@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { connect } from "react-redux";
 import Modal from "react-modal";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
-import { FaCheck, FaClock, FaFileInvoice, FaFilePdf, FaArrowLeft, FaCloudUploadAlt } from "react-icons/fa";
+import { FaCheck, FaFilePdf, FaArrowLeft, FaCloudUploadAlt } from "react-icons/fa";
 
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { logoutUser } from "../../services/userService";
 import {
-    aprovarPagamento, gerarCodigoPix, getComprovante,
-    getParcelaById, marcarPago, marcarPendente,
-    registrarLeitura, registrarPagamento, reprovarPagamento
+    aprovarPagamento, editarValoresFatura, enviarComprovante, gerarCodigoPix,
+    getFaturaById, registrarLeitura, reprovarPagamento
 } from "../../services/financeiroService";
 
 import {
@@ -22,96 +21,79 @@ import {
     PrestacaoDetailValueContainer, PrestacaoDetailLabel, PrestacaoDetailValue,
     PrestacaoDetailPagamentoContainer, QrCodePagamento, QrCodeCopiaEColaContainer, QrCodeCopiaECola,
     PrestacaoDetailButtonContainer, BackButton, SubmitButton, RejectButton,
-    ComprovanteContainer, ComprovanteTitle, ComprovanteImg, ComprovanteIconContainer,
-    LoadingContainer, PdfPreview, WaitingContainer, WaitingTitle, WaitingIcon,
+    ComprovanteContainer, ComprovanteTitle, ComprovanteImg,
+    LoadingContainer, PdfPreview,
 } from "./FinanceiroPage.styles";
 
 import { modalStyles } from "../../styles/ModalStyles";
 import { FormInput } from "../../components/FormLib";
-import { ContentIconContainer, ClientCounter, FormInputArea, FormInputLabel, Image, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFileLegend, StyledFormArea, ButtonGroup } from "../ClientPage/ClientPage.styles";
+import { Image, FormInputArea, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFormArea, ButtonGroup } from "../ClientPage/ClientPage.styles";
 import { FormInputLabelRequired } from "../ContractPage/ContractPage.styles";
 
-import pagoImg from '../../assets/pago.png';
-import cancelImg from '../../assets/cancel.png';
-import waitingImg from '../../assets/waiting.png';
+const STATUS_LABELS = {
+    PENDENTE: 'Pendente',
+    EM_ANALISE: 'Em Análise',
+    PAGO: 'Pago',
+    ATRASADO: 'Atrasado',
+    CANCELADO: 'Cancelado',
+    CONTESTADO: 'Contestado'
+};
 
 const ParcelaInfo = ({ user }) => {
     Modal.setAppElement('#root');
     const navigate = useNavigate();
-    const { prestacaoId } = useParams();
+    const { faturaId } = useParams();
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [parcela, setParcela] = useState(null);
-    const [infos, setInfos] = useState({});
+    const [fatura, setFatura] = useState(null);
 
-    // Pix
-    const [imgb64, setImgb64] = useState(undefined);
-    const [copiaCola, setCopiCola] = useState('');
+    const [pix, setPix] = useState(null);
 
     const [loading, setLoading] = useState(true);
-    const [loadingAction, setLoadingAction] = useState(false); // Para ações de botões
+    const [loadingAction, setLoadingAction] = useState(false);
 
     const [modalLeituraIsOpen, setModalLeituraIsOpen] = useState(false);
     const [modalPagamentoIsOpen, setModalPagamentoIsOpen] = useState(false);
+    const [modalValoresIsOpen, setModalValoresIsOpen] = useState(false);
 
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
-    const [comprovanteLink, setComprovanteLink] = useState();
 
-    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const getMesName = (id) => monthNames[id - 1] || 'Mês Inválido';
+    const isAdmin = user?.role === 'ADMIN';
 
     const handleLogout = () => logoutUser(navigate);
 
-    // Carrega dados iniciais
-    useEffect(() => {
-        const fetchAll = async () => {
-            if (user && user.accessToken) {
-                setLoading(true);
-                try {
-                    // 1. Dados da Parcela
-                    const { parcela: p, infos: i } = await getParcelaById(prestacaoId);
-                    setParcela(p);
-                    setInfos(i);
+    const fetchAll = useCallback(async () => {
+        setLoading(true);
+        try {
+            const f = await getFaturaById(faturaId);
+            setFatura(f);
 
-                    // 2. Pix (Se pendente/atrasado)
-                    if (p.statusPagamento === 'PENDENTE' || p.statusPagamento === 'ATRASADO') {
-                        const pixData = await gerarCodigoPix(prestacaoId);
-                        if (pixData) {
-                            if (pixData.status) {
-                                // Lógica de imagem estática baseada no status
-                                if (pixData.status === 'PAGO') setImgb64(pagoImg);
-                                else if (pixData.status === 'CANCELADO') setImgb64(cancelImg);
-                                else if (pixData.status === 'AGUARDANDO') setImgb64(waitingImg);
-                            } else {
-                                setImgb64(pixData.base64);
-                                setCopiCola(pixData.payload);
-                            }
-                        }
-                    }
-
-                    // 3. Comprovante (Se existir e for admin ou dono)
-                    if (p.linkComprovante) {
-                        const blob = await getComprovante(p.id);
-                        setComprovanteLink(blob);
-                    }
-
-                } catch (error) {
-                    console.error("Erro ao carregar detalhes", error);
-                } finally {
-                    setLoading(false);
-                }
+            if (f.status === 'PENDENTE' || f.status === 'ATRASADO') {
+                const pixData = await gerarCodigoPix(faturaId);
+                setPix(pixData);
             }
-        };
-        fetchAll();
-    }, [user, prestacaoId]);
+        } catch (error) {
+            console.error("Erro ao carregar detalhes da fatura", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [faturaId]);
 
-    // Helpers de Modal
+    useEffect(() => {
+        if (user && user.id) fetchAll();
+    }, [user, fetchAll]);
+
     const handleAction = async (actionFn, ...args) => {
         setLoadingAction(true);
-        await actionFn(...args);
-        setLoadingAction(false);
-        window.location.reload(); // Recarrega para atualizar status (ou refetch)
+        try {
+            await actionFn(...args);
+            await fetchAll();
+        } catch (error) {
+            alert(error.response?.data?.message || "Erro ao executar ação.");
+        } finally {
+            setLoadingAction(false);
+        }
     };
 
     if (!user) return null;
@@ -120,26 +102,25 @@ const ParcelaInfo = ({ user }) => {
         <div className="container">
             <Sidebar sidebarOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} logoutUser={handleLogout} />
 
-            {loading || !parcela ? (
+            {loading || !fatura ? (
                 <LoadingContainer><ThreeDots color={'#4e4e4e'} /></LoadingContainer>
             ) : (
                 <PrestacaoDetailMainContainer>
-                    {/* Header com Voltar e Status */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                         <PrestacaoDetailHeaderContainer style={{ border: 'none', padding: 0, margin: 0 }}>
                             <PrestacaoDetailHeaderTitle>
-                                {parcela.mesReferencia === 0 ? 'Calção' : `Aluguel ${getMesName(parcela.mesReferencia)}`}
+                                Fatura {new Date(fatura.mesReferencia).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                             </PrestacaoDetailHeaderTitle>
                             <span style={{
-                                backgroundColor: parcela.statusPagamento === 'PAGO' ? '#d1fae5' : '#fee2e2',
-                                color: parcela.statusPagamento === 'PAGO' ? '#059669' : '#dc2626',
+                                backgroundColor: fatura.status === 'PAGO' ? '#d1fae5' : '#fee2e2',
+                                color: fatura.status === 'PAGO' ? '#059669' : '#dc2626',
                                 padding: '5px 10px', borderRadius: '15px', fontWeight: 'bold', fontSize: '0.9rem'
                             }}>
-                                {parcela.statusPagamento}
+                                {STATUS_LABELS[fatura.status] || fatura.status}
                             </span>
                         </PrestacaoDetailHeaderContainer>
 
-                        <BackButton onClick={() => navigate('/financeiro')} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <BackButton onClick={() => navigate(isAdmin ? '/financeiro' : '/meus-pagamentos')} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <FaArrowLeft /> Voltar
                         </BackButton>
                     </div>
@@ -149,13 +130,11 @@ const ParcelaInfo = ({ user }) => {
                         <PrestacaoDetailLeftColumn>
                             <ComprovanteContainer>
                                 <ComprovanteTitle>Pagamento / Comprovante</ComprovanteTitle>
-                                {parcela.linkComprovante ? (
-                                    comprovanteLink ? (
-                                        <a href={comprovanteLink} target="_blank" rel="noreferrer">
-                                            <ComprovanteImg src={comprovanteLink} alt="Comprovante" />
-                                        </a>
-                                    ) : <ThreeDots height={30} />
-                                ) : parcela.statusPagamento === 'PAGO' ? (
+                                {fatura.comprovanteUrl ? (
+                                    <a href={fatura.comprovanteUrl} target="_blank" rel="noreferrer">
+                                        <ComprovanteImg src={fatura.comprovanteUrl} alt="Comprovante" />
+                                    </a>
+                                ) : fatura.status === 'PAGO' ? (
                                     <div style={{ textAlign: 'center', marginTop: 20 }}>
                                         <FaCheck size={50} color="#10b981" />
                                         <p style={{ color: '#10b981', fontWeight: 'bold' }}>Pago com Sucesso</p>
@@ -163,12 +142,12 @@ const ParcelaInfo = ({ user }) => {
                                 ) : (
                                     <PrestacaoDetailPagamentoContainer>
                                         <p style={{ fontWeight: 'bold' }}>Escaneie para pagar:</p>
-                                        {imgb64 && <QrCodePagamento src={imgb64} />}
-                                        {copiaCola && (
+                                        {pix?.base64 && <QrCodePagamento src={pix.base64} />}
+                                        {pix?.payload && (
                                             <>
                                                 <p style={{ fontSize: '0.8rem', marginTop: 10 }}>Pix Copia e Cola:</p>
                                                 <QrCodeCopiaEColaContainer>
-                                                    <QrCodeCopiaECola>{copiaCola}</QrCodeCopiaECola>
+                                                    <QrCodeCopiaECola>{pix.payload}</QrCodeCopiaECola>
                                                 </QrCodeCopiaEColaContainer>
                                             </>
                                         )}
@@ -179,78 +158,101 @@ const ParcelaInfo = ({ user }) => {
 
                         {/* COLUNA DIREITA: DADOS */}
                         <PrestacaoDetailRightColumn>
-                            <PrestacaoDetailValueContainer>
-                                <PrestacaoDetailLabel>Cliente:</PrestacaoDetailLabel>
-                                <PrestacaoDetailValue>{infos?.cliente?.name}</PrestacaoDetailValue>
-                            </PrestacaoDetailValueContainer>
+                            {isAdmin && (
+                                <PrestacaoDetailValueContainer>
+                                    <PrestacaoDetailLabel>Cliente:</PrestacaoDetailLabel>
+                                    <PrestacaoDetailValue>{fatura.contrato?.cliente?.nome}</PrestacaoDetailValue>
+                                </PrestacaoDetailValueContainer>
+                            )}
                             <PrestacaoDetailValueContainer>
                                 <PrestacaoDetailLabel>Vencimento:</PrestacaoDetailLabel>
-                                <PrestacaoDetailValue>{new Date(parcela.dataVencimento).toLocaleDateString()}</PrestacaoDetailValue>
+                                <PrestacaoDetailValue>{new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')}</PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
                             <PrestacaoDetailValueContainer>
-                                <PrestacaoDetailLabel>Valor Base:</PrestacaoDetailLabel>
-                                <PrestacaoDetailValue>R$ {parseFloat(parcela.valor).toFixed(2)}</PrestacaoDetailValue>
+                                <PrestacaoDetailLabel>Aluguel:</PrestacaoDetailLabel>
+                                <PrestacaoDetailValue>R$ {parseFloat(fatura.valorAluguel).toFixed(2)}</PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
 
-                            {/* Dados de Energia se houver */}
-                            {parcela.mesReferencia !== 0 && (
-                                <>
-                                    <PrestacaoDetailValueContainer>
-                                        <PrestacaoDetailLabel>Consumo KWh:</PrestacaoDetailLabel>
-                                        <PrestacaoDetailValue>
-                                            {parcela.consumoKWh ? `${parcela.consumoKWh} kWh` : 'Não medido'}
-                                        </PrestacaoDetailValue>
-                                    </PrestacaoDetailValueContainer>
-                                    <PrestacaoDetailValueContainer>
-                                        <PrestacaoDetailLabel>Valor Energia:</PrestacaoDetailLabel>
-                                        <PrestacaoDetailValue>R$ {parseFloat(parcela.valorExcedenteKWh || 0).toFixed(2)}</PrestacaoDetailValue>
-                                    </PrestacaoDetailValueContainer>
-                                </>
+                            <PrestacaoDetailValueContainer>
+                                <PrestacaoDetailLabel>Consumo de Energia:</PrestacaoDetailLabel>
+                                <PrestacaoDetailValue>
+                                    {fatura.consumoTotal ? `${fatura.consumoTotal} kWh (cobrado: ${fatura.consumoCobrado} kWh)` : 'Leitura não lançada'}
+                                </PrestacaoDetailValue>
+                            </PrestacaoDetailValueContainer>
+                            <PrestacaoDetailValueContainer>
+                                <PrestacaoDetailLabel>Valor Energia:</PrestacaoDetailLabel>
+                                <PrestacaoDetailValue>R$ {parseFloat(fatura.valorEnergia || 0).toFixed(2)}</PrestacaoDetailValue>
+                            </PrestacaoDetailValueContainer>
+
+                            {fatura.valorMulta > 0 && (
+                                <PrestacaoDetailValueContainer>
+                                    <PrestacaoDetailLabel>Multa/Juros:</PrestacaoDetailLabel>
+                                    <PrestacaoDetailValue>R$ {parseFloat(fatura.valorMulta).toFixed(2)}</PrestacaoDetailValue>
+                                </PrestacaoDetailValueContainer>
+                            )}
+                            {(fatura.acrescimoAplicado > 0 || fatura.descontoAplicado > 0) && (
+                                <PrestacaoDetailValueContainer>
+                                    <PrestacaoDetailLabel>Ajustes:</PrestacaoDetailLabel>
+                                    <PrestacaoDetailValue>
+                                        +R$ {parseFloat(fatura.acrescimoAplicado).toFixed(2)} / -R$ {parseFloat(fatura.descontoAplicado).toFixed(2)}
+                                    </PrestacaoDetailValue>
+                                </PrestacaoDetailValueContainer>
+                            )}
+                            {fatura.observacao && (
+                                <PrestacaoDetailValueContainer>
+                                    <PrestacaoDetailLabel>Observação:</PrestacaoDetailLabel>
+                                    <PrestacaoDetailValue>{fatura.observacao}</PrestacaoDetailValue>
+                                </PrestacaoDetailValueContainer>
                             )}
 
                             <PrestacaoDetailValueContainer style={{ borderTop: '2px solid #eee', paddingTop: 10, marginTop: 10 }}>
                                 <PrestacaoDetailLabel style={{ fontSize: '1.2rem' }}>Total:</PrestacaoDetailLabel>
                                 <PrestacaoDetailValue style={{ fontSize: '1.2rem', color: '#3b82f6' }}>
-                                    R$ {parseFloat((parcela.valor || 0) + (parcela.multa || 0) + (parcela.valorExcedenteKWh || 0)).toFixed(2)}
+                                    R$ {parseFloat(fatura.valorTotal || 0).toFixed(2)}
                                 </PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
 
                             {/* BOTÕES DE AÇÃO */}
                             <PrestacaoDetailButtonContainer>
-                                {/* Admin Actions */}
-                                {user.isAdmin && (
+                                {isAdmin && (
                                     <>
-                                        {/* Registrar Leitura */}
-                                        {parcela.mesReferencia !== 0 && !parcela.consumoKWh && parcela.statusPagamento !== 'PAGO' && (
-                                            <SubmitButton onClick={() => setModalLeituraIsOpen(true)}>Registrar Leitura</SubmitButton>
+                                        {fatura.status !== 'PAGO' && fatura.status !== 'CANCELADO' && (
+                                            <SubmitButton onClick={() => setModalLeituraIsOpen(true)}>
+                                                {fatura.consumoTotal ? 'Corrigir Leitura' : 'Registrar Leitura'}
+                                            </SubmitButton>
                                         )}
 
-                                        {/* Aprovar Comprovante */}
-                                        {parcela.statusPagamento === 'AGUARDANDO' && (
-                                            <SubmitButton onClick={() => handleAction(aprovarPagamento, parcela.id)}>Aprovar Pagamento</SubmitButton>
+                                        {fatura.status === 'EM_ANALISE' && (
+                                            <SubmitButton onClick={() => handleAction(aprovarPagamento, fatura.id)}>Aprovar Pagamento</SubmitButton>
                                         )}
 
-                                        {/* Aprovar Manualmente */}
-                                        {parcela.statusPagamento !== 'PAGO' && (
+                                        {fatura.status !== 'PAGO' && fatura.status !== 'CANCELADO' && (
                                             <SubmitButton onClick={() => {
-                                                if (window.confirm("Marcar como PAGO manualmente?")) handleAction(marcarPago, parcela.id);
+                                                if (window.confirm("Marcar esta fatura como PAGA?")) handleAction(aprovarPagamento, fatura.id);
                                             }}>Marcar Pago</SubmitButton>
                                         )}
 
-                                        {/* Reprovar/Estornar */}
-                                        {parcela.statusPagamento === 'PAGO' && (
+                                        {fatura.status === 'PAGO' && (
                                             <RejectButton onClick={() => {
-                                                if (window.confirm("Estornar para PENDENTE?")) handleAction(marcarPendente, parcela.id);
+                                                const motivo = window.prompt("Motivo do estorno:");
+                                                if (motivo) handleAction(reprovarPagamento, fatura.id, motivo);
                                             }}>Estornar</RejectButton>
                                         )}
+
+                                        {fatura.status === 'EM_ANALISE' && (
+                                            <RejectButton onClick={() => {
+                                                const motivo = window.prompt("Motivo da reprovação do comprovante:");
+                                                if (motivo) handleAction(reprovarPagamento, fatura.id, motivo);
+                                            }}>Reprovar Comprovante</RejectButton>
+                                        )}
+
+                                        <SubmitButton onClick={() => setModalValoresIsOpen(true)}>Ajustar Multa/Desconto</SubmitButton>
                                     </>
                                 )}
 
-                                {/* User Action: Enviar Comprovante */}
-                                {(parcela.statusPagamento === 'PENDENTE' || parcela.statusPagamento === 'ATRASADO') && (
+                                {!isAdmin && (fatura.status === 'PENDENTE' || fatura.status === 'ATRASADO') && (
                                     <SubmitButton onClick={() => setModalPagamentoIsOpen(true)}>Enviar Comprovante</SubmitButton>
                                 )}
-
                             </PrestacaoDetailButtonContainer>
                         </PrestacaoDetailRightColumn>
                     </PrestcaoDetailContentContainer>
@@ -260,22 +262,78 @@ const ParcelaInfo = ({ user }) => {
                         <StyledFormArea>
                             <h3>Registrar Leitura</h3>
                             <Formik
-                                initialValues={{ novaLeitura: 0, prestacaoId: parcela.id }}
-                                validationSchema={Yup.object({ novaLeitura: Yup.number().min(0).required() })}
-                                onSubmit={(values, { setSubmitting, setFieldError }) => {
-                                    registrarLeitura(values, setModalLeituraIsOpen);
-                                    window.location.reload();
+                                initialValues={{ leituraAtual: fatura.leituraAtual || 0, arquivo: null }}
+                                validationSchema={Yup.object({ leituraAtual: Yup.number().min(0).required() })}
+                                onSubmit={async (values, { setSubmitting }) => {
+                                    setSubmitting(true);
+                                    await handleAction(registrarLeitura, fatura.id, values.leituraAtual, values.arquivo);
+                                    setSubmitting(false);
+                                    setModalLeituraIsOpen(false);
+                                }}
+                            >
+                                {({ setFieldValue, isSubmitting }) => (
+                                    <Form>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Leitura Atual (kWh)</FormInputLabelRequired>
+                                            <FormInput type="number" name="leituraAtual" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Foto do Medidor (opcional)</FormInputLabelRequired>
+                                            <input type="file" accept="image/*" onChange={(e) => setFieldValue('arquivo', e.target.files[0])} />
+                                        </FormInputArea>
+                                        <ButtonGroup>
+                                            <BackButton type="button" onClick={() => setModalLeituraIsOpen(false)}>Cancelar</BackButton>
+                                            <SubmitButton type="submit" disabled={isSubmitting || loadingAction}>
+                                                {(isSubmitting || loadingAction) ? <ThreeDots height={20} /> : "Salvar"}
+                                            </SubmitButton>
+                                        </ButtonGroup>
+                                    </Form>
+                                )}
+                            </Formik>
+                        </StyledFormArea>
+                    </Modal>
+
+                    {/* MODAL AJUSTE DE VALORES */}
+                    <Modal isOpen={modalValoresIsOpen} onRequestClose={() => setModalValoresIsOpen(false)} style={modalStyles}>
+                        <StyledFormArea>
+                            <h3>Ajustar Multa / Acréscimo / Desconto</h3>
+                            <Formik
+                                initialValues={{
+                                    multa: fatura.valorMulta || 0,
+                                    acrescimo: fatura.acrescimoAplicado || 0,
+                                    desconto: fatura.descontoAplicado || 0,
+                                    observacao: fatura.observacao || ''
+                                }}
+                                onSubmit={async (values, { setSubmitting }) => {
+                                    setSubmitting(true);
+                                    await handleAction(editarValoresFatura, fatura.id, values);
+                                    setSubmitting(false);
+                                    setModalValoresIsOpen(false);
                                 }}
                             >
                                 {({ isSubmitting }) => (
                                     <Form>
                                         <FormInputArea>
-                                            <FormInputLabelRequired>Leitura Atual</FormInputLabelRequired>
-                                            <FormInput type="number" name="novaLeitura" />
+                                            <FormInputLabelRequired>Multa</FormInputLabelRequired>
+                                            <FormInput type="number" step="0.01" name="multa" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Acréscimo</FormInputLabelRequired>
+                                            <FormInput type="number" step="0.01" name="acrescimo" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Desconto</FormInputLabelRequired>
+                                            <FormInput type="number" step="0.01" name="desconto" />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Observação</FormInputLabelRequired>
+                                            <FormInput type="text" name="observacao" />
                                         </FormInputArea>
                                         <ButtonGroup>
-                                            <BackButton type="button" onClick={() => setModalLeituraIsOpen(false)}>Cancelar</BackButton>
-                                            <SubmitButton type="submit">Salvar</SubmitButton>
+                                            <BackButton type="button" onClick={() => setModalValoresIsOpen(false)}>Cancelar</BackButton>
+                                            <SubmitButton type="submit" disabled={isSubmitting || loadingAction}>
+                                                {(isSubmitting || loadingAction) ? <ThreeDots height={20} /> : "Salvar"}
+                                            </SubmitButton>
                                         </ButtonGroup>
                                     </Form>
                                 )}
@@ -288,11 +346,13 @@ const ParcelaInfo = ({ user }) => {
                         <StyledFormArea>
                             <h3>Enviar Comprovante</h3>
                             <Formik
-                                initialValues={{ comprovante: null, prestacaoId: parcela.id }}
-                                validationSchema={Yup.object({ comprovante: Yup.mixed().required() })}
-                                onSubmit={(values) => {
-                                    registrarPagamento(values, setModalPagamentoIsOpen);
-                                    window.location.reload();
+                                initialValues={{ comprovante: null }}
+                                validationSchema={Yup.object({ comprovante: Yup.mixed().required('Selecione um arquivo') })}
+                                onSubmit={async (values, { setSubmitting }) => {
+                                    setSubmitting(true);
+                                    await handleAction(enviarComprovante, fatura.id, values.comprovante);
+                                    setSubmitting(false);
+                                    setModalPagamentoIsOpen(false);
                                 }}
                             >
                                 {({ setFieldValue, isSubmitting }) => (
@@ -317,7 +377,9 @@ const ParcelaInfo = ({ user }) => {
 
                                         <ButtonGroup>
                                             <BackButton type="button" onClick={() => setModalPagamentoIsOpen(false)}>Cancelar</BackButton>
-                                            <SubmitButton type="submit">{isSubmitting ? <ThreeDots height={20} /> : "Enviar"}</SubmitButton>
+                                            <SubmitButton type="submit" disabled={isSubmitting || loadingAction}>
+                                                {(isSubmitting || loadingAction) ? <ThreeDots height={20} /> : "Enviar"}
+                                            </SubmitButton>
                                         </ButtonGroup>
                                     </Form>
                                 )}

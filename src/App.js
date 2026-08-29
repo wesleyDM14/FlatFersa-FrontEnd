@@ -81,27 +81,17 @@ const App = ({ checked }) => {
             <Route path="/apartamentos/novo" element={<PrivateRoute allowedRoles={['ADMIN']}><NovoApartamento /></PrivateRoute>} />
             <Route path="/apartamentos/:apartamentoId" element={<PrivateRoute allowedRoles={['ADMIN']}><ApartamentoInfos /></PrivateRoute>} />
 
-            {/* CONTRATOS */}
-            <Route path="/contratos" element={<PrivateRoute allowedRoles={['ADMIN']}><ContractPage /></PrivateRoute>} />
-            <Route path="/contratos/novo" element={<PrivateRoute allowedRoles={['ADMIN']}><NovoContract /></PrivateRoute>} />
+            {/* CONTRATOS (ADMIN gerencia todos, INQUILINO vê/solicita o seu) */}
+            <Route path="/contratos" element={<PrivateRoute allowedRoles={['ADMIN', 'INQUILINO']}><ContractPage /></PrivateRoute>} />
+            <Route path="/contratos/novo" element={<PrivateRoute allowedRoles={['ADMIN', 'INQUILINO']}><NovoContract /></PrivateRoute>} />
 
-            {/* FINANCEIRO (ADMIN) */}
+            {/* FINANCEIRO (ADMIN vê tudo, INQUILINO vê só as próprias faturas) */}
             <Route path="/financeiro" element={<PrivateRoute allowedRoles={['ADMIN']}><FianceiroPage /></PrivateRoute>} />
-            <Route path="/faturas/:faturaId" element={<PrivateRoute allowedRoles={['ADMIN']}><ParcelaInfo /></PrivateRoute>} />
+            <Route path="/faturas/:faturaId" element={<PrivateRoute allowedRoles={['ADMIN', 'INQUILINO']}><ParcelaInfo /></PrivateRoute>} />
 
-
-            {/* --- ROTAS DE INQUILINO (SÓ INQUILINO ACESSA) --- */}
-            {/* Futuramente vamos descomentar e criar essas páginas */}
-
-            {/* <Route 
-                path="/meus-pagamentos" 
-                element={<PrivateRoute allowedRoles={['INQUILINO']}><MeusPagamentos /></PrivateRoute>} 
-            />
-            <Route 
-                path="/meu-contrato" 
-                element={<PrivateRoute allowedRoles={['INQUILINO']}><MeuContratoPage /></PrivateRoute>} 
-            /> 
-            */}
+            {/* --- ROTAS DE INQUILINO --- */}
+            <Route path="/meus-pagamentos" element={<PrivateRoute allowedRoles={['INQUILINO']}><FianceiroPage /></PrivateRoute>} />
+            <Route path="/meu-contrato" element={<Navigate to="/contratos" replace />} />
 
             {/* Rota padrão para 404 - Redireciona para Dashboard se logado, ou Login se não */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

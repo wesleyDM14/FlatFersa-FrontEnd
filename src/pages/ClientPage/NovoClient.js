@@ -114,14 +114,9 @@ const NovoClient = ({ user }) => {
                                                 </FormInputArea>
                                             </SubItensContainer>
 
-                                            <SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabelRequired>Senha Provisória</FormInputLabelRequired>
-                                                    <Limitador>
-                                                        <FormInput name='password' type='password' placeholder='******' />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                            </SubItensContainer>
+                                            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: 4 }}>
+                                                A senha inicial de acesso será o CPF do cliente.
+                                            </p>
                                         </FormColum>
 
                                         <FormColum>

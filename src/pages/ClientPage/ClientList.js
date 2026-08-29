@@ -240,27 +240,21 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                     <Formik
                         initialValues={{
                             id: selectedClient.id,
-                            nome: selectedClient.nome || '',
+                            name: selectedClient.nome || '',
                             cpf: selectedClient.cpf || '',
                             rg: selectedClient.rg || '',
-                            telefone: selectedClient.telefone || '',
-                            enderecoAtual: selectedClient.enderecoAtual || '',
-                            docFrenteUrl: selectedClient.docFrenteUrl || '',
-                            docVersoUrl: selectedClient.docVersoUrl || '',
-                            newPassword: '',
-                            confirmPassword: '',
+                            phone: selectedClient.telefone || '',
+                            address: selectedClient.enderecoAtual || '',
                         }}
                         validationSchema={
                             Yup.object({
-                                nome: Yup.string().required('Obrigatório'),
-                                telefone: Yup.string().required('Obrigatório'),
-                                enderecoAtual: Yup.string().required('Endereço é Obrigatório'),
-                                newPassword: Yup.string(),
-                                confirmPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'As senhas devem coincidir'),
+                                name: Yup.string().required('Obrigatório'),
+                                phone: Yup.string().required('Obrigatório'),
+                                address: Yup.string().required('Endereço é Obrigatório'),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-                            values.dataNascimento = startDate;
+                            values.dateBirth = startDate;
                             await updateClientById(values, setSubmitting, setFieldError, closeEditModal);
                             refreshData();
                             closeEditModal();
@@ -273,7 +267,7 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                         <FormColum>
                                             <FormInputArea>
                                                 <FormInputLabelRequired>Nome</FormInputLabelRequired>
-                                                <FormInput type='text' name='nome' placeholder='Nome do cliente' />
+                                                <FormInput type='text' name='name' placeholder='Nome do cliente' />
                                             </FormInputArea>
                                             <SubItensContainer>
                                                 <FormInputArea>
@@ -289,25 +283,11 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                                     </Limitador>
                                                 </FormInputArea>
                                             </SubItensContainer>
-                                            <SubItensContainer>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Nova Senha</FormInputLabel>
-                                                    <Limitador>
-                                                        <FormInput name='newPassword' type='password' />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                                <FormInputArea>
-                                                    <FormInputLabel>Confirmar Nova Senha</FormInputLabel>
-                                                    <Limitador>
-                                                        <FormInput name='confirmPassword' type='password' />
-                                                    </Limitador>
-                                                </FormInputArea>
-                                            </SubItensContainer>
                                         </FormColum>
                                         <FormColum>
                                             <FormInputArea>
                                                 <FormInputLabelRequired>Endereço</FormInputLabelRequired>
-                                                <FormInput type='text' name='enderecoAtual' placeholder='Endereço do cliente' />
+                                                <FormInput type='text' name='address' placeholder='Endereço do cliente' />
                                             </FormInputArea>
                                             <SubItensContainer>
                                                 <FormInputArea>
@@ -319,7 +299,7 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                                 <FormInputArea>
                                                     <FormInputLabelRequired>Telefone</FormInputLabelRequired>
                                                     <Limitador>
-                                                        <FormInput name='telefone' type='text' placeholder='Telefone' />
+                                                        <FormInput name='phone' type='text' placeholder='Telefone' />
                                                     </Limitador>
                                                 </FormInputArea>
                                             </SubItensContainer>
@@ -344,7 +324,7 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                                         accept="image/*"
                                                         onChange={(event) => {
                                                             const file = event.target.files[0];
-                                                            setFieldValue('docFrenteUrl', file);
+                                                            setFieldValue('documentFront', file);
                                                             setSelectedFrontImage(file ? URL.createObjectURL(file) : undefined);
                                                         }}
                                                     />
@@ -371,7 +351,7 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                                         accept="image/*"
                                                         onChange={(event) => {
                                                             const file = event.target.files[0];
-                                                            setFieldValue('docVersoUrl', file);
+                                                            setFieldValue('documentBack', file);
                                                             setSelectedBackImage(file ? URL.createObjectURL(file) : undefined);
                                                         }}
                                                     />

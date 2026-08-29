@@ -16,7 +16,6 @@ import {
     AdminPredioContainer,
     BackButton,
     ButtonGroup,
-    ContentIconContainer,
     DeleteButtonContainer,
     DeleteContainer,
     DeleteIcon,
@@ -139,8 +138,8 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
                             cidade: selectedPredio.cidade || '',
                             estado: selectedPredio.estado || '',
                             bairro: selectedPredio.bairro || '',
-                            numApt: selectedPredio.numApt || 0,
-                            kwhPrice: selectedPredio.kwhPrice || 0,
+                            diaVencimentoPadrao: selectedPredio.diaVencimentoPadrao || 5,
+                            precoKwhAtual: selectedPredio.precoKwhAtual || 0,
                             finalidade: selectedPredio.finalidade || '',
                         }}
                         validationSchema={
@@ -149,8 +148,8 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
                                 endereco: Yup.string().required("Obrigatório"),
                                 cidade: Yup.string().required("Obrigatório"),
                                 estado: Yup.string().required("Obrigatório").max(2),
-                                numApt: Yup.number().required('Obrigatório'),
-                                kwhPrice: Yup.number().required('Obrigatório'),
+                                diaVencimentoPadrao: Yup.number().required('Obrigatório').min(1).max(31),
+                                precoKwhAtual: Yup.number().required('Obrigatório'),
                             })
                         }
                         onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -194,9 +193,9 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
                                     <FormColum>
                                         <SubItensContainer>
                                             <FormInputArea>
-                                                <FormInputLabelRequired>Qtd. Apts</FormInputLabelRequired>
+                                                <FormInputLabelRequired>Dia Vencimento Padrão</FormInputLabelRequired>
                                                 <Limitador>
-                                                    <FormInput type="number" name='numApt' />
+                                                    <FormInput type="number" name='diaVencimentoPadrao' min='1' max='31' />
                                                 </Limitador>
                                             </FormInputArea>
 
@@ -212,7 +211,7 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
                                             <FormInputArea>
                                                 <FormInputLabelRequired>kWh (R$)</FormInputLabelRequired>
                                                 <LimitadorAlt>
-                                                    <FormInput type="number" name='kwhPrice' step="0.01" />
+                                                    <FormInput type="number" name='precoKwhAtual' step="0.01" />
                                                 </LimitadorAlt>
                                             </FormInputArea>
 
