@@ -305,12 +305,13 @@ export const PredioSingleContainer = styled.div`
 `;
 
 export const StyledLabel = styled.h1`
+    display: none;
     font-size: 18px;
     color: ${props => props.theme.colors.lightblue};
     margin-right: 10px;
 
     @media only screen and (max-width: 978px){
-        display: none;
+        display: inline;
     }
 `;
 

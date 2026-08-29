@@ -26,6 +26,11 @@ const GlobalStyle = createGlobalStyle`
         padding: 0;
     }
 
+    /* Trava o scroll da página por trás enquanto um modal (react-modal) está aberto */
+    body.ReactModal__Body--open {
+        overflow: hidden;
+    }
+
     body {
         box-sizing: border-box;
         font-family: 'Lato', sans-serif;

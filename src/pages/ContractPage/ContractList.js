@@ -17,7 +17,7 @@ import {
     DetailContractHeaderSubTitle, DetailContractHeaderTitle, DetailContractValueContainer,
     EditIcon, FinanceiroList, FinanceiroListElement, FinanceiroListElementContainer,
     FinanceiroListIconContainer, FinanceiroListValue, FormContent,
-    FormInputArea, FormInputLabelRequired, Limitador, ListLabel,
+    FormInputArea, FormInputLabel, FormInputLabelRequired, Limitador, ListLabel,
     PredioListContainer, PredioListHeader, PredioSingleContainer, PredioValue,
     RejectButton, SinglePredio, SolicitacaoModalContainer,
     SolicitacaoModalTitle, SolicitacaoTitleContainer, StyledFormArea, StyledLabel,
@@ -500,7 +500,7 @@ const ContractList = ({ contratos, user, refreshData, navigate, search, page, se
                                     <FormInput type="number" name="duracaoMeses" />
                                 </FormInputArea>
                                 <FormInputArea>
-                                    <FormInputLabelRequired>Novo Valor do Aluguel (opcional)</FormInputLabelRequired>
+                                    <FormInputLabel>Novo Valor do Aluguel (opcional)</FormInputLabel>
                                     <FormInput type="number" step="0.01" name="valorAluguel" />
                                 </FormInputArea>
                                 <ButtonGroup>

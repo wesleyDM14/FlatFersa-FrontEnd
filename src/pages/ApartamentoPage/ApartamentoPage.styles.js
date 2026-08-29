@@ -137,13 +137,13 @@ export const PredioListContainer = styled.div`
 
 export const PredioListHeader = styled.div`
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 0.7fr;
     padding: 15px 20px;
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
-    
+
     @media (max-width: 768px){
-        grid-template-columns: 1fr 2fr 0.5fr;
+        grid-template-columns: 1fr 1.5fr 1fr 0.7fr;
     }
 `;
 
@@ -156,7 +156,7 @@ export const ListLabel = styled.h5`
 
 export const SinglePredio = styled.div`
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 0.7fr;
     padding: 15px 20px;
     border-bottom: 1px solid #f1f5f9;
     align-items: center;
@@ -168,7 +168,7 @@ export const SinglePredio = styled.div`
     }
 
     @media (max-width: 768px){
-        grid-template-columns: 1fr 2fr 0.5fr;
+        grid-template-columns: 1fr 1.5fr 1fr 0.7fr;
     }
 `;
 

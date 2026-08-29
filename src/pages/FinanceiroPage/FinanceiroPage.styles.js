@@ -182,11 +182,17 @@ export const PredioValue = styled.span`
 
 // Detalhes da Parcela (ParcelaInfo)
 export const PrestacaoDetailMainContainer = styled.div`
-    padding: 20px;
+    grid-area: main;
+    padding: 20px 30px;
+    margin-top: 15px;
+    margin-bottom: 28px;
     background: #fff;
     border-radius: 12px;
-    margin-top: 20px;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+
+    @media (max-width: 768px){
+        padding: 15px;
+    }
 `;
 
 export const PrestacaoDetailHeaderContainer = styled.div`
