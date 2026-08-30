@@ -27,7 +27,8 @@ import {
     FaTimes,
     FaUser,
     FaUsers,
-    FaKey
+    FaKey,
+    FaTools
 } from 'react-icons/fa';
 
 import logo from '../../assets/favicon.png';
@@ -95,6 +96,11 @@ const Sidebar = ({ user, sidebarOpen, closeSidebar, logoutUser }) => {
                             <IconItemContainer><FaMoneyBillWave /></IconItemContainer>
                             <ItemTitle>Financeiro</ItemTitle>
                         </MenuItem>
+
+                        <MenuItem onClick={() => handleNavigate('/manutencao')} className={isActive('/manutencao')}>
+                            <IconItemContainer><FaTools /></IconItemContainer>
+                            <ItemTitle>Manutenção</ItemTitle>
+                        </MenuItem>
                     </>
                 )}
 
@@ -109,6 +115,11 @@ const Sidebar = ({ user, sidebarOpen, closeSidebar, logoutUser }) => {
                         <MenuItem onClick={() => handleNavigate('/meu-contrato')} className={isActive('/meu-contrato')}>
                             <IconItemContainer><FaRegHandshake /></IconItemContainer>
                             <ItemTitle>Meu Contrato</ItemTitle>
+                        </MenuItem>
+
+                        <MenuItem onClick={() => handleNavigate('/manutencao')} className={isActive('/manutencao')}>
+                            <IconItemContainer><FaTools /></IconItemContainer>
+                            <ItemTitle>Manutenção</ItemTitle>
                         </MenuItem>
                     </>
                 )}

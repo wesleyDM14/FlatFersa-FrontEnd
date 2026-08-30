@@ -36,6 +36,7 @@ import NovoContract from "./pages/ContractPage/NovoContract";
 
 import FianceiroPage from "./pages/FinanceiroPage/FinanceiroPage";
 import ParcelaInfo from "./pages/FinanceiroPage/ParcelaInfo";
+import ManutencaoPage from "./pages/ManutencaoPage/ManutencaoPage";
 
 // Pages - CLIENTE (INQUILINO)
 // import MeusPagamentos from "./pages/FinanceiroPage/MeusPagamentos"; // Vamos criar em breve
@@ -88,6 +89,7 @@ const App = ({ checked }) => {
             {/* FINANCEIRO (ADMIN vê tudo, INQUILINO vê só as próprias faturas) */}
             <Route path="/financeiro" element={<PrivateRoute allowedRoles={['ADMIN']}><FianceiroPage /></PrivateRoute>} />
             <Route path="/faturas/:faturaId" element={<PrivateRoute allowedRoles={['ADMIN', 'INQUILINO']}><ParcelaInfo /></PrivateRoute>} />
+            <Route path="/manutencao" element={<PrivateRoute allowedRoles={['ADMIN', 'INQUILINO']}><ManutencaoPage /></PrivateRoute>} />
 
             {/* --- ROTAS DE INQUILINO --- */}
             <Route path="/meus-pagamentos" element={<PrivateRoute allowedRoles={['INQUILINO']}><FianceiroPage /></PrivateRoute>} />
