@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FaBuilding, FaEdit, FaFileInvoice, FaTrash } from "react-icons/fa";
 import Modal from "react-modal";
 import { Formik, Form } from "formik";
@@ -34,7 +34,7 @@ import {
     SubmitButton
 } from "./PredioPage.styles";
 
-const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage }) => {
+const PredioList = ({ predios, refreshData, page, setPage, totalPages }) => {
     Modal.setAppElement('#root');
     const navigate = useNavigate();
 
@@ -68,15 +68,8 @@ const PredioList = ({ predios, refreshData, search, page, setPage, itemsPerPage 
         setSelectedPredio({});
     };
 
-    // --- LÓGICA DE FILTRO E PAGINAÇÃO ---
-    const filteredPredios = useMemo(() =>
-        predios.filter(predio =>
-            predio.nome?.toLowerCase().includes(search.toLowerCase()) ||
-            predio.cidade?.toLowerCase().includes(search.toLowerCase())
-        ), [predios, search]);
-
-    const totalPages = Math.ceil(filteredPredios.length / itemsPerPage);
-    const currentPageItems = filteredPredios.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // A lista já vem pronta (filtrada e paginada) do backend via PredioPage.
+    const currentPageItems = predios;
 
     return (
         <PredioListContainer>

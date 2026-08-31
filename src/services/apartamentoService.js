@@ -1,12 +1,9 @@
 import api from "./api";
 
-export const getApartamentos = async (setApartamentos) => {
-    try {
-        const response = await api.get('/apartamentos');
-        setApartamentos(response.data);
-    } catch (error) {
-        console.error(error.response?.data?.message || error.message);
-    }
+// Listagem paginada (admin) - backend retorna { items, total, page, totalPages }
+export const getApartamentos = async ({ page = 1, limit = 10, search = '' } = {}) => {
+    const response = await api.get('/apartamentos', { params: { page, limit, search } });
+    return response.data;
 };
 
 export const getApartamentosByPredioId = async (predioId, setApartamentos) => {
@@ -19,10 +16,11 @@ export const getApartamentosByPredioId = async (predioId, setApartamentos) => {
     }
 };
 
-// Utilitário para telas que precisam escolher um apartamento vago (ex: transferência de contrato)
+// Utilitário para telas que precisam escolher um apartamento vago (ex: transferência de contrato,
+// nova solicitação). Rota dedicada, sem paginação, já traz o prédio incluso.
 export const getApartamentosVagos = async () => {
-    const response = await api.get('/apartamentos');
-    return response.data.filter(a => a.status === 'VAGO');
+    const response = await api.get('/apartamentos/vagos');
+    return response.data;
 };
 
 export const createApartamento = async (apartamentoData, navigate, setSubmitting, setFieldError) => {

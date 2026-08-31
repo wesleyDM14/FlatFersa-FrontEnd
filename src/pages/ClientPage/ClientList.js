@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaEdit, FaFileInvoice, FaTrash, FaUser, FaWhatsapp } from "react-icons/fa";
 import Modal from "react-modal";
 import { Formik, Form } from "formik";
@@ -70,7 +70,7 @@ const CLIENTE_STATUS_STYLE = {
     BLOQUEADO: { icon: '#6b7280', pillColor: '#374151', pillBg: '#f3f4f6', label: 'Bloqueado' },
 };
 
-const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
+const ClientList = ({ clientes, refreshData, navigate, page, setPage, totalPages }) => {
     Modal.setAppElement(document.getElementById('root'));
 
     // Modais
@@ -108,20 +108,8 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
     const openSolicitacaoModal = () => setModalSolicitacaoIsOpen(true);
     const closeSolicitacaoModal = () => setModalSolicitacaoIsOpen(false);
 
-    // Paginação e Filtro (Ajustado com os nomes do Prisma e proteção contra nulos)
-    const filteredClients = useMemo(() => {
-        const safeSearch = (search || '').toLowerCase();
-        
-        return clientes.filter(client => {
-            const safeName = (client.nome || '').toLowerCase();
-            const safePhone = (client.telefone || '').toLowerCase();
-            
-            return safeName.includes(safeSearch) || safePhone.includes(safeSearch);
-        });
-    }, [clientes, search]);
-
-    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
-    const currentPageItems = filteredClients.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // A lista já vem pronta (filtrada e paginada) do backend via ClientPage.
+    const currentPageItems = clientes;
 
     // Busca de Documentos
     useEffect(() => {

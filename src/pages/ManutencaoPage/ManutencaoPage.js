@@ -50,8 +50,10 @@ const ManutencaoPage = ({ user }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [chamados, setChamados] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
     const [filterType, setFilterType] = useState('TOTAL');
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -68,22 +70,40 @@ const ManutencaoPage = ({ user }) => {
 
     const isAdmin = user?.role === 'ADMIN';
 
+    // Debounce da busca (~400ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Reseta a página sempre que a busca mudar (o filtro de status não tem suporte
+    // no backend para /chamados, então ele permanece um filtro client-side sobre a página atual)
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch]);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const data = isAdmin ? await getChamados() : await getMeusChamados();
-            setChamados(data || []);
+            // Não há filtro de status no backend para chamados, apenas page/limit/search.
+            const data = isAdmin
+                ? await getChamados({ page, limit: itemsPerPage, search: debouncedSearch })
+                : await getMeusChamados({ page, limit: itemsPerPage });
+            setChamados(data.items || []);
+            setTotalPages(data.totalPages || 1);
         } catch (error) {
             console.error("Erro ao carregar chamados", error);
         } finally {
             setLoading(false);
         }
-    }, [isAdmin]);
+    }, [isAdmin, page, debouncedSearch]);
 
     useEffect(() => {
         if (user && user.id) fetchData();
     }, [user, fetchData]);
 
+    // Não existe rota de contagens globais para chamados, então os cards mostram
+    // a contagem apenas da página atual (fallback aceitável para esta listagem).
     const counts = React.useMemo(() => ({
         total: chamados.length,
         abertos: chamados.filter(c => c.status === 'ABERTO').length,
@@ -91,19 +111,12 @@ const ManutencaoPage = ({ user }) => {
         concluidos: chamados.filter(c => c.status === 'CONCLUIDO').length,
     }), [chamados]);
 
+    // Filtro de status aplicado apenas sobre a página atual (backend não suporta status em /chamados)
     const filteredList = React.useMemo(() => {
         let list = chamados;
         if (filterType !== 'TOTAL') list = list.filter(c => c.status === filterType);
-        if (search) {
-            const term = search.toLowerCase();
-            list = list.filter(c =>
-                c.titulo?.toLowerCase().includes(term) ||
-                c.cliente?.nome?.toLowerCase().includes(term) ||
-                c.apartamento?.numero?.toString().includes(term)
-            );
-        }
         return list;
-    }, [chamados, filterType, search]);
+    }, [chamados, filterType]);
 
     const handleCardClick = (type) => {
         setFilterType(type);
@@ -219,7 +232,7 @@ const ManutencaoPage = ({ user }) => {
                                 refreshData={fetchData}
                                 page={page}
                                 setPage={setPage}
-                                itemsPerPage={itemsPerPage}
+                                totalPages={totalPages}
                             />
                         )}
                     </ContentManutencaoContainer>

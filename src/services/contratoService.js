@@ -1,11 +1,19 @@
 import api from "./api";
 import { saveAs } from "file-saver";
 
-export const getContratos = async () => {
-    const response = await api.get('/contratos');
+// Listagem paginada (admin) - backend agora retorna { items, total, page, totalPages }
+export const getContratos = async ({ page = 1, limit = 10, search = '', status = '' } = {}) => {
+    const response = await api.get('/contratos', { params: { page, limit, search, status } });
     return response.data;
 };
 
+// Contagens globais (Ativos/Solicitações/Total) para os cards, sem carregar a lista inteira
+export const getContratosCounts = async () => {
+    const response = await api.get('/contratos/counts');
+    return response.data;
+};
+
+// Lista pequena por natureza (contratos do próprio cliente) - continua sem paginação real
 export const getMeusContratos = async () => {
     const response = await api.get('/me/contratos');
     return response.data;

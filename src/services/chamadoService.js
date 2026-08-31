@@ -1,12 +1,14 @@
 import api from "./api";
 
-export const getChamados = async () => {
-    const response = await api.get('/chamados');
+// Admin: { items, total, page, totalPages }
+export const getChamados = async ({ page = 1, limit = 10, search = '' } = {}) => {
+    const response = await api.get('/chamados', { params: { page, limit, search } });
     return response.data;
 };
 
-export const getMeusChamados = async () => {
-    const response = await api.get('/me/chamados');
+// Cliente vendo os próprios chamados: { items, total, page, totalPages }
+export const getMeusChamados = async ({ page = 1, limit = 10 } = {}) => {
+    const response = await api.get('/me/chamados', { params: { page, limit } });
     return response.data;
 };
 

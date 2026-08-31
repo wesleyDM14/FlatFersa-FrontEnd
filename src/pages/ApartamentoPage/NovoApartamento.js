@@ -11,7 +11,7 @@ import Sidebar from "../../components/Sidebar";
 import { FormInput, PredioSelect } from "../../components/FormLib";
 
 import { logoutUser } from '../../services/userService';
-import { getPredios } from "../../services/predioService";
+import { getTodosPredios } from "../../services/predioService";
 import { createApartamento } from "../../services/apartamentoService";
 
 import {
@@ -59,7 +59,8 @@ const NovoApartamento = ({ user }) => {
             const fetchData = async () => {
                 setLoading(true);
                 try {
-                    await getPredios(setPredios);
+                    const prediosData = await getTodosPredios();
+                    setPredios(prediosData);
                 } catch (error) {
                     console.error("Erro ao carregar dados", error);
                 } finally {

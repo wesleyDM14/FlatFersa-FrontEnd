@@ -10,7 +10,7 @@ import SearchBar from "../../components/SearchBar";
 import ParcelaList from "./ParcelaList";
 
 import { logoutUser } from '../../services/userService';
-import { getFaturas } from "../../services/financeiroService";
+import { getFaturas, getFaturasCounts } from "../../services/financeiroService";
 
 import {
     MainFinanceiroContainer,
@@ -37,71 +37,59 @@ const FinanceiroPage = ({ user }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Dados brutos
-    const [allParcelas, setAllParcelas] = useState([]);
+    // Página atual de parcelas, já vinda pronta do backend (ou calculada no service para cliente)
+    const [parcelas, setParcelas] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [counts, setCounts] = useState({ pago: 0, pendente: 0, atrasado: 0, emAnalise: 0, total: 0 });
 
-    // Filtro ativo: 'TOTAL', 'PAGO', 'PENDENTE', 'ATRASADO', 'AGUARDANDO'
+    // Filtro ativo: 'TOTAL', 'PAGO', 'PENDENTE', 'ATRASADO', 'EM_ANALISE'
     const [filterType, setFilterType] = useState('TOTAL');
 
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
     const handleLogout = () => logoutUser(navigate);
 
+    const isAdmin = user?.role === 'ADMIN';
+
+    // Debounce da busca (~400ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Reseta a página sempre que busca ou filtro de status mudar
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, filterType]);
+
     // Carrega dados
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const isAdmin = user.role === 'ADMIN';
-            const data = await getFaturas(isAdmin);
-            setAllParcelas(data || []);
+            const status = filterType === 'TOTAL' ? '' : filterType;
+            const [data, countsData] = await Promise.all([
+                getFaturas(isAdmin, { page, limit: itemsPerPage, search: debouncedSearch, status }),
+                getFaturasCounts(isAdmin)
+            ]);
+            setParcelas(data.items || []);
+            setTotalPages(data.totalPages || 1);
+            setCounts(countsData || { pago: 0, pendente: 0, atrasado: 0, emAnalise: 0, total: 0 });
         } catch (error) {
             console.error("Erro ao carregar faturas", error);
         } finally {
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [isAdmin, page, debouncedSearch, filterType]);
 
     useEffect(() => {
         if (user && user.id) {
             fetchData();
         }
     }, [user, fetchData]);
-
-    // Calcular contadores (Memoizado para performance)
-    const counts = React.useMemo(() => {
-        return {
-            total: allParcelas.length,
-            pagos: allParcelas.filter(p => p.status === 'PAGO').length,
-            pendentes: allParcelas.filter(p => p.status === 'PENDENTE').length,
-            atrasados: allParcelas.filter(p => p.status === 'ATRASADO').length,
-            emAnalise: allParcelas.filter(p => p.status === 'EM_ANALISE').length,
-        };
-    }, [allParcelas]);
-
-    // Filtrar lista baseada no card + busca
-    const filteredList = React.useMemo(() => {
-        let list = allParcelas;
-
-        // 1. Filtro do Card
-        if (filterType !== 'TOTAL') {
-            list = list.filter(p => p.status === filterType);
-        }
-
-        // 2. Filtro de Busca
-        if (search) {
-            const term = search.toLowerCase();
-            list = list.filter(p =>
-                p.contrato?.cliente?.nome?.toLowerCase().includes(term) ||
-                new Date(p.dataVencimento).toLocaleDateString('pt-BR').includes(term) ||
-                p.status?.toLowerCase().includes(term)
-            );
-        }
-
-        return list;
-    }, [allParcelas, filterType, search]);
 
     // Handle clique no card (com scroll)
     const handleCardClick = (type) => {
@@ -115,8 +103,6 @@ const FinanceiroPage = ({ user }) => {
     };
 
     if (!user) return <LoadingContainer><ThreeDots color="#4e4e4e" /></LoadingContainer>;
-
-    const isAdmin = user.role === 'ADMIN';
 
     return (
         <div className="container">
@@ -138,7 +124,7 @@ const FinanceiroPage = ({ user }) => {
                                 <CardTitle>Pagos</CardTitle>
                                 <CardIconContainer>
                                     <FaCheck />
-                                    <FinanceiroCounter>{counts.pagos}</FinanceiroCounter>
+                                    <FinanceiroCounter>{counts.pago}</FinanceiroCounter>
                                 </CardIconContainer>
                             </Card>
 
@@ -149,7 +135,7 @@ const FinanceiroPage = ({ user }) => {
                                 <CardTitle>Pendentes</CardTitle>
                                 <CardIconContainer>
                                     <FaHourglassHalf />
-                                    <FinanceiroCounter>{counts.pendentes}</FinanceiroCounter>
+                                    <FinanceiroCounter>{counts.pendente}</FinanceiroCounter>
                                 </CardIconContainer>
                             </Card>
 
@@ -160,7 +146,7 @@ const FinanceiroPage = ({ user }) => {
                                 <CardTitle>Atrasados</CardTitle>
                                 <CardIconContainer>
                                     <FaTimes />
-                                    <FinanceiroCounter>{counts.atrasados}</FinanceiroCounter>
+                                    <FinanceiroCounter>{counts.atrasado}</FinanceiroCounter>
                                 </CardIconContainer>
                             </Card>
 
@@ -203,7 +189,7 @@ const FinanceiroPage = ({ user }) => {
                             </SearcherContainer>
                         </ContentFinanceiroHeader>
 
-                        {filteredList.length === 0 ? (
+                        {parcelas.length === 0 ? (
                             <NoContentContainer>
                                 <FaMoneyBillWave color='#6c757d' fontSize={80} style={{ marginBottom: 20 }} />
                                 <NoContentAvisoContainer>
@@ -212,12 +198,12 @@ const FinanceiroPage = ({ user }) => {
                             </NoContentContainer>
                         ) : (
                             <ParcelaList
-                                parcelas={filteredList}
+                                parcelas={parcelas}
                                 isAdmin={isAdmin}
                                 navigate={navigate}
                                 page={page}
                                 setPage={setPage}
-                                itemsPerPage={itemsPerPage}
+                                totalPages={totalPages}
                             />
                         )}
                     </ContentFinanceiroContainer>

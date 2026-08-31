@@ -39,7 +39,7 @@ const STATUS_OPTIONS = [
     { value: 'CANCELADO', label: 'Cancelado', icon: <FaBan />, color: '#6b7280' },
 ];
 
-const ChamadoList = ({ chamados, isAdmin, refreshData, page, setPage, itemsPerPage }) => {
+const ChamadoList = ({ chamados, isAdmin, refreshData, page, setPage, totalPages }) => {
     Modal.setAppElement('#root');
 
     const [selectedChamado, setSelectedChamado] = useState(null);
@@ -72,8 +72,8 @@ const ChamadoList = ({ chamados, isAdmin, refreshData, page, setPage, itemsPerPa
         }
     };
 
-    const totalPages = Math.ceil(chamados.length / itemsPerPage);
-    const currentPageItems = chamados.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // A lista já vem pronta (paginada pelo backend, filtrada por status na página atual) via ManutencaoPage.
+    const currentPageItems = chamados;
 
     return (
         <PredioListContainer>

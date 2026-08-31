@@ -13,7 +13,7 @@ import LayoutPlanta from "../ApartamentoPage/LayoutPlanta";
 import { ApartamentoSelect, ClientSelect, FormInput, PredioSelect, StyledDatePicker } from "../../components/FormLib";
 
 import { logoutUser } from "../../services/userService";
-import { getPredios } from "../../services/predioService";
+import { getTodosPredios } from "../../services/predioService";
 import { getClientesForContract } from "../../services/clientService";
 import { getApartamentosByPredioId } from "../../services/apartamentoService";
 import { criarContratoDireto, solicitarContrato } from "../../services/contratoService";
@@ -58,7 +58,8 @@ const NovoContract = ({ user }) => {
             if (user && user.id) {
                 setLoading(true);
                 try {
-                    await getPredios(setPredios);
+                    const prediosData = await getTodosPredios();
+                    setPredios(prediosData);
                     if (isAdmin) {
                         await getClientesForContract(setClientes, setLoadingClientes);
                     }

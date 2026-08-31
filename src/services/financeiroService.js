@@ -2,22 +2,65 @@ import api from "./api";
 import { getMeusContratos } from "./contratoService";
 
 // --- LISTAGEM ---
-// Admin vê todas as faturas do sistema. Cliente vê as faturas dos seus próprios contratos
-// (o backend não expõe uma listagem de faturas para o cliente, elas já vêm dentro de /me/contratos).
-export const getFaturas = async (isAdmin) => {
+// Admin: backend pagina de verdade (/faturas?page&limit&search&status -> {items,total,page,totalPages}).
+// Cliente: o backend não expõe uma listagem de faturas para o cliente (elas já vêm dentro de /me/contratos),
+// então paginamos/filtramos aqui mesmo, do lado do cliente, mas devolvendo o MESMO formato {items,total,page,totalPages}
+// para a página não precisar tratar admin/cliente de formas diferentes.
+export const getFaturas = async (isAdmin, { page = 1, limit = 10, search = '', status = '' } = {}) => {
     if (isAdmin) {
-        const response = await api.get('/faturas');
+        const response = await api.get('/faturas', { params: { page, limit, search, status } });
         return response.data;
     }
 
     const contratos = await getMeusContratos();
-    const faturas = [];
+    let faturas = [];
     contratos.forEach(contrato => {
         (contrato.faturas || []).forEach(fatura => {
             faturas.push({ ...fatura, contrato });
         });
     });
-    return faturas;
+
+    if (status) {
+        faturas = faturas.filter(f => f.status === status);
+    }
+
+    if (search) {
+        const term = search.toLowerCase();
+        faturas = faturas.filter(f =>
+            f.contrato?.cliente?.nome?.toLowerCase().includes(term) ||
+            new Date(f.dataVencimento).toLocaleDateString('pt-BR').includes(term) ||
+            f.status?.toLowerCase().includes(term)
+        );
+    }
+
+    const total = faturas.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const start = (page - 1) * limit;
+    const items = faturas.slice(start, start + limit);
+
+    return { items, total, page, totalPages };
+};
+
+// --- CONTAGENS PARA OS CARDS (Pago/Pendente/Atrasado/Em Análise/Total) ---
+export const getFaturasCounts = async (isAdmin) => {
+    if (isAdmin) {
+        const response = await api.get('/faturas/counts');
+        return response.data;
+    }
+
+    // Não existe rota de counts para cliente; como a lista dele já é pequena
+    // (faturas dos próprios contratos), calculamos localmente.
+    const contratos = await getMeusContratos();
+    const faturas = [];
+    contratos.forEach(contrato => (contrato.faturas || []).forEach(f => faturas.push(f)));
+
+    return {
+        pago: faturas.filter(f => f.status === 'PAGO').length,
+        pendente: faturas.filter(f => f.status === 'PENDENTE').length,
+        atrasado: faturas.filter(f => f.status === 'ATRASADO').length,
+        emAnalise: faturas.filter(f => f.status === 'EM_ANALISE').length,
+        total: faturas.length,
+    };
 };
 
 // --- DETALHES ---

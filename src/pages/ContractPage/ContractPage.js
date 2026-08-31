@@ -10,7 +10,7 @@ import SearchBar from "../../components/SearchBar";
 import ContractList from "./ContractList";
 
 import { logoutUser } from '../../services/userService';
-import { getContratos, getMeusContratos } from "../../services/contratoService";
+import { getContratos, getContratosCounts, getMeusContratos } from "../../services/contratoService";
 
 import {
     AddButtonText,
@@ -33,6 +33,15 @@ import {
     CardIconContainer,
 } from "./ContractPage.styles";
 
+// Mapeia o filtro dos cards para o enum de status aceito pelo backend
+const statusFromFilterType = (filterType) => {
+    switch (filterType) {
+        case 'ATIVOS': return 'ATIVO';
+        case 'SOLICITACOES': return 'SOLICITADO';
+        default: return '';
+    }
+};
+
 const ContractPage = ({ user }) => {
     const navigate = useNavigate();
     const listRef = useRef(null);
@@ -43,13 +52,14 @@ const ContractPage = ({ user }) => {
     // Filtros
     const [filterType, setFilterType] = useState('TOTAL');
 
-    const [contratosAtivos, setContratosAtivos] = useState([]);
-    const [contratosSolicitacao, setContratosSolicitacao] = useState([]);
+    const [contratosCounts, setContratosCounts] = useState({ ativos: 0, solicitacoes: 0, total: 0 });
     const [contratoAtivoUser, setContratoAtivoUser] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 10;
 
     const handleLogout = () => logoutUser(navigate);
@@ -57,17 +67,46 @@ const ContractPage = ({ user }) => {
     // Helper para verificar se é admin com segurança
     const isAdmin = user && (user.role === 'ADMIN' || user.isAdmin === true);
 
+    // Debounce da busca (~400ms) para não martelar a API a cada tecla
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Sempre que busca ou filtro de status mudar, volta para a primeira página
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, filterType]);
+
     const fetchData = useCallback(async () => {
         try {
-            const contratosData = isAdmin ? await getContratos() : await getMeusContratos();
-            setContratos(contratosData);
-
             if (isAdmin) {
-                setContratosAtivos(contratosData.filter(c => c.status === 'ATIVO'));
-                setContratosSolicitacao(contratosData.filter(c => c.status === 'SOLICITADO'));
+                const status = statusFromFilterType(filterType);
+                const [data, counts] = await Promise.all([
+                    getContratos({ page, limit: itemsPerPage, search: debouncedSearch, status }),
+                    getContratosCounts()
+                ]);
+                setContratos(data.items || []);
+                setTotalPages(data.totalPages || 1);
+                setContratosCounts(counts || { ativos: 0, solicitacoes: 0, total: 0 });
             } else {
+                // Lista pequena por natureza (contratos do próprio cliente) - sem paginação real no backend.
+                // Filtramos e paginamos aqui mesmo para manter a mesma UX de Pagination no rodapé.
+                const contratosData = await getMeusContratos();
+
                 const temAtivo = contratosData.some(c => ['ATIVO', 'AGUARDANDO_ASSINATURA', 'SOLICITADO'].includes(c.status));
                 setContratoAtivoUser(temAtivo);
+
+                const term = debouncedSearch.toLowerCase();
+                const filtered = contratosData.filter(c => {
+                    const aptNum = c.apartamento?.numero?.toString() || '';
+                    const status = c.status?.toLowerCase() || '';
+                    return aptNum.includes(term) || status.includes(term);
+                });
+
+                setTotalPages(Math.max(1, Math.ceil(filtered.length / itemsPerPage)));
+                const start = (page - 1) * itemsPerPage;
+                setContratos(filtered.slice(start, start + itemsPerPage));
             }
         } catch (error) {
             console.error("Erro ao buscar contratos:", error);
@@ -75,7 +114,7 @@ const ContractPage = ({ user }) => {
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAdmin]);
+    }, [isAdmin, page, debouncedSearch, filterType]);
 
     useEffect(() => {
         // Só tenta buscar se o usuário tiver ID (estiver logado).
@@ -95,16 +134,6 @@ const ContractPage = ({ user }) => {
             }
         }, 100);
     };
-
-    const getCurrentList = () => {
-        switch (filterType) {
-            case 'ATIVOS': return contratosAtivos;
-            case 'SOLICITACOES': return contratosSolicitacao;
-            default: return contratos;
-        }
-    };
-
-    const currentList = getCurrentList();
 
     // Se não tem user ainda, mostra loading para não quebrar a tela
     if (!user) {
@@ -152,7 +181,7 @@ const ContractPage = ({ user }) => {
                                 <CardTitle>Contratos Ativos</CardTitle>
                                 <CardIconContainer>
                                     <FaFileContract />
-                                    <ContratoCounter>{contratosAtivos.length}</ContratoCounter>
+                                    <ContratoCounter>{contratosCounts.ativos}</ContratoCounter>
                                 </CardIconContainer>
                             </Card>
 
@@ -163,7 +192,7 @@ const ContractPage = ({ user }) => {
                                 <CardTitle>Solicitações</CardTitle>
                                 <CardIconContainer>
                                     <FaFileImport />
-                                    <ContratoCounter>{contratosSolicitacao.length}</ContratoCounter>
+                                    <ContratoCounter>{contratosCounts.solicitacoes}</ContratoCounter>
                                 </CardIconContainer>
                             </Card>
 
@@ -174,7 +203,7 @@ const ContractPage = ({ user }) => {
                                 <CardTitle>Histórico Total</CardTitle>
                                 <CardIconContainer>
                                     <FaDatabase />
-                                    <ContratoCounter>{contratos.length}</ContratoCounter>
+                                    <ContratoCounter>{contratosCounts.total}</ContratoCounter>
                                 </CardIconContainer>
                             </Card>
                         </ContratoCardsContainer>
@@ -194,7 +223,7 @@ const ContractPage = ({ user }) => {
                             </SearcherContainer>
                         </ContentContratoHeader>
 
-                        {currentList.length === 0 ? (
+                        {contratos.length === 0 ? (
                             <NoContentContainer>
                                 <FaHandshake color='#6c757d' fontSize={80} style={{ marginBottom: 20 }} />
                                 <NoContentAvisoContainer>
@@ -208,13 +237,13 @@ const ContractPage = ({ user }) => {
                             </NoContentContainer>
                         ) : (
                             <ContractList
-                                contratos={currentList}
+                                contratos={contratos}
                                 user={user}
                                 refreshData={fetchData}
                                 navigate={navigate}
-                                search={search}
                                 page={page}
                                 setPage={setPage}
+                                totalPages={totalPages}
                                 itemsPerPage={itemsPerPage}
                             />
                         )}

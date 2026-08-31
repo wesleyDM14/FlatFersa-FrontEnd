@@ -1,15 +1,19 @@
 import api from "./api";
 
 // ==========================================================
-// LISTAR PRÉDIOS
+// LISTAR PRÉDIOS (paginado, para a tela de gestão de prédios)
 // ==========================================================
-export const getPredios = async (setPredios) => {
-    try {
-        const response = await api.get('/predios');
-        setPredios(response.data);
-    } catch (err) {
-        console.error("Erro ao buscar prédios:", err);
-    }
+export const getPredios = async ({ page = 1, limit = 10, search = '' } = {}) => {
+    const response = await api.get('/predios', { params: { page, limit, search } });
+    return response.data; // { items, total, page, totalPages }
+};
+
+// ==========================================================
+// TODOS OS PRÉDIOS (sem paginação) - para popular selects (ex: criar apartamento/contrato)
+// ==========================================================
+export const getTodosPredios = async () => {
+    const response = await api.get('/predios/todos');
+    return response.data; // [{ id, nome }]
 };
 
 // ==========================================================

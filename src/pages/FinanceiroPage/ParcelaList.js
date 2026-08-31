@@ -15,10 +15,10 @@ const FATURA_STATUS_STYLE = {
     CONTESTADO: { icon: '#ef4444', pillColor: '#dc2626', pillBg: '#fee2e2', label: 'Contestado' },
 };
 
-const ParcelaList = ({ parcelas, isAdmin, navigate, page, setPage, itemsPerPage }) => {
+const ParcelaList = ({ parcelas, isAdmin, navigate, page, setPage, totalPages }) => {
 
-    const totalPages = Math.ceil(parcelas.length / itemsPerPage);
-    const currentPageItems = parcelas.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // A lista já vem pronta (filtrada e paginada) do backend via FinanceiroPage.
+    const currentPageItems = parcelas;
 
     return (
         <PredioListContainer>

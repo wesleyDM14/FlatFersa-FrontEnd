@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { Formik, Form, Field } from "formik";
@@ -7,7 +7,7 @@ import { FaEdit, FaTrash, FaList, FaMap, FaFileInvoice, FaDoorOpen } from "react
 import { ThreeDots } from "react-loader-spinner";
 
 import { FormInput } from "../../components/FormLib";
-import { deleteApartamentoById, updateApartamento } from "../../services/apartamentoService";
+import { deleteApartamentoById, updateApartamento, getApartamentosByPredioId } from "../../services/apartamentoService";
 import Pagination from "../../components/Pagination";
 import { modalStyles } from "../../styles/ModalStyles";
 import { ListRow } from "../../components/ListRow";
@@ -42,7 +42,7 @@ const STATUS_STYLE = {
     MANUTENCAO: { icon: '#f59e0b', pillColor: '#d97706', pillBg: '#fef3c7', label: 'Manutenção' },
 };
 
-const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, itemsPerPage }) => {
+const ApartamentoList = ({ apartamentos, refreshData, page, setPage, totalPages }) => {
     Modal.setAppElement('#root');
     const navigate = useNavigate();
 
@@ -51,6 +51,13 @@ const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, ite
     const [selectedApartamento, setSelectedApartamento] = useState({});
     const [deletting, setDeletting] = useState(false);
     const [showVisualMap, setShowVisualMap] = useState(false);
+
+    // A planta visual precisa do prédio INTEIRO (30 apartamentos), não apenas da página atual
+    // da listagem principal (que agora vem paginada do servidor). Por isso, ao ativar o modo
+    // planta, buscamos separadamente todos os apartamentos do prédio via rota dedicada
+    // (/predios/:id/apartamentos, que não foi paginada nesta mudança de contrato).
+    const [plantaApartamentos, setPlantaApartamentos] = useState([]);
+    const [loadingPlanta, setLoadingPlanta] = useState(false);
 
     // --- MANIPULAÇÃO DE MODAIS ---
     const openEditModal = (apartamento) => {
@@ -73,21 +80,28 @@ const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, ite
         setSelectedApartamento({});
     };
 
-    // --- FILTRAGEM ---
-    const filteredApartamentos = useMemo(() =>
-        apartamentos.filter(apt =>
-            apt.numero?.toString().includes(search) ||
-            apt.predio?.nome.toLowerCase().includes(search.toLowerCase())
-        ), [apartamentos, search]);
+    // A lista já vem pronta (filtrada e paginada) do backend via ApartamentoPage.
+    const currentPageItems = apartamentos;
 
-    // Lógica para detectar se deve mostrar o botão de Mapa
-    const hasFlatFersa = filteredApartamentos.some(apt =>
-        apt.predio?.nome.toLowerCase().includes("fersa")
+    // Lógica para detectar se deve mostrar o botão de Mapa (baseada na página atual)
+    const hasFlatFersa = apartamentos.some(apt =>
+        apt.predio?.nome?.toLowerCase().includes("fersa")
     );
 
-    // Paginação
-    const totalPages = Math.ceil(filteredApartamentos.length / itemsPerPage);
-    const currentPageItems = filteredApartamentos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // Ao ativar a planta visual, busca TODOS os apartamentos do prédio Flat Fersa
+    // (a listagem principal está paginada e não teria os 30 apartamentos necessários).
+    useEffect(() => {
+        if (showVisualMap && hasFlatFersa) {
+            const fersaApt = apartamentos.find(apt => apt.predio?.nome?.toLowerCase().includes("fersa"));
+            const predioId = fersaApt?.predio?.id || fersaApt?.predioId;
+            if (predioId) {
+                setLoadingPlanta(true);
+                getApartamentosByPredioId(predioId, setPlantaApartamentos)
+                    .finally(() => setLoadingPlanta(false));
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showVisualMap, hasFlatFersa]);
 
     return (
         <PredioListContainer>
@@ -110,10 +124,16 @@ const ApartamentoList = ({ apartamentos, refreshData, search, page, setPage, ite
 
             {/* RENDERIZAÇÃO CONDICIONAL: PLANTA OU LISTA */}
             {showVisualMap && hasFlatFersa ? (
-                <LayoutPlanta
-                    apartamentos={filteredApartamentos}
-                    setSelectedApartamento={(apt) => openEditModal(apt)}
-                />
+                loadingPlanta ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+                        <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                    </div>
+                ) : (
+                    <LayoutPlanta
+                        apartamentos={plantaApartamentos}
+                        setSelectedApartamento={(apt) => openEditModal(apt)}
+                    />
+                )
             ) : (
                 <>
                     {currentPageItems.map((apartamento) => {

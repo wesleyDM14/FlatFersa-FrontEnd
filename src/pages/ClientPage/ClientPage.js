@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ThreeDots } from "react-loader-spinner";
@@ -12,7 +12,7 @@ import ClientList from "./ClientList";
 
 // Serviços
 import { logoutUser } from "../../services/userService";
-import { getClientes } from "../../services/clientService";
+import { getClientes, getClientesCounts } from "../../services/clientService";
 
 // Estilos
 import {
@@ -36,21 +36,31 @@ import {
     TextContent,
 } from "./ClientPage.styles";
 
+// Mapeia o filtro dos cards para o enum de status aceito pelo backend
+const statusFromFilterType = (filterType) => {
+    switch (filterType) {
+        case 'ATIVOS': return 'APROVADO';
+        case 'SOLICITACOES': return 'PENDENTE_APROVACAO';
+        default: return '';
+    }
+};
+
 const ClientPage = ({ user }) => {
     const navigate = useNavigate();
     const listRef = useRef(null); // Ref para o container da lista
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [clientes, setClientes] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Filtros de visualização (Cards)
     const [filterType, setFilterType] = useState('TOTAL'); // 'TOTAL', 'ATIVOS', 'SOLICITACOES'
 
-    const [clientesAtivos, setClientesAtivos] = useState([]);
-    const [clientesSolicitacao, setClientesSolicitacao] = useState([]);
+    const [counts, setCounts] = useState({ ativos: 0, solicitacoes: 0, total: 0 });
 
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -58,23 +68,40 @@ const ClientPage = ({ user }) => {
         logoutUser(navigate);
     };
 
-    const fetchData = async () => {
+    // Debounce da busca (~400ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Reseta a página sempre que busca ou filtro de status mudar
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, filterType]);
+
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            // V2: Não passa user, interceptor resolve token
-            await getClientes(setClientes, setClientesSolicitacao, setClientesAtivos);
+            const status = statusFromFilterType(filterType);
+            const [data, countsData] = await Promise.all([
+                getClientes({ page, limit: itemsPerPage, search: debouncedSearch, status }),
+                getClientesCounts()
+            ]);
+            setClientes(data.items || []);
+            setTotalPages(data.totalPages || 1);
+            setCounts(countsData || { ativos: 0, solicitacoes: 0, total: 0 });
         } catch (error) {
             console.error("Error loading data", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearch, filterType]);
 
     useEffect(() => {
         if (user && user.role === 'ADMIN') {
             fetchData();
         }
-    }, [user]);
+    }, [user, fetchData]);
 
     // Função para alterar filtro e rolar até a lista (UX Mobile)
     const handleCardClick = (type) => {
@@ -86,17 +113,6 @@ const ClientPage = ({ user }) => {
             listRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
-
-    // Determina qual lista mostrar baseada no filtro
-    const getCurrentList = () => {
-        switch (filterType) {
-            case 'ATIVOS': return clientesAtivos;
-            case 'SOLICITACOES': return clientesSolicitacao;
-            default: return clientes;
-        }
-    };
-
-    const currentList = getCurrentList();
 
     if (!user || user.role !== 'ADMIN') return null;
 
@@ -131,7 +147,7 @@ const ClientPage = ({ user }) => {
                             <CardTitle>Clientes Ativos</CardTitle>
                             <CardIconContainer>
                                 <FaUserCheck />
-                                <ClientCounter>{clientesAtivos.length}</ClientCounter>
+                                <ClientCounter>{counts.ativos}</ClientCounter>
                             </CardIconContainer>
                         </Card>
 
@@ -141,8 +157,8 @@ const ClientPage = ({ user }) => {
                         >
                             <CardTitle>Solicitações Pendentes</CardTitle>
                             <CardIconContainer>
-                                <FaUserEdit color={clientesSolicitacao.length > 0 ? '#f59e0b' : '#3b82f6'} />
-                                <ClientCounter>{clientesSolicitacao.length}</ClientCounter>
+                                <FaUserEdit color={counts.solicitacoes > 0 ? '#f59e0b' : '#3b82f6'} />
+                                <ClientCounter>{counts.solicitacoes}</ClientCounter>
                             </CardIconContainer>
                         </Card>
 
@@ -153,7 +169,7 @@ const ClientPage = ({ user }) => {
                             <CardTitle>Total Cadastrados</CardTitle>
                             <CardIconContainer>
                                 <FaDatabase />
-                                <ClientCounter>{clientes.length}</ClientCounter>
+                                <ClientCounter>{counts.total}</ClientCounter>
                             </CardIconContainer>
                         </Card>
                     </ClienteCardsContainer>
@@ -175,7 +191,7 @@ const ClientPage = ({ user }) => {
                             </SearcherContainer>
                         </ContentClientHeader>
 
-                        {currentList.length === 0 ? (
+                        {clientes.length === 0 ? (
                             <NoContentContainer>
                                 <FaUsers color='#cbd5e1' fontSize={80} style={{ marginBottom: 20 }} />
                                 <NoContentAvisoContainer>
@@ -189,13 +205,12 @@ const ClientPage = ({ user }) => {
                             </NoContentContainer>
                         ) : (
                             <ClientList
-                                clientes={currentList}
+                                clientes={clientes}
                                 refreshData={fetchData}
                                 navigate={navigate}
-                                search={search}
                                 page={page}
                                 setPage={setPage}
-                                itemsPerPage={itemsPerPage}
+                                totalPages={totalPages}
                             />
                         )}
                     </ContentClientContainer>

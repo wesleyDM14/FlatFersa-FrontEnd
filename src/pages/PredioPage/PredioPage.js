@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ThreeDots } from 'react-loader-spinner';
@@ -36,10 +36,38 @@ const PredioPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [predios, setPredios] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
+
+    // Debounce da busca (~400ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Reseta a página sempre que a busca mudar
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch]);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getPredios({ page, limit: itemsPerPage, search: debouncedSearch });
+            setPredios(data.items || []);
+            setTotal(data.total || 0);
+            setTotalPages(data.totalPages || 1);
+        } catch (error) {
+            console.error("Erro ao carregar prédios", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, debouncedSearch]);
 
     // Busca dados iniciais
     useEffect(() => {
@@ -47,19 +75,7 @@ const PredioPage = ({ user }) => {
         if (user && user.role === 'ADMIN') {
             fetchData();
         }
-    }, [user]);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            // Nova assinatura: não precisa passar 'user', o serviço pega o token sozinho
-            await getPredios(setPredios);
-        } catch (error) {
-            console.error("Erro ao carregar prédios", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [user, fetchData]);
 
     const handleLogout = () => {
         logoutUser(navigate);
@@ -96,7 +112,7 @@ const PredioPage = ({ user }) => {
 
                     <ContentPredioContainer>
                         <ContentPredioHeader>
-                            <PredioCounter>Total: {predios.length} prédios</PredioCounter>
+                            <PredioCounter>Total: {total} prédios</PredioCounter>
                             <SearcherContainer>
                                 <SearchBar search={search} setSearch={setSearch} placeholder="Buscar prédio..." />
                             </SearcherContainer>
@@ -119,10 +135,9 @@ const PredioPage = ({ user }) => {
                                 user={user}
                                 navigate={navigate}
                                 refreshData={fetchData} // Passa a função de refresh direto
-                                search={search}
                                 page={page}
                                 setPage={setPage}
-                                itemsPerPage={itemsPerPage}
+                                totalPages={totalPages}
                             />
                         )}
                     </ContentPredioContainer>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Formik, Form } from "formik";
 import Modal from "react-modal";
 import * as Yup from 'yup';
@@ -78,7 +78,7 @@ const FATURA_STATUS_ICONS = {
     CONTESTADO: <FaExclamationTriangle color="#dc2626" />
 };
 
-const ContractList = ({ contratos, user, refreshData, navigate, search, page, setPage, itemsPerPage }) => {
+const ContractList = ({ contratos, user, refreshData, navigate, page, setPage, totalPages, itemsPerPage }) => {
     Modal.setAppElement('#root');
     const isAdmin = user.role === 'ADMIN';
 
@@ -118,22 +118,8 @@ const ContractList = ({ contratos, user, refreshData, navigate, search, page, se
         setModalTransferirIsOpen(true);
     };
 
-    const filteredContratos = useMemo(() => {
-        return contratos.filter(contrato => {
-            const clienteName = contrato.cliente?.nome?.toLowerCase() || '';
-            const aptNum = contrato.apartamento?.numero?.toString() || '';
-            const status = contrato.status?.toLowerCase() || '';
-            const term = search.toLowerCase();
-
-            if (isAdmin) {
-                return clienteName.includes(term) || aptNum.includes(term) || status.includes(term);
-            }
-            return aptNum.includes(term) || status.includes(term);
-        });
-    }, [contratos, search, isAdmin]);
-
-    const totalPages = Math.ceil(filteredContratos.length / itemsPerPage);
-    const currentPageItems = filteredContratos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // A lista já vem pronta (filtrada e paginada) do backend via ContractPage.
+    const currentPageItems = contratos;
 
     const financeiroItems = selectedContrato.faturas || [];
     const totalPagesFinanceiro = Math.ceil(financeiroItems.length / itemsPerPage);

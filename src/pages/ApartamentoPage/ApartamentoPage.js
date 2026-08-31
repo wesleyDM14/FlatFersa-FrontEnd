@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import { connect } from "react-redux";
 import { ThreeDots } from "react-loader-spinner";
@@ -33,8 +33,11 @@ const ApartamentoPage = ({ user }) => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [apartamentos, setApartamentos] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -42,23 +45,37 @@ const ApartamentoPage = ({ user }) => {
         logoutUser(navigate);
     };
 
+    // Debounce da busca (~400ms)
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Reseta a página sempre que a busca mudar
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch]);
+
     // Função de busca de dados
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            await getApartamentos(setApartamentos);
+            const data = await getApartamentos({ page, limit: itemsPerPage, search: debouncedSearch });
+            setApartamentos(data.items || []);
+            setTotal(data.total || 0);
+            setTotalPages(data.totalPages || 1);
         } catch (error) {
             console.error("Erro ao carregar dados", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearch]);
 
     useEffect(() => {
         if (user && user.role === 'ADMIN') {
             fetchData();
         }
-    }, [user]);
+    }, [user, fetchData]);
 
     // Proteção de Rota
     if (!user || user.role !== 'ADMIN') return null;
@@ -87,7 +104,7 @@ const ApartamentoPage = ({ user }) => {
 
                     <ContentApartamentoContainer>
                         <ContentApartamentoHeader>
-                            <ApartamentoCounter>Total: {apartamentos.length} apartamentos</ApartamentoCounter>
+                            <ApartamentoCounter>Total: {total} apartamentos</ApartamentoCounter>
                             <SearcherContainer>
                                 <SearchBar search={search} setSearch={setSearch} placeholder="Buscar por número ou prédio..." />
                             </SearcherContainer>
@@ -109,10 +126,9 @@ const ApartamentoPage = ({ user }) => {
                                 apartamentos={apartamentos}
                                 refreshData={fetchData}
                                 navigate={navigate}
-                                search={search}
                                 page={page}
                                 setPage={setPage}
-                                itemsPerPage={itemsPerPage}
+                                totalPages={totalPages}
                             />
                         )}
                     </ContentApartamentoContainer>

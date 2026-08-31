@@ -1,30 +1,22 @@
 import api from "./api";
 
-// --- LISTAGEM GERAL (Para a tela de Clientes) ---
-export const getClientes = async (setClients, setSolicitacoes, setAtivos, setLoading) => {
-    try {
-        const response = await api.get('/clients');
-        const clientes = response.data;
-
-        const ativos = clientes.filter(c => c.statusCadastro === 'APROVADO');
-        const solicitacoes = clientes.filter(c => c.statusCadastro === 'PENDENTE_APROVACAO');
-
-        if (setSolicitacoes) setSolicitacoes(solicitacoes);
-        if (setAtivos) setAtivos(ativos);
-        setClients(clientes);
-    } catch (err) {
-        console.error(err.response?.data?.message || err.message);
-    } finally {
-        if (setLoading) setLoading(false);
-    }
+// --- LISTAGEM GERAL PAGINADA (Para a tela de Clientes) ---
+export const getClientes = async ({ page = 1, limit = 10, search = '', status = '' } = {}) => {
+    const response = await api.get('/clients', { params: { page, limit, search, status } });
+    return response.data; // { items, total, page, totalPages }
 };
 
-// --- LISTAGEM PARA CONTRATO (Apenas cadastros aprovados) ---
+// --- CONTAGENS GLOBAIS (para os cards Ativos/Solicitações/Total) ---
+export const getClientesCounts = async () => {
+    const response = await api.get('/clients/counts');
+    return response.data; // { ativos, solicitacoes, total }
+};
+
+// --- LISTAGEM PARA CONTRATO (Apenas cadastros aprovados, sem paginação) ---
 export const getClientesForContract = async (setClients, setLoading) => {
     try {
-        const response = await api.get('/clients');
-        const clientesAprovados = response.data.filter(c => c.statusCadastro === 'APROVADO');
-        setClients(clientesAprovados);
+        const response = await api.get('/clients/aprovados');
+        setClients(response.data);
     } catch (err) {
         console.error("Erro ao buscar clientes para contrato", err);
         alert("Erro ao carregar lista de clientes.");
