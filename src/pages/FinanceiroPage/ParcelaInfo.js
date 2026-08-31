@@ -5,7 +5,7 @@ import Modal from "react-modal";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import { ThreeDots } from "react-loader-spinner";
-import { FaCheck, FaFilePdf, FaArrowLeft, FaCloudUploadAlt } from "react-icons/fa";
+import { FaCheck, FaFilePdf, FaArrowLeft, FaCloudUploadAlt, FaClock } from "react-icons/fa";
 
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
@@ -78,7 +78,9 @@ const ParcelaInfo = ({ user }) => {
             const f = await getFaturaById(faturaId);
             setFatura(f);
 
-            if (f.status === 'PENDENTE' || f.status === 'ATRASADO') {
+            // PIX é uma forma de pagamento do cliente - admin nunca paga a própria
+            // fatura que administra, então não faz sentido gerar/mostrar QR code pra ele.
+            if (!isAdmin && (f.status === 'PENDENTE' || f.status === 'ATRASADO')) {
                 const pixData = await gerarCodigoPix(faturaId);
                 setPix(pixData);
             }
@@ -87,7 +89,7 @@ const ParcelaInfo = ({ user }) => {
         } finally {
             setLoading(false);
         }
-    }, [faturaId]);
+    }, [faturaId, isAdmin]);
 
     useEffect(() => {
         if (user && user.id) fetchAll();
@@ -191,6 +193,13 @@ const ParcelaInfo = ({ user }) => {
                                     <div style={{ textAlign: 'center', marginTop: 20, color: '#6b7280' }}>
                                         <p style={{ fontWeight: 'bold' }}>
                                             {fatura.status === 'CANCELADO' ? 'Fatura cancelada' : 'Pagamento contestado'}
+                                        </p>
+                                    </div>
+                                ) : isAdmin ? (
+                                    <div style={{ textAlign: 'center', marginTop: 20 }}>
+                                        <FaClock size={50} color="#d97706" />
+                                        <p style={{ color: '#d97706', fontWeight: 'bold' }}>
+                                            {fatura.status === 'ATRASADO' ? 'Pagamento atrasado' : 'Aguardando pagamento do cliente'}
                                         </p>
                                     </div>
                                 ) : (
