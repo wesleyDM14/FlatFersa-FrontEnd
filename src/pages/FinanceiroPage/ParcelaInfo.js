@@ -365,11 +365,29 @@ const ParcelaInfo = ({ user }) => {
                                     setModalValoresIsOpen(false);
                                 }}
                             >
-                                {({ isSubmitting }) => (
+                                {({ isSubmitting, values, setFieldValue }) => (
                                     <Form>
                                         <FormInputArea>
                                             <FormInputLabelRequired>Multa</FormInputLabelRequired>
-                                            <FormInput type="number" step="0.01" name="multa" />
+                                            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <FormInput type="number" step="0.01" name="multa" />
+                                                </div>
+                                                {Number(values.multa) > 0 && (
+                                                    <RejectButton
+                                                        type="button"
+                                                        style={{ whiteSpace: 'nowrap' }}
+                                                        onClick={() => setFieldValue('multa', 0)}
+                                                    >
+                                                        Remover Multa
+                                                    </RejectButton>
+                                                )}
+                                            </div>
+                                            {Number(values.multa) > 0 && (
+                                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: 4 }}>
+                                                    Esta fatura tem multa/juros aplicada. Clique em "Remover Multa" para perdoá-la.
+                                                </p>
+                                            )}
                                         </FormInputArea>
                                         <FormInputArea>
                                             <FormInputLabelRequired>Acréscimo</FormInputLabelRequired>

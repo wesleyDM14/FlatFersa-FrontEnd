@@ -42,83 +42,112 @@ const PoliticaPrivacidade = () => {
                     </ContentHeader>
                     <ContentBody>
                         <ContentParagraph>
-                            Última atualização: 22/04/2024
+                            Última atualização: 30/08/2026
                         </ContentParagraph>
                         <br />
                         <ContentParagraph>
-                            A Plataforma FlatFersa é uma plataforma online acessível na URL <Link href="/dashboard">https://flatfersa.com.br</Link>, por meio da qual a OffsetDev ("OffsetDev", "nós" ou "nossos"), disponibiliza uma plataforma de tecnologia para conectar Usuários ("Usuário", "você" ou "seu") a serviços tais como intermediação à abertura de contratos de locação com a FlatFersa, acompanhamento de contratos de aluguel, pagamentos, bem como outras funcionalidades que forem apresentadas na Plataforma ("Serviços").
+                            O FlatFersa ("nós", "nosso") disponibiliza uma plataforma de gestão de aluguéis, usada por
+                            proprietários/administradores ("Administrador") e locatários ("Cliente", "você") para gerenciar
+                            contratos de locação, cobranças, faturas, chamados de manutenção e comunicação entre as partes.
+                            Esta Política de Privacidade explica quais dados pessoais coletamos, por que os coletamos, como
+                            os protegemos e quais direitos você tem sobre eles, em conformidade com a Lei Geral de Proteção
+                            de Dados (Lei nº 13.709/2018 - LGPD).
                         </ContentParagraph>
-                        <br />
-                        <ContentParagraph>
-                            Esta Política de Privacidade descreve como as informações pessoais são coletadas, usadas e compartilhadas quando você utiliza os serviços oferecidos pela FlatFersa ("nós", "nosso" ou "nos").
-                        </ContentParagraph>
+
                         <ContentSubTitle>
-                            Informações que Coletamos
+                            1. Dados que Coletamos
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Ao utilizar nosso sistema de aluguel, podemos coletar as seguintes informações pessoais:
+                            Para viabilizar um contrato de locação, coletamos:
                         </ContentParagraph>
                         <ContentList>
-                            <ContentListItem>Informações de contato, como nome, endereço de e-mail, número de telefone e endereço residencial, que você nos fornece ao se registrar ou entrar em contato conosco.</ContentListItem>
-                            <ContentListItem>Informações de pagamento, como detalhes do cartão de crédito ou outras informações de pagamento, que você nos fornece para processar transações de aluguel.</ContentListItem>
-                            <ContentListItem>Informações sobre imóveis e contratos de aluguel, incluindo endereço do imóvel, detalhes do contrato, histórico de pagamento e informações relacionadas.</ContentListItem>
+                            <ContentListItem>Dados de identificação: nome completo, CPF, RG, data de nascimento.</ContentListItem>
+                            <ContentListItem>Dados de contato: e-mail, telefone e endereço residencial atual.</ContentListItem>
+                            <ContentListItem>Documentos de identificação: fotos da frente e do verso do seu RG ou CNH, enviadas por você no cadastro.</ContentListItem>
+                            <ContentListItem>Dados contratuais e financeiros: contratos de locação, valores de aluguel, histórico de faturas, comprovantes de pagamento e leituras de consumo de energia do imóvel alugado.</ContentListItem>
+                            <ContentListItem>Chamados de manutenção: título, descrição e fotos que você opcionalmente anexa a um chamado aberto para o seu apartamento.</ContentListItem>
                         </ContentList>
-                        <br />
+
                         <ContentSubTitle>
-                            Como Utilizamos Suas Informações
+                            2. Para que Usamos Seus Dados
                         </ContentSubTitle>
                         <br />
-                        <ContentParagraph>
-                            Utilizamos as informações coletadas para:
-                        </ContentParagraph>
                         <ContentList>
-                            <ContentListItem>Facilitar o processo de aluguel e fornecer suporte relacionado aos nossos serviços.</ContentListItem>
-                            <ContentListItem>Processar pagamentos de aluguel e garantir transações seguras.</ContentListItem>
-                            <ContentListItem>Personalizar sua experiência, fornecendo recomendações de imóveis e comunicações relevantes.</ContentListItem>
-                            <ContentListItem>Melhorar e otimizar nosso sistema de aluguel, incluindo análises e desenvolvimento de novos recursos.</ContentListItem>
-                            <ContentListItem>Cumprir obrigações legais e regulamentares, como exigido por lei.</ContentListItem>
+                            <ContentListItem>Formalizar, gerenciar e renovar o seu contrato de locação.</ContentListItem>
+                            <ContentListItem>Calcular e cobrar faturas de aluguel e consumo de energia, incluindo geração de cobrança via PIX.</ContentListItem>
+                            <ContentListItem>Verificar sua identidade durante a análise do seu cadastro como locatário.</ContentListItem>
+                            <ContentListItem>Enviar avisos e notificações relacionados ao seu contrato, faturas e chamados de manutenção.</ContentListItem>
+                            <ContentListItem>Cumprir obrigações legais, fiscais e contábeis (guarda de comprovantes e histórico financeiro).</ContentListItem>
                         </ContentList>
-                        <br />
+
                         <ContentSubTitle>
-                            Compartilhamento de Informações
+                            3. Como Protegemos Seus Documentos
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Não compartilhamos suas informações pessoais com terceiros, exceto quando necessário para fornecer nossos serviços de aluguel, cumprir obrigações legais ou proteger nossos direitos.
+                            Seus documentos de identificação e comprovantes de pagamento não ficam publicamente acessíveis:
+                            o acesso a essas imagens exige estar autenticado no sistema, e somente você e o administrador
+                            responsável pelo seu contrato podem visualizá-los. Senhas são armazenadas de forma criptografada
+                            (nunca em texto puro), e o acesso ao painel administrativo é restrito a usuários autorizados.
                         </ContentParagraph>
-                        <br />
+
                         <ContentSubTitle>
-                            Segurança
+                            4. Compartilhamento de Informações
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Implementamos medidas de segurança para proteger suas informações pessoais contra acesso não autorizado, alteração, divulgação ou destruição.
+                            Não vendemos nem compartilhamos seus dados pessoais com terceiros para fins de marketing.
+                            Compartilhamos dados apenas com prestadores estritamente necessários para operar o serviço
+                            (por exemplo, o serviço de envio de e-mails transacionais e o gerador de código PIX para
+                            pagamento), ou quando exigido por lei ou ordem judicial.
                         </ContentParagraph>
-                        <br />
+
                         <ContentSubTitle>
-                            Seus Direitos
+                            5. Por Quanto Tempo Guardamos Seus Dados
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Você tem o direito de acessar, corrigir, atualizar ou solicitar a exclusão de suas informações pessoais. Se você tiver alguma dúvida ou solicitação sobre suas informações, entre em contato conosco através das informações fornecidas abaixo.
+                            Mantemos seus dados enquanto seu contrato estiver ativo e, após o encerramento, pelo prazo
+                            necessário ao cumprimento de obrigações legais, fiscais e cíveis relacionadas a contratos de
+                            locação (histórico de faturas e comprovantes de pagamento), findo o qual você pode solicitar
+                            a exclusão dos seus dados pessoais conforme a seção 6 abaixo.
                         </ContentParagraph>
-                        <br />
+
                         <ContentSubTitle>
-                            Alterações nesta Política de Privacidade
+                            6. Seus Direitos e Como Exercê-los
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Esta Política de Privacidade pode ser atualizada periodicamente para refletir mudanças em nossas práticas de privacidade. Recomendamos revisar esta página regularmente para obter as informações mais recentes sobre nossas práticas de privacidade.
+                            Nos termos da LGPD, você tem direito a: confirmação da existência de tratamento, acesso aos
+                            seus dados, correção de dados incompletos ou desatualizados, anonimização ou exclusão de dados
+                            desnecessários, portabilidade e informação sobre com quem compartilhamos seus dados.
                         </ContentParagraph>
-                        <br />
+                        <ContentParagraph>
+                            Você pode corrigir seus dados a qualquer momento na página <Link href="/perfil">Meu Perfil</Link>.
+                            Para solicitar a <strong>exclusão da sua conta e dos seus dados pessoais</strong>, use o botão
+                            "Solicitar Exclusão de Conta" na mesma página — a solicitação é analisada pelo administrador e,
+                            se você não tiver contrato ativo, seus dados de identificação são anonimizados (o histórico de
+                            faturas é preservado sem identificação direta, por obrigação fiscal). Se preferir, também pode
+                            entrar em contato pelo e-mail abaixo.
+                        </ContentParagraph>
+
                         <ContentSubTitle>
-                            Entre em Contato Conosco
+                            7. Alterações nesta Política
                         </ContentSubTitle>
                         <br />
                         <ContentParagraph>
-                            Se você tiver alguma dúvida ou preocupação sobre esta Política de Privacidade ou nossas práticas de privacidade, entre em contato conosco em:
-                            <Link href="https://dev.escritoriooffset.com.br/"> Offset Dev</Link>
+                            Esta Política pode ser atualizada periodicamente para refletir mudanças em nossas práticas ou
+                            na legislação aplicável. A data da última atualização está sempre indicada no topo desta página.
+                        </ContentParagraph>
+
+                        <ContentSubTitle>
+                            8. Contato
+                        </ContentSubTitle>
+                        <br />
+                        <ContentParagraph>
+                            Dúvidas sobre esta Política ou sobre o tratamento dos seus dados pessoais podem ser enviadas para{' '}
+                            <Link href="mailto:contato@flatfersa.com.br">contato@flatfersa.com.br</Link>.
                         </ContentParagraph>
                     </ContentBody>
                 </ContentContainer>

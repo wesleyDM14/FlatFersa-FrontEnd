@@ -4,13 +4,13 @@ import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import { connect } from "react-redux";
 import { ThreeDots } from "react-loader-spinner";
-import { FaUserEdit, FaLock } from "react-icons/fa";
+import { FaUserEdit, FaLock, FaExclamationTriangle } from "react-icons/fa";
 
 import Navbar from '../../components/Navbar';
 import Sidebar from '../../components/Sidebar';
 import { FormInput, MaskedInput } from "../../components/FormLib";
 
-import { getLoggedUserInfo, logoutUser, updateMyProfile, updateMyPassword } from '../../services/userService';
+import { getLoggedUserInfo, logoutUser, updateMyProfile, updateMyPassword, solicitarExclusaoConta } from '../../services/userService';
 
 import {
     MainPerfilContainer,
@@ -38,8 +38,28 @@ const PerfilPage = ({ user }) => {
     const [userInfo, setUserInfo] = useState({});
 
     const isAdmin = user?.role === 'ADMIN';
+    const [solicitandoExclusao, setSolicitandoExclusao] = useState(false);
 
     const handleLogout = () => logoutUser(navigate);
+
+    const handleSolicitarExclusao = async () => {
+        if (!window.confirm(
+            "Tem certeza que deseja solicitar a exclusão da sua conta?\n\n" +
+            "Um administrador vai analisar seu pedido. Se você não tiver contrato ativo, " +
+            "seus dados pessoais serão anonimizados e sua conta será desativada."
+        )) return;
+
+        setSolicitandoExclusao(true);
+        try {
+            const result = await solicitarExclusaoConta();
+            alert(result.message || "Solicitação enviada com sucesso.");
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || "Erro ao solicitar exclusão de conta.");
+        } finally {
+            setSolicitandoExclusao(false);
+        }
+    };
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -200,6 +220,37 @@ const PerfilPage = ({ user }) => {
                                 )}
                             </Formik>
                         </ProfileCard>
+
+                        {!isAdmin && (
+                            <ProfileCard>
+                                <SectionTitle style={{ color: '#dc2626' }}>
+                                    <FaExclamationTriangle style={{ marginRight: 10 }} /> Zona de Risco
+                                </SectionTitle>
+                                {userInfo.exclusaoSolicitada ? (
+                                    <p style={{ color: '#d97706', fontWeight: 600 }}>
+                                        Sua solicitação de exclusão de conta está em análise pelo administrador.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p style={{ color: '#6b7280', marginBottom: 15 }}>
+                                            Ao solicitar a exclusão, seus dados pessoais (nome, CPF, RG, documentos, telefone
+                                            e endereço) serão anonimizados assim que aprovado pelo administrador. Isso só é
+                                            possível se você não tiver um contrato ativo no momento.
+                                        </p>
+                                        <ButtonGroup>
+                                            <SubmitButton
+                                                type="button"
+                                                style={{ backgroundColor: '#dc2626' }}
+                                                onClick={handleSolicitarExclusao}
+                                                disabled={solicitandoExclusao}
+                                            >
+                                                {solicitandoExclusao ? <ThreeDots color="#fff" height={20} width={40} /> : "Solicitar Exclusão de Conta"}
+                                            </SubmitButton>
+                                        </ButtonGroup>
+                                    </>
+                                )}
+                            </ProfileCard>
+                        )}
                     </ContentPerfilContainer>
                 </MainPerfilContainer>
             )}

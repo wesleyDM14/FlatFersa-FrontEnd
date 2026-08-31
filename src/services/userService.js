@@ -71,6 +71,21 @@ export const updateMyPassword = async (data, setFieldError) => {
     }
 };
 
+export const solicitarExclusaoConta = async () => {
+    const response = await api.post('/me/solicitar-exclusao');
+    return response.data;
+};
+
+export const aprovarExclusaoCliente = async (clientId) => {
+    const response = await api.post(`/clients/${clientId}/aprovar-exclusao`);
+    return response.data;
+};
+
+export const negarExclusaoCliente = async (clientId, motivo) => {
+    const response = await api.post(`/clients/${clientId}/negar-exclusao`, { motivo });
+    return response.data;
+};
+
 export const requestCreateClient = async (formData, navigate, setFieldError, setSubmitting) => {
     try {
         await api.post('/solicitar-acesso', formData, {

@@ -9,6 +9,7 @@ import { ThreeDots } from "react-loader-spinner";
 import { FormInput, StyledDatePicker } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
 import { ListRow } from "../../components/ListRow";
+import { AuthenticatedImage } from "../../components/AuthenticatedImage";
 
 // Estilos
 import {
@@ -20,7 +21,6 @@ import {
     DeleteContainer,
     DeleteIcon,
     DeleteTitle,
-    DocumentImage,
     EditIcon,
     FormColum,
     FormContent,
@@ -30,7 +30,6 @@ import {
     Image,
     ImgContainer,
     Limitador,
-    LinkImgContainer,
     PredioListContainer,
     StyledFileArea,
     StyledFileIconContainer,
@@ -58,10 +57,11 @@ import {
 import {
     aproveClient,
     deleteClientById,
-    getDocumentoImagem, 
+    getDocumentoImagem,
     reproveClient,
     updateClientById
 } from "../../services/clientService";
+import { aprovarExclusaoCliente, negarExclusaoCliente } from "../../services/userService";
 
 const CLIENTE_STATUS_STYLE = {
     APROVADO: { icon: '#10b981', pillColor: '#059669', pillBg: '#d1fae5', label: 'Aprovado' },
@@ -77,6 +77,7 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false);
     const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
     const [modalSolicitacaoIsOpen, setModalSolicitacaoIsOpen] = useState(false);
+    const [modalExclusaoIsOpen, setModalExclusaoIsOpen] = useState(false);
 
     const [selectedClient, setSelectedClient] = useState({});
     const [startDate, setStartDate] = useState(new Date());
@@ -97,6 +98,12 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
 
     const openDeleteModal = () => setModalDeleteIsOpen(true);
     const closeDeleteModal = () => setModalDeleteIsOpen(false);
+
+    const openExclusaoModal = () => setModalExclusaoIsOpen(true);
+    const closeExclusaoModal = () => {
+        setModalExclusaoIsOpen(false);
+        setSelectedClient({});
+    };
 
     const openSolicitacaoModal = () => setModalSolicitacaoIsOpen(true);
     const closeSolicitacaoModal = () => setModalSolicitacaoIsOpen(false);
@@ -140,7 +147,10 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                         <ListRow
                             key={cliente.id}
                             onClick={() => {
-                                if (cliente.statusCadastro === 'PENDENTE_APROVACAO') {
+                                if (cliente.exclusaoSolicitada) {
+                                    setSelectedClient(cliente);
+                                    openExclusaoModal();
+                                } else if (cliente.statusCadastro === 'PENDENTE_APROVACAO') {
                                     setSelectedClient(cliente);
                                     openSolicitacaoModal();
                                 } else {
@@ -148,12 +158,12 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                 }
                             }}
                             icon={<FaUser />}
-                            iconColor={st.icon}
+                            iconColor={cliente.exclusaoSolicitada ? '#dc2626' : st.icon}
                             title={cliente.nome}
                             subtitle={cliente.telefone || 'Sem telefone cadastrado'}
-                            statusLabel={st.label}
-                            statusColor={st.pillColor}
-                            statusBg={st.pillBg}
+                            statusLabel={cliente.exclusaoSolicitada ? 'Exclusão Solicitada' : st.label}
+                            statusColor={cliente.exclusaoSolicitada ? '#dc2626' : st.pillColor}
+                            statusBg={cliente.exclusaoSolicitada ? '#fee2e2' : st.pillBg}
                             actions={
                                 <>
                                     {cliente.telefone && (
@@ -304,8 +314,10 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                             <FormInputArea>
                                                 <FormInputLabel>Documento de Identificação (Frente)</FormInputLabel>
                                                 <StyledFileArea>
-                                                    {selectedFrontImage || selectedClient.docFrenteUrl ? (
-                                                        <Image src={selectedFrontImage || selectedClient.docFrenteUrl} />
+                                                    {selectedFrontImage ? (
+                                                        <Image src={selectedFrontImage} />
+                                                    ) : selectedClient.docFrenteUrl ? (
+                                                        <AuthenticatedImage clientId={selectedClient.id} tipo="Frente" style={{ maxWidth: '100%', maxHeight: 180, borderRadius: 8 }} />
                                                     ) : (
                                                         <div>
                                                             <StyledFileIconContainer>
@@ -331,8 +343,10 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                                             <FormInputArea>
                                                 <FormInputLabel>Documento de Identificação (Verso)</FormInputLabel>
                                                 <StyledFileArea>
-                                                    {selectedBackImage || selectedClient.docVersoUrl ? (
-                                                        <Image src={selectedBackImage || selectedClient.docVersoUrl} />
+                                                    {selectedBackImage ? (
+                                                        <Image src={selectedBackImage} />
+                                                    ) : selectedClient.docVersoUrl ? (
+                                                        <AuthenticatedImage clientId={selectedClient.id} tipo="Verso" style={{ maxWidth: '100%', maxHeight: 180, borderRadius: 8 }} />
                                                     ) : (
                                                         <div>
                                                             <StyledFileIconContainer>
@@ -413,19 +427,25 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                             </DataColumn>
 
                             <DataColumn>
-                                <LinkImgContainer href={selectedClient.docFrenteUrl} target="_blank">
-                                    <ImgContainer>
-                                        <SolicitacaoModalContentLabel>Documento (Frente): </SolicitacaoModalContentLabel>
-                                        <DocumentImage src={selectedClient.docFrenteUrl} />
-                                    </ImgContainer>
-                                </LinkImgContainer>
+                                <ImgContainer>
+                                    <SolicitacaoModalContentLabel>Documento (Frente): </SolicitacaoModalContentLabel>
+                                    <AuthenticatedImage
+                                        clientId={selectedClient.id}
+                                        tipo="Frente"
+                                        openOnClick
+                                        style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }}
+                                    />
+                                </ImgContainer>
 
-                                <LinkImgContainer href={selectedClient.docVersoUrl} target="_blank">
-                                    <ImgContainer>
-                                        <SolicitacaoModalContentLabel>Documento (Verso): </SolicitacaoModalContentLabel>
-                                        <DocumentImage src={selectedClient.docVersoUrl} />
-                                    </ImgContainer>
-                                </LinkImgContainer>
+                                <ImgContainer>
+                                    <SolicitacaoModalContentLabel>Documento (Verso): </SolicitacaoModalContentLabel>
+                                    <AuthenticatedImage
+                                        clientId={selectedClient.id}
+                                        tipo="Verso"
+                                        openOnClick
+                                        style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }}
+                                    />
+                                </ImgContainer>
                             </DataColumn>
                         </SolicitacaoModalContent>
 
@@ -473,6 +493,90 @@ const ClientList = ({ clientes, refreshData, navigate, search, page, setPage, it
                         )}
                     </SolicitacaoModalContainer>
                 </>
+            </Modal>
+
+            {/* MODAL DE REVISÃO DE EXCLUSÃO DE CONTA */}
+            <Modal
+                isOpen={modalExclusaoIsOpen}
+                onRequestClose={closeExclusaoModal}
+                style={modalStyles}
+                contentLabel="Solicitação de Exclusão de Conta"
+            >
+                <SolicitacaoModalContainer>
+                    <SolicitacaoTitleContainer>
+                        <SolicitacaoModalTitle>Solicitação de Exclusão de Conta</SolicitacaoModalTitle>
+                    </SolicitacaoTitleContainer>
+                    <SolicitacaoModalContent>
+                        <DataColumn>
+                            <DataContainer>
+                                <SolicitacaoModalContentLabel>Nome:</SolicitacaoModalContentLabel>
+                                <SolicitacaoModalContentValue>{selectedClient.nome}</SolicitacaoModalContentValue>
+                            </DataContainer>
+                            <DataContainer>
+                                <SolicitacaoModalContentLabel>CPF:</SolicitacaoModalContentLabel>
+                                <SolicitacaoModalContentValue>{selectedClient.cpf}</SolicitacaoModalContentValue>
+                            </DataContainer>
+                            <DataContainer>
+                                <SolicitacaoModalContentLabel>Solicitado em:</SolicitacaoModalContentLabel>
+                                <SolicitacaoModalContentValue>
+                                    {selectedClient.dataSolicitacaoExclusao ? new Date(selectedClient.dataSolicitacaoExclusao).toLocaleDateString('pt-BR') : '-'}
+                                </SolicitacaoModalContentValue>
+                            </DataContainer>
+                        </DataColumn>
+                    </SolicitacaoModalContent>
+
+                    <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: '10px 0 20px' }}>
+                        Se aprovado, os dados pessoais deste cliente (nome, CPF, RG, documentos, telefone e endereço)
+                        serão anonimizados. Isso só é possível se ele não tiver contrato ativo no momento.
+                    </p>
+
+                    {isProcessing ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                            <ThreeDots color={'#4e4e4e'} height={49} width={100} />
+                        </div>
+                    ) : (
+                        <ButtonGroup>
+                            <BackButton type='button' onClick={closeExclusaoModal}>Fechar</BackButton>
+                            <RejectButton
+                                type='button'
+                                onClick={async () => {
+                                    const motivo = window.prompt("Motivo para negar a exclusão:");
+                                    if (!motivo) return;
+                                    setIsProcessing(true);
+                                    try {
+                                        await negarExclusaoCliente(selectedClient.id, motivo);
+                                        refreshData();
+                                        closeExclusaoModal();
+                                    } catch (err) {
+                                        alert(err.response?.data?.message || "Erro ao negar exclusão.");
+                                    } finally {
+                                        setIsProcessing(false);
+                                    }
+                                }}
+                            >
+                                Negar
+                            </RejectButton>
+                            <SubmitButton
+                                type="button"
+                                onClick={async () => {
+                                    if (!window.confirm("Confirma a anonimização dos dados deste cliente? Essa ação não pode ser desfeita.")) return;
+                                    setIsProcessing(true);
+                                    try {
+                                        await aprovarExclusaoCliente(selectedClient.id);
+                                        refreshData();
+                                        closeExclusaoModal();
+                                    } catch (err) {
+                                        alert(err.response?.data?.message || "Erro ao aprovar exclusão.");
+                                    } finally {
+                                        setIsProcessing(false);
+                                    }
+                                }}
+                            >
+                                Aprovar Exclusão
+                            </SubmitButton>
+                        </ButtonGroup>
+                    )}
+                </SolicitacaoModalContainer>
             </Modal>
 
             <Pagination totalPages={totalPages} currentPage={page} setPage={setPage} />

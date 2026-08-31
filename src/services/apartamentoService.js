@@ -51,6 +51,11 @@ export const getApartamentoById = async (apartamentoId, setApartamento) => {
     }
 };
 
+export const getHistoricoApartamento = async (apartamentoId) => {
+    const response = await api.get(`/apartamentos/${apartamentoId}/historico`);
+    return response.data;
+};
+
 export const updateApartamento = async (values, setSubmitting, setFieldError) => {
     try {
         const response = await api.put(`/apartamentos/${values.id}`, values);
