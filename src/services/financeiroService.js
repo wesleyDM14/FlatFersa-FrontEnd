@@ -81,9 +81,10 @@ export const gerarCodigoPix = async (faturaId) => {
 };
 
 // --- LEITURA DE ENERGIA (ADMIN) ---
-export const registrarLeitura = async (faturaId, leituraAtual, arquivo) => {
+export const registrarLeitura = async (faturaId, leituraAtual, arquivo, leituraAnterior) => {
     const formData = new FormData();
     formData.append('leituraAtual', leituraAtual);
+    if (leituraAnterior !== undefined && leituraAnterior !== '') formData.append('leituraAnterior', leituraAnterior);
     if (arquivo) formData.append('file', arquivo);
 
     const response = await api.put(`/faturas/${faturaId}/leitura`, formData, {

@@ -325,25 +325,69 @@ const ParcelaInfo = ({ user }) => {
                         <StyledFormArea>
                             <h3>Registrar Leitura</h3>
                             <Formik
-                                initialValues={{ leituraAtual: fatura.leituraAtual || 0, arquivo: null }}
-                                validationSchema={Yup.object({ leituraAtual: Yup.number().min(0).required() })}
+                                initialValues={{
+                                    leituraAtual: fatura.leituraAtual || '',
+                                    leituraAnterior: fatura.leituraAnterior || '',
+                                    arquivo: null
+                                }}
+                                validationSchema={Yup.object({
+                                    leituraAtual: Yup.number().min(0).required(),
+                                    leituraAnterior: Yup.number().min(0).required(),
+                                })}
                                 onSubmit={async (values, { setSubmitting }) => {
                                     setSubmitting(true);
-                                    await handleAction(registrarLeitura, fatura.id, values.leituraAtual, values.arquivo);
+                                    await handleAction(registrarLeitura, fatura.id, values.leituraAtual, values.arquivo, values.leituraAnterior);
                                     setSubmitting(false);
                                     setModalLeituraIsOpen(false);
                                 }}
                             >
-                                {({ setFieldValue, isSubmitting }) => (
+                                {({ values, touched, setFieldValue, setFieldTouched, isSubmitting }) => (
                                     <Form>
+                                        {fatura.leituraAnterior === 0 && fatura.sugestaoConsumoMedio != null && (
+                                            <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: 12, lineHeight: 1.4 }}>
+                                                Este contrato veio do sistema antigo, que não guardava a leitura acumulada
+                                                do medidor - só o consumo mensal. Por isso sugerimos a "Leitura Anterior"
+                                                com base na média dos últimos meses ({fatura.sugestaoConsumoMedio} kWh/mês).
+                                                Ajuste se você souber o valor real do medidor.
+                                            </p>
+                                        )}
                                         <FormInputArea>
                                             <FormInputLabelRequired>Leitura Atual (kWh)</FormInputLabelRequired>
-                                            <FormInput type="number" name="leituraAtual" />
+                                            <FormInput
+                                                type="number"
+                                                name="leituraAtual"
+                                                onChange={(e) => {
+                                                    const novaLeituraAtual = e.target.value;
+                                                    setFieldValue('leituraAtual', novaLeituraAtual);
+                                                    // Só auto-preenche se o admin ainda não mexeu manualmente no campo
+                                                    // de leitura anterior e temos uma sugestão baseada no histórico.
+                                                    if (!touched.leituraAnterior && fatura.leituraAnterior === 0 && fatura.sugestaoConsumoMedio != null && novaLeituraAtual !== '') {
+                                                        const sugerida = Math.max(0, Number(novaLeituraAtual) - fatura.sugestaoConsumoMedio);
+                                                        setFieldValue('leituraAnterior', sugerida);
+                                                    }
+                                                }}
+                                            />
+                                        </FormInputArea>
+                                        <FormInputArea>
+                                            <FormInputLabelRequired>Leitura Anterior (kWh)</FormInputLabelRequired>
+                                            <FormInput
+                                                type="number"
+                                                name="leituraAnterior"
+                                                onChange={(e) => {
+                                                    setFieldValue('leituraAnterior', e.target.value);
+                                                    setFieldTouched('leituraAnterior', true, false);
+                                                }}
+                                            />
                                         </FormInputArea>
                                         <FormInputArea>
                                             <FormInputLabelRequired>Foto do Medidor (opcional)</FormInputLabelRequired>
                                             <input type="file" accept="image/*" onChange={(e) => setFieldValue('arquivo', e.target.files[0])} />
                                         </FormInputArea>
+                                        {values.leituraAtual !== '' && values.leituraAnterior !== '' && (
+                                            <p style={{ fontSize: '0.85rem', color: '#374151', marginTop: -8, marginBottom: 12 }}>
+                                                Consumo calculado: <strong>{Math.max(0, Number(values.leituraAtual) - Number(values.leituraAnterior))} kWh</strong>
+                                            </p>
+                                        )}
                                         <ButtonGroup>
                                             <BackButton type="button" onClick={() => setModalLeituraIsOpen(false)}>Cancelar</BackButton>
                                             <SubmitButton type="submit" disabled={isSubmitting || loadingAction}>
