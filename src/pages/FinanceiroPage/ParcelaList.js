@@ -1,6 +1,7 @@
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import Pagination from "../../components/Pagination";
 import { ListRow } from "../../components/ListRow";
+import { formatDateBR } from "../../utils/dateUtils";
 
 import {
     PredioListContainer
@@ -24,7 +25,7 @@ const ParcelaList = ({ parcelas, isAdmin, navigate, page, setPage, totalPages })
         <PredioListContainer>
             {currentPageItems.map((parcela) => {
                 const total = parseFloat(parcela.valorTotal || 0).toFixed(2);
-                const vencimento = new Date(parcela.dataVencimento).toLocaleDateString('pt-BR');
+                const vencimento = formatDateBR(parcela.dataVencimento);
                 const st = FATURA_STATUS_STYLE[parcela.status] || FATURA_STATUS_STYLE.PENDENTE;
 
                 return (

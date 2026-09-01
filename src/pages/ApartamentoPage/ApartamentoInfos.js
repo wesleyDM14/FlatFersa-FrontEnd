@@ -18,6 +18,7 @@ import Navbar from "../../components/Navbar";
 // Serviços
 import { logoutUser } from "../../services/userService";
 import { getApartamentoById, getHistoricoApartamento } from "../../services/apartamentoService";
+import { formatDateBR } from "../../utils/dateUtils";
 
 // Estilos (Reaproveitando os estilos unificados que criamos)
 import {
@@ -258,9 +259,9 @@ const ApartamentoInfos = ({ user }) => {
                                         <div>
                                             <DetailValue>{contrato.cliente?.nome}</DetailValue>
                                             <div style={{ color: '#64748b', fontSize: '0.85rem', marginTop: 4 }}>
-                                                {new Date(contrato.dataInicio).toLocaleDateString('pt-BR')}
+                                                {formatDateBR(contrato.dataInicio)}
                                                 {' - '}
-                                                {contrato.dataFim ? new Date(contrato.dataFim).toLocaleDateString('pt-BR') : 'Atual'}
+                                                {contrato.dataFim ? formatDateBR(contrato.dataFim) : 'Atual'}
                                             </div>
                                         </div>
                                         <span style={{
@@ -288,7 +289,7 @@ const ApartamentoInfos = ({ user }) => {
                                                 <tbody>
                                                     {contrato.faturas.map((fatura) => (
                                                         <tr key={fatura.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                            <td style={{ padding: '8px 6px' }}>{new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')}</td>
+                                                            <td style={{ padding: '8px 6px' }}>{formatDateBR(fatura.dataVencimento)}</td>
                                                             <td style={{ padding: '8px 6px' }}>{fatura.leituraAnterior}</td>
                                                             <td style={{ padding: '8px 6px' }}>{fatura.leituraAtual}</td>
                                                             <td style={{ padding: '8px 6px' }}>{fatura.consumoTotal}</td>

@@ -8,6 +8,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { logoutUser } from "../../services/userService";
 import { getClienteById, getDocumentoImagem } from "../../services/clientService";
+import { formatDateBR } from "../../utils/dateUtils";
 
 // Estilos Reutilizados (Copiar estrutura básica do PredioPage.styles para um arquivo global seria ideal)
 // Mas aqui uso o ClientPage.styles que acabamos de refazer
@@ -137,7 +138,7 @@ const ClientInfos = ({ user }) => {
                             </DetailCard>
                             <DetailCard>
                                 <Label>Data de Nascimento</Label>
-                                <Value>{new Date(client.dataNascimento).toLocaleDateString('pt-BR')}</Value>
+                                <Value>{formatDateBR(client.dataNascimento)}</Value>
                             </DetailCard>
                         </DetailsContainer>
 

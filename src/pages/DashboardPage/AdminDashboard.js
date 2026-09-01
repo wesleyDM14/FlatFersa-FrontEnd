@@ -4,6 +4,7 @@ import { ThreeDots } from "react-loader-spinner";
 import { FiDollarSign, FiHome, FiUserCheck, FiActivity } from "react-icons/fi";
 import { Line, Doughnut } from "react-chartjs-2";
 import { getDashboardAdmin } from "../../services/dashboardService";
+import { formatDateBR } from "../../utils/dateUtils";
 import {
     StatsGrid,
     ChartsGrid,
@@ -221,7 +222,7 @@ const AdminDashboard = () => {
                                 <tr key={item.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/faturas/${item.id}`)}>
                                     <td style={{ fontWeight: 500 }}>{item.cliente}</td>
                                     <td>{item.apartamento}</td>
-                                    <td>{new Date(item.vencimento).toLocaleDateString('pt-BR')}</td>
+                                    <td>{formatDateBR(item.vencimento)}</td>
                                     <td>R$ {formatMoney(item.valor)}</td>
                                     <td>
                                         <StatusPill status={item.status}>

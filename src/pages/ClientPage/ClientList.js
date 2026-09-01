@@ -10,6 +10,7 @@ import { FormInput, StyledDatePicker } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
 import { ListRow } from "../../components/ListRow";
 import { AuthenticatedImage } from "../../components/AuthenticatedImage";
+import { formatDateBR } from "../../utils/dateUtils";
 
 // Estilos
 import {
@@ -405,7 +406,7 @@ const ClientList = ({ clientes, refreshData, navigate, page, setPage, totalPages
                                 <DataContainer>
                                     <SolicitacaoModalContentLabel>Data Nascimento:</SolicitacaoModalContentLabel>
                                     <SolicitacaoModalContentValue>
-                                        {selectedClient.dataNascimento ? new Date(selectedClient.dataNascimento).toLocaleDateString() : 'N/A'}
+                                        {selectedClient.dataNascimento ? formatDateBR(selectedClient.dataNascimento) : 'N/A'}
                                     </SolicitacaoModalContentValue>
                                 </DataContainer>
                                 <DataContainer>

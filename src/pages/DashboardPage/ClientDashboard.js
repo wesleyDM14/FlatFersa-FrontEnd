@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { FiFileText, FiZap, FiCheckCircle, FiAlertCircle, FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
 import { getDashboardClient } from "../../services/dashboardService";
+import { formatDateBR } from "../../utils/dateUtils";
 import {
     StatsGrid,
     InfoCard,
@@ -126,7 +127,7 @@ const ClientDashboard = () => {
                         {data.nextPayments?.length > 0 ? (
                             data.nextPayments.map((pag) => (
                                 <tr key={pag.id}>
-                                    <td>{new Date(pag.vencimento).toLocaleDateString('pt-BR')}</td>
+                                    <td>{formatDateBR(pag.vencimento)}</td>
                                     <td>R$ {(pag.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                     <td>
                                         <StatusPill status={pag.status}>

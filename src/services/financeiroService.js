@@ -1,5 +1,6 @@
 import api from "./api";
 import { getMeusContratos } from "./contratoService";
+import { formatDateBR } from "../utils/dateUtils";
 
 // --- LISTAGEM ---
 // Admin: backend pagina de verdade (/faturas?page&limit&search&status -> {items,total,page,totalPages}).
@@ -28,7 +29,7 @@ export const getFaturas = async (isAdmin, { page = 1, limit = 10, search = '', s
         const term = search.toLowerCase();
         faturas = faturas.filter(f =>
             f.contrato?.cliente?.nome?.toLowerCase().includes(term) ||
-            new Date(f.dataVencimento).toLocaleDateString('pt-BR').includes(term) ||
+            formatDateBR(f.dataVencimento).includes(term) ||
             f.status?.toLowerCase().includes(term)
         );
     }

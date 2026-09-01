@@ -29,6 +29,7 @@ import { modalStyles } from "../../styles/ModalStyles";
 import { FormInput } from "../../components/FormLib";
 import { Image, FormInputArea, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFormArea, ButtonGroup } from "../ClientPage/ClientPage.styles";
 import { FormInputLabelRequired } from "../ContractPage/ContractPage.styles";
+import { formatDateBR, formatMonthYearBR } from "../../utils/dateUtils";
 
 const STATUS_LABELS = {
     PENDENTE: 'Pendente',
@@ -152,7 +153,7 @@ const ParcelaInfo = ({ user }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                         <PrestacaoDetailHeaderContainer style={{ border: 'none', padding: 0, margin: 0 }}>
                             <PrestacaoDetailHeaderTitle>
-                                Fatura {new Date(fatura.mesReferencia).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                                Fatura {formatMonthYearBR(fatura.mesReferencia)}
                             </PrestacaoDetailHeaderTitle>
                             <span style={{
                                 backgroundColor: (STATUS_BADGE_COLORS[fatura.status] || STATUS_BADGE_COLORS.PENDENTE).bg,
@@ -229,7 +230,7 @@ const ParcelaInfo = ({ user }) => {
                             )}
                             <PrestacaoDetailValueContainer>
                                 <PrestacaoDetailLabel>Vencimento:</PrestacaoDetailLabel>
-                                <PrestacaoDetailValue>{new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')}</PrestacaoDetailValue>
+                                <PrestacaoDetailValue>{formatDateBR(fatura.dataVencimento)}</PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
                             <PrestacaoDetailValueContainer>
                                 <PrestacaoDetailLabel>Aluguel:</PrestacaoDetailLabel>

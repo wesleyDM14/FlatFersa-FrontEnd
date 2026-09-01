@@ -35,6 +35,7 @@ import { FormInput, ApartamentoSelect } from "../../components/FormLib";
 import Pagination from "../../components/Pagination";
 import { ListRow } from "../../components/ListRow";
 import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle } from "../ClientPage/ClientPage.styles";
+import { formatDateBR } from "../../utils/dateUtils";
 
 const STATUS_COLORS = {
     ATIVO: '#10b981',
@@ -211,12 +212,12 @@ const ContractList = ({ contratos, user, refreshData, navigate, page, setPage, t
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Início:</DetailContractDataLabel>
-                                            <DetailContractDataValue>{new Date(selectedContrato.dataInicio).toLocaleDateString('pt-BR')}</DetailContractDataValue>
+                                            <DetailContractDataValue>{formatDateBR(selectedContrato.dataInicio)}</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Término:</DetailContractDataLabel>
                                             <DetailContractDataValue>
-                                                {selectedContrato.dataFim ? new Date(selectedContrato.dataFim).toLocaleDateString('pt-BR') : '—'}
+                                                {selectedContrato.dataFim ? formatDateBR(selectedContrato.dataFim) : '—'}
                                             </DetailContractDataValue>
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
@@ -233,7 +234,7 @@ const ContractList = ({ contratos, user, refreshData, navigate, page, setPage, t
                                             <FinanceiroListElementContainer key={fatura.id} onClick={() => navigate(`/faturas/${fatura.id}`)}>
                                                 <FinanceiroListElement>
                                                     <FinanceiroListValue>
-                                                        {new Date(fatura.dataVencimento).toLocaleDateString('pt-BR')} - R$ {parseFloat(fatura.valorTotal || 0).toFixed(2)}
+                                                        {formatDateBR(fatura.dataVencimento)} - R$ {parseFloat(fatura.valorTotal || 0).toFixed(2)}
                                                     </FinanceiroListValue>
                                                     <FinanceiroListIconContainer title={FATURA_STATUS_LABELS[fatura.status] || fatura.status} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                         {FATURA_STATUS_ICONS[fatura.status]}
