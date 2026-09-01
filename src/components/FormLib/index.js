@@ -135,8 +135,10 @@ export const PredioSelect = ({ predios, setSelectedPredio, setLoading }) => {
                 }}
                 menuPlacement="auto"
                 menuPosition="fixed"
+                menuPortalTarget={document.body}
                 noOptionsMessage={() => "Sem Prédios Cadastrados"}
                 styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     control: (baseStyles, state) => ({
                         maxWidth: '100%',
                         width: '90%',
@@ -192,8 +194,10 @@ export const ClientSelect = ({ clientes, setSelectedClient }) => {
                 }}
                 menuPlacement="auto"
                 menuPosition="fixed"
+                menuPortalTarget={document.body}
                 noOptionsMessage={() => "Sem Clientes Cadastrados"}
                 styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     control: (baseStyles, state) => ({
                         maxWidth: '100%',
                         width: '90%',
@@ -250,8 +254,10 @@ export const ApartamentoSelect = ({ apartamentos, setSelectedApartamento }) => {
                 }}
                 menuPlacement="auto"
                 menuPosition="fixed"
+                menuPortalTarget={document.body}
                 noOptionsMessage={() => "Sem Apartamentos Cadastrados"}
                 styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     control: (baseStyles, state) => ({
                         maxWidth: '100%',
                         width: '90%',

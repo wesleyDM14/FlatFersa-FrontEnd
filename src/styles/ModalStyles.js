@@ -6,6 +6,11 @@ function isSmallScreen() {
 }
 
 export const modalStyles = {
+    overlay: {
+        backgroundColor: 'rgba(15, 23, 42, 0.55)',
+        backdropFilter: 'blur(2px)',
+        zIndex: 1000,
+    },
     content: {
         top: '50%',
         left: '50%',
@@ -14,9 +19,12 @@ export const modalStyles = {
         marginRight: '-50%',
         transform: 'translate(-50%,-50%)',
         overflowY: 'auto',
-        maxHeight: '600px',
-        padding: '0',
-        maxWidth: '90%'
+        maxHeight: '85vh',
+        padding: '28px 32px',
+        maxWidth: '90%',
+        border: 'none',
+        borderRadius: '14px',
+        boxShadow: '0 20px 60px rgba(15, 23, 42, 0.3)',
     }
 
 }
