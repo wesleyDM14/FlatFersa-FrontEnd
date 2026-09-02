@@ -4,6 +4,7 @@ import { ThreeDots } from "react-loader-spinner";
 import { FiFileText, FiZap, FiCheckCircle, FiAlertCircle, FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
 import { getDashboardClient } from "../../services/dashboardService";
 import { formatDateBR } from "../../utils/dateUtils";
+import { formatNumber } from "../../utils/numberUtils";
 import {
     StatsGrid,
     InfoCard,
@@ -91,7 +92,7 @@ const ClientDashboard = () => {
                     </IconBox>
                     <CardContent>
                         <CardTitle>Consumo do Último Mês</CardTitle>
-                        <StatNumber>{data.energyInsights?.consumoUltimoMes || 0} kWh</StatNumber>
+                        <StatNumber>{formatNumber(data.energyInsights?.consumoUltimoMes || 0)} kWh</StatNumber>
                         <span style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '5px', display: 'flex', alignItems: 'center', gap: 5 }}>
                             <TrendIcon /> {data.energyInsights?.status || 'Estável'}
                         </span>
@@ -104,7 +105,7 @@ const ClientDashboard = () => {
                     </IconBox>
                     <CardContent>
                         <CardTitle>Última Leitura</CardTitle>
-                        <StatNumber>{data.energyInsights?.ultimaLeitura || 0} kWh</StatNumber>
+                        <StatNumber>{formatNumber(data.energyInsights?.ultimaLeitura || 0)} kWh</StatNumber>
                         <span style={{ fontSize: '12px', color: '#666' }}>
                             Registrado no medidor do apartamento
                         </span>

@@ -36,6 +36,7 @@ import Pagination from "../../components/Pagination";
 import { ListRow } from "../../components/ListRow";
 import { StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle } from "../ClientPage/ClientPage.styles";
 import { formatDateBR } from "../../utils/dateUtils";
+import { formatNumber } from "../../utils/numberUtils";
 
 const STATUS_COLORS = {
     ATIVO: '#10b981',
@@ -222,7 +223,7 @@ const ContractList = ({ contratos, user, refreshData, navigate, page, setPage, t
                                         </DetailContractValueContainer>
                                         <DetailContractValueContainer>
                                             <DetailContractDataLabel>Limite kWh Isento:</DetailContractDataLabel>
-                                            <DetailContractDataValue>{selectedContrato.limiteKwhIsento} kWh</DetailContractDataValue>
+                                            <DetailContractDataValue>{formatNumber(selectedContrato.limiteKwhIsento)} kWh</DetailContractDataValue>
                                         </DetailContractValueContainer>
                                     </DetailContractDataSectionContainer>
                                 </DetailContractDataColumnLeft>

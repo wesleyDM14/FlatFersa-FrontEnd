@@ -30,6 +30,7 @@ import { FormInput } from "../../components/FormLib";
 import { Image, FormInputArea, StyledFileArea, StyledFileIconContainer, StyledFileInput, StyledFileInputTitle, StyledFormArea, ButtonGroup } from "../ClientPage/ClientPage.styles";
 import { FormInputLabelRequired } from "../ContractPage/ContractPage.styles";
 import { formatDateBR, formatMonthYearBR } from "../../utils/dateUtils";
+import { formatNumber } from "../../utils/numberUtils";
 
 const STATUS_LABELS = {
     PENDENTE: 'Pendente',
@@ -237,10 +238,22 @@ const ParcelaInfo = ({ user }) => {
                                 <PrestacaoDetailValue>R$ {parseFloat(fatura.valorAluguel).toFixed(2)}</PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
 
+                            {fatura.leituraAtual > 0 && (
+                                <>
+                                    <PrestacaoDetailValueContainer>
+                                        <PrestacaoDetailLabel>Leitura Anterior:</PrestacaoDetailLabel>
+                                        <PrestacaoDetailValue>{formatNumber(fatura.leituraAnterior)} kWh</PrestacaoDetailValue>
+                                    </PrestacaoDetailValueContainer>
+                                    <PrestacaoDetailValueContainer>
+                                        <PrestacaoDetailLabel>Leitura Atual:</PrestacaoDetailLabel>
+                                        <PrestacaoDetailValue>{formatNumber(fatura.leituraAtual)} kWh</PrestacaoDetailValue>
+                                    </PrestacaoDetailValueContainer>
+                                </>
+                            )}
                             <PrestacaoDetailValueContainer>
                                 <PrestacaoDetailLabel>Consumo de Energia:</PrestacaoDetailLabel>
                                 <PrestacaoDetailValue>
-                                    {fatura.consumoTotal ? `${fatura.consumoTotal} kWh (cobrado: ${fatura.consumoCobrado} kWh)` : 'Leitura não lançada'}
+                                    {fatura.leituraAtual > 0 ? `${formatNumber(fatura.consumoTotal)} kWh (cobrado: ${formatNumber(fatura.consumoCobrado)} kWh)` : 'Leitura não lançada'}
                                 </PrestacaoDetailValue>
                             </PrestacaoDetailValueContainer>
                             <PrestacaoDetailValueContainer>
@@ -386,7 +399,7 @@ const ParcelaInfo = ({ user }) => {
                                         </FormInputArea>
                                         {values.leituraAtual !== '' && values.leituraAnterior !== '' && (
                                             <p style={{ fontSize: '0.85rem', color: '#374151', marginTop: -8, marginBottom: 12 }}>
-                                                Consumo calculado: <strong>{Math.max(0, Number(values.leituraAtual) - Number(values.leituraAnterior))} kWh</strong>
+                                                Consumo calculado: <strong>{formatNumber(Math.max(0, Number(values.leituraAtual) - Number(values.leituraAnterior)))} kWh</strong>
                                             </p>
                                         )}
                                         <ButtonGroup>

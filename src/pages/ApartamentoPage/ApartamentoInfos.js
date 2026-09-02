@@ -19,6 +19,7 @@ import Navbar from "../../components/Navbar";
 import { logoutUser } from "../../services/userService";
 import { getApartamentoById, getHistoricoApartamento } from "../../services/apartamentoService";
 import { formatDateBR } from "../../utils/dateUtils";
+import { formatNumber } from "../../utils/numberUtils";
 
 // Estilos (Reaproveitando os estilos unificados que criamos)
 import {
@@ -290,9 +291,9 @@ const ApartamentoInfos = ({ user }) => {
                                                     {contrato.faturas.map((fatura) => (
                                                         <tr key={fatura.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                             <td style={{ padding: '8px 6px' }}>{formatDateBR(fatura.dataVencimento)}</td>
-                                                            <td style={{ padding: '8px 6px' }}>{fatura.leituraAnterior}</td>
-                                                            <td style={{ padding: '8px 6px' }}>{fatura.leituraAtual}</td>
-                                                            <td style={{ padding: '8px 6px' }}>{fatura.consumoTotal}</td>
+                                                            <td style={{ padding: '8px 6px' }}>{formatNumber(fatura.leituraAnterior)}</td>
+                                                            <td style={{ padding: '8px 6px' }}>{formatNumber(fatura.leituraAtual)}</td>
+                                                            <td style={{ padding: '8px 6px' }}>{formatNumber(fatura.consumoTotal)}</td>
                                                             <td style={{ padding: '8px 6px' }}>{FATURA_STATUS_LABEL[fatura.status] || fatura.status}</td>
                                                         </tr>
                                                     ))}
